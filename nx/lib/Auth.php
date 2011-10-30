@@ -23,7 +23,7 @@ class Auth {
    /**
     *  Creates a unique token for a given session.
     *
-    *  @param string $salt           The token salt.
+    *  @param string $salt          The token salt.
     *  @access public
     *  @return string
     */
@@ -37,12 +37,12 @@ class Auth {
    /**
     *  Checks that the supplied token is valid for a given request.
     *
-    *  @param array $request         The data provided with the http request.
+    *  @param string $token         The token.
     *  @access public
     *  @return bool
     */
-    public static function is_token_valid($request) {
-        return ( $request['token'] === $_SESSION['token'] );
+    public static function is_token_valid($token) {
+        return ( $token === $_SESSION['token'] );
     }
 
 }

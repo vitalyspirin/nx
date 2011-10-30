@@ -44,24 +44,30 @@ class Session extends \nx\core\Model {
     *
     *  @param array $config         The configuration settings,
     *                               which can take five options:
-    *                               `no_cache`            - Whether or not to
-    *                                                       cache the session.
-    *                               `session_lifetime`    - The length of a
-    *                                                       session.
-    *                               `login_cookie_expire` - The cookie expiration
-    *                                                       date.
-    *                               `session_salt`        - The salt for session
-    *                                                       encryption.
-    *                               `cookie_id_name`      - Name of the cookie for
-    *                                                       the user.
+    *                               `use_db`            - Whether or not to
+    *                                                     use the database
+    *                                                     to manage sessions.
+    *                                                     Falls back to the
+    *                                                     session.save_handler
+    *                                                     setting defined
+    *                                                     within php.ini if
+    *                                                     set to false.
+    *                               `session_lifetime`  - The length of a
+    *                                                     session.
+    *                               `cookie_expiration` - The cookie expiration
+    *                                                     date.
+    *                               `session_salt`      - The salt for session
+    *                                                     encryption.
+    *                               `cookie_id_name`    - Name of the cookie for
+    *                                                     the user.
     *  @access public
     *  @return void
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'no_cache'            => true,
+            'use_db'              => false,
             'session_lifetime'    => 3600,           // 60 minutes
-            'login_cookie_expire' => 2592000,        // 30 days
+            'cookie_expiration'   => 2592000,        // 30 days
             'session_salt'        => 'M^mc?(9%ZKx[',
             'cookie_id_name'      => 'nx_id'
         );
@@ -79,14 +85,16 @@ class Session extends \nx\core\Model {
 
         $this->last_active = date('Y-m-d H:i:s', time());
 
-        session_set_save_handler(
-            array($this, 'open'),
-            array($this, 'close'),
-            array($this, 'read'),
-            array($this, 'write'),
-            array($this, 'destroy'),
-            array($this, 'gc')
-        );
+        if ( $this->_config['use_db'] ) {
+            session_set_save_handler(
+                array($this, 'open'),
+                array($this, 'close'),
+                array($this, 'read'),
+                array($this, 'write'),
+                array($this, 'destroy'),
+                array($this, 'gc')
+            );
+        }
 
         session_start();
     }
@@ -119,7 +127,7 @@ class Session extends \nx\core\Model {
         setcookie(
             $this->_config['cookie_id_name'],
             String::encrypt_cookie($user_id),
-            time() + $this->_config['login_cookie_expire']
+            time() + $this->_config['cookie_expiration']
         );
 
         return true;

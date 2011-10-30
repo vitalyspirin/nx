@@ -245,7 +245,12 @@ class Controller extends Object {
         if ( empty($request) ) {
             return true;
         }
-        return Auth::is_token_valid($request, $this->classname());
+
+        if ( !isset($request['token']) ) {
+            return false;
+        }
+
+        return Auth::is_token_valid($request['token'], $this->classname());
     }
 
    /**
