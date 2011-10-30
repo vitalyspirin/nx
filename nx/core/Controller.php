@@ -166,16 +166,7 @@ class Controller extends Object {
             return false;
         }
 
-        $rest_results = array();
-        if ( !empty($this->_http_get) && method_exists($this, '_get') ) {
-            $rest_results['get'] = $this->_get($id);
-        }
-
-        if ( !empty($this->_http_post) && method_exists($this, '_post') ) {
-            $rest_results['post'] = $this->_post($id);
-        }
-
-        $results = $this->$method($id, $rest_results);
+        $results = $this->$method($id);
 
         if ( is_null($results) || $results === false ) {
             return false;
