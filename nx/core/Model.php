@@ -21,7 +21,7 @@ use nx\lib\Validator;
  *  object relationships, it provides automatic
  *  interfacing with both databases and caches to
  *  allow for convenient object storage and retrieval.
- *  It also provides sanitization and validation mechanisms.
+ *  It also provides typecasting and validation mechanisms.
  *
  *  @package core
  */
@@ -90,19 +90,19 @@ class Model extends Object {
     );
 
    /**
-    *  The sanitizers to be used when parsing
-    *  data.  Acceptable sanitizers are:
+    *  The typecasts to be used when parsing
+    *  data.  Acceptable types are:
     *  `key` => `b` for booleans
     *  `key` => `f` for float/decimals
     *  `key` => `i` for integers
     *  `key` => `s` for strings
     *
-    *  @see /nx/lib/Data::sanitize()
-    *  @see /nx/core/Model->sanitize()
+    *  @see /nx/lib/Data::typecast()
+    *  @see /nx/core/Model->typecast()
     *  @var array
     *  @access protected
     */
-    protected $_sanitizers = array();
+    protected $_typecasts = array();
 
    /**
     *  The validators to be used when validating
@@ -273,17 +273,18 @@ class Model extends Object {
     */
     public function delete($where = null) {
         $key = $this->classname() . '_' . $this->get_pk();
-        if ( !$this->_cache->delete($key) ) {
-            // TODO: Throw exception!
-        }
+        $this->_cache->delete($key);
 
         if ( is_null($where) ) {
-            // TODO: Throw exception if id is null?
-            $where = array($this->_meta['key'] => $obj->get_pk());
+            $id = $this->get_pk();
+            if ( is_null($id) ) {
+                return false;
+            }
+            $where = array($this->_meta['key'] => $id);
         }
 
         if ( !$this->_db->delete($this->classname(), $where) ) {
-            // TODO: Throw exception!
+            return false;
         }
         return true;
     }
@@ -531,15 +532,15 @@ class Model extends Object {
     }
 
    /**
-    *  Sanitizes an object's properties in accordance with the sanitizers
-    *  defined in $this->_sanitzers.
+    *  Typecasts an object's properties in accordance with the typecasts
+    *  defined in $this->_typecasts.
     *
     *  @access public
     *  @return object
     */
-    public function sanitize() {
-        foreach ( $this->_sanitizers as $property => $type ) {
-            $this->$property = Data::sanitize($this->$property, $type);
+    public function typecast() {
+        foreach ( $this->_typecasts as $property => $type ) {
+            $this->$property = Data::typecast($this->$property, $type);
         }
         return $this;
     }
