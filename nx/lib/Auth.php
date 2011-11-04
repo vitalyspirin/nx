@@ -21,17 +21,55 @@ namespace nx\lib;
 class Auth {
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected static $_config = array(
+        'gc_collect' => 3600
+    );
+
+   /**
     *  Creates a unique token for a given session.
     *
     *  @param string $salt          The token salt.
     *  @access public
     *  @return string
     */
-    public static function create_token($salt = 'JU7]h{I^Wic)') {
+    public static function create_token($salt = 'KU7*[lI^7iC)') {
+        if ( !isset($_SESSION['token']) ) {
+            $_SESSION['token'] = array();
+        }
+
         $token = sha1(microtime() . $salt);
-        $_SESSION['token'] = $token;
+        $_SESSION['token'] = self::garbage_collect($_SESSION['token']) + array(
+            (string) microtime(true) => $token
+        );
 
         return $token;
+    }
+
+   /**
+    *  Cleans out any tokens that have expired.
+    *
+    *  @param array $tokens         The tokens to check for expiration.
+    *  @param int $expiration       The number of seconds after which
+    *                               the tokens should expire.
+    *  @access public
+    *  @return string
+    */
+    public static function garbage_collect($tokens, $expiration = null) {
+        if ( is_null($expiration) ) {
+            $expiration = self::$_config['gc_collect'];
+        }
+
+        foreach ( $tokens as $timestamp => $token ) {
+            if ( time() - (int) $timestamp > $expiration ) {
+                unset($tokens[$timestamp]);
+            }
+        }
+        return $tokens;
     }
 
    /**
@@ -42,7 +80,7 @@ class Auth {
     *  @return bool
     */
     public static function is_token_valid($token) {
-        return ( $token === $_SESSION['token'] );
+        return ( in_array($token, $_SESSION['token']) );
     }
 
 }
