@@ -147,6 +147,21 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($args, $check, 'Parsing a query string with the'
             . ' controller, action, id, and multiple args set (`' . $query_string
             . '`) failed to return the expected data format.');
+
+        $query_string = '/register/get_value?name=high%20tide*&start=0&count=20';
+        $args = Router::parse_url($query_string);
+        $check = array(
+            'controller' => 'Register',
+            'action'     => 'get_value',
+            'id'         => Router::$defaults['id'],
+            'get'        => array(
+                'name'  => 'high tide*',
+                'start' => '0',
+                'count' => '20'
+            )
+        );
+        $this->assertEquals($args, $check);
+
     }
 
 }

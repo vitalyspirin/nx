@@ -59,6 +59,11 @@ class Router {
     *  @return array
     */
     protected static function _parse_query_string($query_string) {
+        $arg_pos = strpos($query_string, '&args=');
+        if ( $arg_pos !== false ) {
+            $args = substr($query_string, $arg_pos + strlen('&args='));
+            $query_string = substr($query_string, 0, $arg_pos);
+        }
         $query = array();
         parse_str($query_string, $query);
 
@@ -73,8 +78,8 @@ class Router {
             : self::$defaults['id'];
 
         $get = array();
-        if ( isset($query['args']) && $query['args'] != '' ) {
-            $args = substr($query_string, strpos($query_string, $query['args']));
+        if ( isset($args) && $args != '' ) {
+            $args = rawurldecode(str_replace('%20', '+', $args));
             parse_str($args, $get);
         }
         return compact('controller', 'action', 'id', 'get');
