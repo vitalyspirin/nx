@@ -11,22 +11,21 @@
 namespace nx\lib;
 
 /*
- *  The `Data` class is a collection of data-oriented methods, which
- *  help sanitize and organize remote data.
+ *  The `Data` class helps typecast data.
  *
  *  @package lib
  */
 class Data {
 
    /**
-    *  Sanitizes input according to type.
+    *  Typecasts input.
     *
-    *  @param mixed $data      The data to be sanitized.
-    *  @param string $type     The type of validation.
+    *  @param mixed $data      The data to be typecasted.
+    *  @param string $type     The type.
     *  @access public
     *  @return mixed
     */
-    public static function sanitize($data, $type) {
+    public static function typecast($data, $type) {
         switch ( $type ) {
             case 'b':
                 $data = (boolean) filter_var($data, FILTER_SANITIZE_NUMBER_INT);
@@ -42,11 +41,7 @@ class Data {
                 $data = intval(filter_var($data, FILTER_SANITIZE_NUMBER_INT));
                 break;
             case 's':
-                $data = trim(strval(filter_var(
-                    $data,
-                    FILTER_SANITIZE_SPECIAL_CHARS,
-                    FILTER_FLAG_STRIP_LOW | FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_AMP
-                )));
+                $data = trim(strval($data));
                 break;
         }
         return $data;

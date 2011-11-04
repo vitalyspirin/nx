@@ -16,7 +16,7 @@ use nx\lib\Meta;
 
 /*
  *  The `Controller` class is the parent class of all
- *  application controllers.  It provides access to sanitized
+ *  application controllers.  It provides access to typecasted
  *  $_POST and $_GET data and ensures protection against CSRF
  *  attacks.
  *
@@ -34,7 +34,7 @@ class Controller extends Object {
     protected $_accessible = true;
 
    /**
-    *  The sanitized data from $_GET.
+    *  The typecasted data from $_GET.
     *
     *  @var array
     *  @access protected
@@ -42,27 +42,12 @@ class Controller extends Object {
     protected $_http_get = array();
 
    /**
-    *  The sanitized data from $_POST.
+    *  The typecasted data from $_POST.
     *
     *  @var array
     *  @access protected
     */
     protected $_http_post = array();
-
-   /**
-    *  The sanitizers to be used when parsing
-    *  request data.  Acceptable sanitizers are:
-    *  `key` => `b` for booleans
-    *  `key` => `f` for float/decimals
-    *  `key` => `i` for integers
-    *  `key` => `s` for strings
-    *
-    *  @see /nx/lib/Data::sanitize()
-    *  @see /nx/core/Controller->sanitize()
-    *  @var array
-    *  @access protected
-    */
-    protected $_sanitizers = array();
 
    /**
     *  The session object.
@@ -87,6 +72,21 @@ class Controller extends Object {
     *  @access protected
     */
     protected $_token = null;
+
+   /**
+    *  The typecasts to be used when parsing
+    *  request data.  Acceptable types are:
+    *  `key` => `b` for booleans
+    *  `key` => `f` for float/decimals
+    *  `key` => `i` for integers
+    *  `key` => `s` for strings
+    *
+    *  @see /nx/lib/Data::typecast()
+    *  @see /nx/core/Controller->typecast()
+    *  @var array
+    *  @access protected
+    */
+    protected $_typecasts = array();
 
    /**
     *  The user object.
@@ -117,7 +117,7 @@ class Controller extends Object {
     }
 
    /**
-    *  Initializes the controller with sanitized http request data,
+    *  Initializes the controller with typecasted http request data,
     *  generates a token to be used to ensure that the next request is valid,
     *  and loads a user object if a valid session is found.
     *
@@ -130,11 +130,11 @@ class Controller extends Object {
         $session = $this->_config['classes']['session'];
         $this->_session = new $session();
 
-        $this->_http_get = $this->sanitize($this->_config['http_get']);
-        $this->_http_post = $this->sanitize($this->_config['http_post']);
+        $this->_typecasts += array('token' => 's');
+        $this->_http_get = $this->typecast($this->_config['http_get']);
+        $this->_http_post = $this->typecast($this->_config['http_post']);
 
-        if ( !$this->_is_valid_request($this->_http_get)
-            || !$this->_is_valid_request($this->_http_post) ) {
+        if ( !$this->_is_valid_request($this->_http_post) ) {
             $this->handle_CSRF();
             $this->_token = null;
         }
@@ -172,6 +172,8 @@ class Controller extends Object {
             return false;
         }
 
+        $results += array('token' => $this->_token);
+
         $to_view = array(
             'file' => $this->_config['view_dir'] . $this->_template . '/'
                 . lcfirst($this->classname()) . '/' . $method . '.html',
@@ -198,7 +200,7 @@ class Controller extends Object {
     *  @return void
     */
     public function handle_CSRF() {
-        // TODO: Log this as a potential CSRF attack
+        // TODO: HTTP 403
         die('CSRF attack!');
     }
 
@@ -241,7 +243,7 @@ class Controller extends Object {
             return false;
         }
 
-        return Auth::is_token_valid($request['token'], $this->classname());
+        return Auth::is_token_valid($request['token']);
     }
 
    /**
@@ -261,27 +263,27 @@ class Controller extends Object {
     }
 
    /**
-    *  Sanitizes data according to the sanitizers defined in $this->_sanitizers.
-    *  If data is an object, the object's sanitize() method will be called.
+    *  Typecasts data according to the typecasts defined in $this->_typecasts.
+    *  If data is an object, the object's typecast() method will be called.
     *
-    *  @param array $data          The data to be sanitized.
+    *  @param array $data          The data to be typecasted.
     *  @access public
     *  @return array
     */
-    public function sanitize($data) {
-        $sanitized = array();
+    public function typecast($data) {
+        $typecasted = array();
         foreach ( $data as $key => $val ) {
             if ( !is_array($val) ) {
-                if ( isset($this->_sanitizers[$key]) ) {
-                    $sanitized[$key] = Data::sanitize($val, $this->_sanitizers[$key]);
+                if ( isset($this->_typecasts[$key]) ) {
+                    $typecasted[$key] = Data::typecast($val, $this->_typecasts[$key]);
                 }
             } else {
                 foreach ( $val as $id => $obj ) {
-                    $sanitized[$key][$id] = $obj->sanitize();
+                    $typecasted[$key][$id] = $obj->typecast();
                 }
             }
         }
-        return $sanitized;
+        return $typecasted;
     }
 
 }
