@@ -24,10 +24,11 @@ class Request {
     *  object is bound).
     *
     *  @param array $data      The $_POST data.
+    *  @param array $model     The namespace of the application models.
     *  @access public
     *  @return mixed
     */
-    public static function extract_post($data) {
+    public static function extract_post($data, $model_location) {
         $collection = array();
         foreach ( $data as $child_key => $child ) {
             if ( !is_array($child) ) { // name = 'username'
@@ -36,16 +37,17 @@ class Request {
                 $loc = strrpos($child_key, '|');
                 if ( $loc !== false ) { // name = 'User|id[username]'
                     $id = substr($child_key, $loc + 1);
-                    $class = substr($child_key, 0, $loc);
+                    $class_name = substr($child_key, 0, $loc);
+                    $class = $model_location . $class_name;
                     $obj = new $class(array('id' => $id));
                     foreach ( $child as $key => $value )
                     {
                         $obj->$key = $value;
                     }
-                    $collection[$class][] = $obj;
+                    $collection[$class_name][] = $obj;
                 } else { // name = 'User[][username]'
                     foreach ( $child as $grandchild_array ) {
-                        $obj_name = 'app\model\\' . $child_key;
+                        $obj_name = $model_location . $child_key;
                         $obj = new $obj_name();
                         foreach ( $grandchild_array as $key => $value ) {
                             $obj->$key = $value;

@@ -17,6 +17,12 @@ namespace nx\lib;
  */
 class Dispatcher {
 
+   /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
     protected static $_config = array(
         'classes'   => array(
             'request' => 'nx\lib\Request',
@@ -59,7 +65,7 @@ class Dispatcher {
         }
 
         $request = static::$_config['classes']['request'];
-        $args['post'] = $request::extract_post($_POST);
+        $args['post'] = $request::extract_post($_POST, 'app\model\\');
 
         $controller = new $controller_name(array(
             'http_get'  => $args['get'],
@@ -78,9 +84,10 @@ class Dispatcher {
         }
 
         // AJAX
-        if ( is_string($results['vars']) ) {
-            echo htmlspecialchars($results['vars'], ENT_QUOTES, 'UTF-8');
-            return true;
+        if ( isset($results['vars']['json']) ) {
+            $json = $results['vars']['json'];
+            $options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
+            return json_encode($json, $options);
         }
 
         $view = static::$_config['classes']['view'];
