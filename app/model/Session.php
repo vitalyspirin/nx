@@ -96,7 +96,10 @@ class Session extends \nx\core\Model {
             );
         }
 
-        session_start();
+        // Don't start a new session if one already exists
+        if ( !session_id() ) {
+            session_start();
+        }
     }
 
    /**
