@@ -20,6 +20,18 @@ namespace nx\lib;
 class Compiler {
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected static $_config = array(
+        'classes'   => array(
+            'dispatcher' => 'nx\lib\Dispatcher',
+        )
+    );
+
+   /**
     *  Retrieves the compiled filename, and caches the file
     *  if it is not already cached.
     *
@@ -52,23 +64,21 @@ class Compiler {
         $compiled = self::_replace(file_get_contents($file));
         $template_dir = dirname($template);
         if ( !is_dir($template_dir) && !mkdir($template_dir, 0755, true) ) {
-            // TODO: Throw exception
            return false;
         }
 
-        if ( is_writable($template_dir)
-            && file_put_contents($template, $compiled) !== false ) {
-            $pattern = $template_dir . '/template_' . $location . '_*.html';
-            foreach ( glob($pattern) as $old ) {
-                if ( $old !== $template ) {
-                    unlink($old);
-                }
-            }
-            return $template;
+        if ( !is_writable($template_dir)
+            || file_put_contents($template, $compiled) === false ) {
+            return false;
         }
 
-        // TODO: Throw exception if write fails!
-        return false;
+        $pattern = $template_dir . '/template_' . $location . '_*.html';
+        foreach ( glob($pattern) as $old ) {
+            if ( $old !== $template ) {
+                unlink($old);
+            }
+        }
+        return $template;
     }
 
    /**
@@ -79,9 +89,11 @@ class Compiler {
     *  @return string
     */
     protected static function _replace($template) {
+        $dispatcher = self::$_config['classes']['dispatcher'];
         $replace = array(
-            '/\<\?=\s*\$this->(.+?)\s*;?\s*\?>/msx' => '<?php echo $this->$1; ?>',
-            '/\<\?=\s*(.+?)\s*;?\s*\?>/msx'         => '<?php echo $this->_form->escape($1); ?>'
+            '/\<\?=\s*Dispatcher::(.+?)\s*;?\s*\?>/msx' => '<?php echo ' . $dispatcher . '::$1; ?>',
+            '/\<\?=\s*\$this->(.+?)\s*;?\s*\?>/msx'     => '<?php echo $this->$1; ?>',
+            '/\<\?=\s*(.+?)\s*;?\s*\?>/msx'             => '<?php echo $this->_form->escape($1); ?>'
         );
 
         return preg_replace(array_keys($replace), array_values($replace), $template);
