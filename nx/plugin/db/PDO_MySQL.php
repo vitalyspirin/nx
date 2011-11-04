@@ -96,6 +96,7 @@ class PDO_MySQL extends \nx\core\Object {
             return true;
         } catch ( PDOException $e ) {
             // TODO: How to handle error reporting?
+            //die($e->getMessage() . var_dump($e->getTrace()));
             return false;
         }
     }
@@ -133,7 +134,6 @@ class PDO_MySQL extends \nx\core\Object {
     */
     public function delete($table, $where) {
         if ( is_null($where) ) {
-            // TODO: Throw exception!
             return false;
         }
 
@@ -270,6 +270,10 @@ class PDO_MySQL extends \nx\core\Object {
                         } while ( isset($where[$new_name]) );
                         $sql .=  '`' . $name . '` ';
                         switch ( $sign ) {
+                            case 'like':
+                                $sql .= 'like ';
+                                $constraint = '%' . $constraint . '%';
+                                break;
                             case 'gt':
                                 $sql .= '>';
                                 break;
@@ -328,7 +332,7 @@ class PDO_MySQL extends \nx\core\Object {
             $statement->execute($data);
     	} catch ( \PDOException $e ) {
             // TODO: How to handle error reporting?
-            die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
+            //die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
             return false;
         }
 
@@ -378,7 +382,7 @@ class PDO_MySQL extends \nx\core\Object {
             $statement->execute();
     	} catch ( \PDOException $e ) {
             // TODO: How to handle error reporting?
-            die($e->getMessage() . $sql . var_dump($parameters) . var_dump($e->getTrace()));
+            //die($e->getMessage() . $sql . var_dump($parameters) . var_dump($e->getTrace()));
             $this->_affected_rows = 0;
             return false;
         }
@@ -468,7 +472,7 @@ class PDO_MySQL extends \nx\core\Object {
             $statement->execute($data);
     	} catch ( \PDOException $e ) {
             // TODO: How to handle error reporting?
-            die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
+            //die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
             return false;
         }
 
@@ -507,7 +511,7 @@ class PDO_MySQL extends \nx\core\Object {
             $statement->execute($data);
     	} catch ( \PDOException $e ) {
             // TODO: How to handle error reporting?
-            die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
+            //die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
             return false;
         }
 

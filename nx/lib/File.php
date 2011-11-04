@@ -59,9 +59,7 @@ class File {
     public static function write($filename, $data, $mode = 'a') {
         $handle = @fopen($filename, $mode);
         if ( !$handle ) {
-            // TODO: Set exception handler!
-            throw new \Exception('Could not open ' . $filename . ' for writing.'
-                . '  Check the location and permissions of the file and try again.');
+            return false;
         }
 
         fwrite($handle, $data);
