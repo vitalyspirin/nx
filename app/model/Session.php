@@ -3,7 +3,6 @@
 namespace app\model;
 
 use nx\lib\Password;
-use nx\lib\String;
 
 class Session extends \nx\core\Model {
 
@@ -54,22 +53,13 @@ class Session extends \nx\core\Model {
     *                                                     set to false.
     *                               `session_lifetime`  - The length of a
     *                                                     session.
-    *                               `cookie_expiration` - The cookie expiration
-    *                                                     date.
-    *                               `session_salt`      - The salt for session
-    *                                                     encryption.
-    *                               `cookie_id_name`    - Name of the cookie for
-    *                                                     the user.
     *  @access public
     *  @return void
     */
     public function __construct(array $config = array()) {
         $defaults = array(
             'use_db'              => false,
-            'session_lifetime'    => 3600,           // 60 minutes
-            'cookie_expiration'   => 2592000,        // 30 days
-            'session_salt'        => 'M^mc?(9%ZKx[',
-            'cookie_id_name'      => 'nx_id'
+            'session_lifetime'    => 3600   // 60 minutes
         );
         parent::__construct($config + $defaults);
     }
@@ -125,13 +115,8 @@ class Session extends \nx\core\Model {
         session_regenerate_id(true);
         $_SESSION = array();
         $_SESSION['user_id'] = $user_id;
-        $_SESSION['fingerprint'] = $this->_get_fingerprint($user_id);
+        $_SESSION['fingerprint'] = $this->_get_fingerprint();
         $_SESSION['last_active'] = $this->last_active;
-        setcookie(
-            $this->_config['cookie_id_name'],
-            String::encrypt_cookie($user_id),
-            time() + $this->_config['cookie_expiration']
-        );
 
         return true;
     }
@@ -169,12 +154,14 @@ class Session extends \nx\core\Model {
    /**
     *  Returns the user's session fingerprint.
     *
-    *  @param int $user_id          The user's ID.
     *  @access private
     *  @return string
     */
-    private function _get_fingerprint($user_id) {
-        return sha1($this->_config['session_salt'] . $user_id . $_SERVER['HTTP_USER_AGENT']);
+    private function _get_fingerprint() {
+        // The only thing that's unlikely to change between requests
+        // is the user agent.  While this can be spoofed easily, it's
+        // still an additional obstacle to overcome in session hijacking.
+        return $_SERVER['HTTP_USER_AGENT'];
     }
 
    /**
@@ -205,19 +192,17 @@ class Session extends \nx\core\Model {
             return false;
         }
 
-        $uid = String::decrypt_cookie($_COOKIE[$this->_config['cookie_id_name']]);
-        $fingerprint = $this->_get_fingerprint($_SESSION['user_id']);
-        if (
-            !isset($_COOKIE[$this->_config['cookie_id_name']])
-            || $_SESSION['user_id'] != $uid
-            || $_SESSION['fingerprint'] != $fingerprint
-        ) {
+        $fingerprint = $this->_get_fingerprint();
+        if ( $_SESSION['fingerprint'] != $fingerprint ) {
             $this->User_id = 0;
             $this->logout();
             return false;
         }
 
-        if ( strtotime($_SESSION['last_active']) + $this->_config['session_lifetime'] < time() ) {
+        $max_alive = strtotime($_SESSION['last_active'])
+            + $this->_config['session_lifetime'];
+
+        if ( $max_alive < time() ) {
             $this->User_id = 0;
             $this->reset();
             return false;
@@ -233,11 +218,10 @@ class Session extends \nx\core\Model {
     *
     *  @param obj $user             The user object to check against.
     *  @param string $password      The password to check against.
-    *  @param string $ip            The user's IP address.
     *  @access public
     *  @return bool
     */
-    public function login($user, $password, $ip) {
+    public function login($user, $password) {
         if ( !$user ) {
             return false;
         }
@@ -246,7 +230,7 @@ class Session extends \nx\core\Model {
             return false;
         }
 
-        $user->ip = sprintf('%u', ip2long($ip));
+        $user->ip = sprintf('%u', ip2long($_SERVER['REMOTE_ADDR']));
         $user->last_login = date('Y-m-d H:i:s');
         $user->store();
 
@@ -256,14 +240,13 @@ class Session extends \nx\core\Model {
     }
 
    /**
-    *  Ends the current session and deletes the login cookie.
+    *  Ends the current session.
     *
     *  @access public
     *  @return void
     */
     public function logout() {
         $_SESSION = array();
-        setcookie($this->_config['cookie_id_name'], '', time() - 3600);
         session_destroy();
     }
 
