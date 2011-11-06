@@ -39,7 +39,8 @@ class Meta {
     *  Returns all of the columns (protected properties that are
     *  not prefixed with an underscore) of a given object.
     *
-    *  @param object $obj                 The object from which to retrieve the properties.
+    *  @param object $obj                 The object from which to
+    *                                     retrieve the properties.
     *  @access public
     *  @return array
     */
@@ -50,7 +51,9 @@ class Meta {
         foreach ( $props as $prop ) {
             $name = $prop->getName();
             if ( strpos($name, '_') !== 0 ) {
-                $collection[$name] = $obj->$name;
+                $prop->setAccessible(true);
+                $collection[$name] = $prop->getValue($obj);
+                $prop->setAccessible(false);
             }
         }
         return $collection;
@@ -59,7 +62,8 @@ class Meta {
    /**
     *  Returns all of the protected methods in a given class.
     *
-    *  @param object $obj                 The object from which to retrieve the methods.
+    *  @param object $obj                 The object from which to
+    *                                     retrieve the methods.
     *  @access public
     *  @return array
     */
