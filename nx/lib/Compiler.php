@@ -93,6 +93,7 @@ class Compiler {
         $replace = array(
             '/\<\?=\s*Dispatcher::(.+?)\s*;?\s*\?>/msx' => '<?php echo ' . $dispatcher . '::$1; ?>',
             '/\<\?=\s*\$this->(.+?)\s*;?\s*\?>/msx'     => '<?php echo $this->$1; ?>',
+            '/\$e\((.+?)\)\s*;/msx'                     => 'echo $this->_form->escape($1);',
             '/\<\?=\s*(.+?)\s*;?\s*\?>/msx'             => '<?php echo $this->_form->escape($1); ?>'
         );
 
