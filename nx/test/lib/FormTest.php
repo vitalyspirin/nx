@@ -4,22 +4,48 @@ namespace nx\test\lib;
 
 use nx\lib\Form;
 
-class ModelMock extends \nx\core\Model {
+class ModelMock {
     protected $id;
     protected $test_name = 'test value';
+
+    public function __get($property) {
+        return $this->$property;
+    }
+
+    public function classname() {
+        return 'ModelMock';
+    }
+
+    public function get_pk() {
+        return $this->id;
+    }
 
     public function set_id($val) {
         $this->id = $val;
     }
+
 }
 
-class ModelMock2 extends \nx\core\Model {
+class ModelMock2 {
     protected $id;
     protected $test_name = 'test value';
+
+    public function __get($property) {
+        return $this->$property;
+    }
+
+    public function classname() {
+        return 'ModelMock2';
+    }
+
+    public function get_pk() {
+        return $this->id;
+    }
 
     public function set_id($val) {
         $this->id = $val;
     }
+
 }
 
 class FormTest extends \PHPUnit_Framework_TestCase {
