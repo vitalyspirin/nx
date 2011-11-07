@@ -41,8 +41,8 @@ class View extends Object {
                 'compiler' => 'nx\lib\Compiler',
                 'form'     => 'nx\lib\Form'
             ),
-            'view_dir' => dirname(dirname(__DIR__)) . '/app/view/',
-            'template' => 'web'
+            'template' => null,
+            'view_dir' => dirname(dirname(__DIR__)) . '/app/view/'
         );
 
         parent::__construct($config + $defaults);
@@ -70,8 +70,11 @@ class View extends Object {
     *  @return string
     */
     public function render($file, $vars = null) {
-        $file = $this->_config['view_dir'] . $this->_config['template'] . '/'
-            . $file . '.html';
+        $path = $this->_config['view_dir'];
+        if ( !is_null($this->_config['template']) ) {
+            $path .= $this->_config['template'] . '/';
+        }
+        $file = $path . $file . '.html';
 
         if ( is_array($vars) ) {
             extract($vars);

@@ -11,7 +11,7 @@
 namespace nx\core;
 
 /*
- *  The `Dispatcher` class is used to page rendering.
+ *  The `Dispatcher` class is used to handle page rendering.
  *
  *  @package lib
  */

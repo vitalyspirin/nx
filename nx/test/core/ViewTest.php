@@ -10,12 +10,13 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
     protected $_file;
     protected $_path;
     protected $_view;
+    protected $_view_name;
 
     public function setUp() {
-        $this->_view = new View();
 
         $this->_path = dirname(__FILE__) . '/';
-        $this->_file = $this->_path . 'test.html';
+        $this->_view_name = 'test';
+        $this->_file = $this->_path . $this->_view_name . '.html';
         $contents = "<html>
     <body>\n
         <?=\$hello;?> <?=str_replace('test', 'yes', \$hello);?> <?=\$this->_form->email(array('class' => 'test'));?> <?php echo \$hello; ?>\n
@@ -23,6 +24,11 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
 </html>";
 
         file_put_contents($this->_file, $contents);
+        $config = array(
+            'template' => null,
+            'view_dir' => $this->_path
+        );
+        $this->_view = new View($config);
     }
 
     public function tearDown() {
@@ -36,7 +42,7 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
 
     public function test_RenderFile_ReturnsHTML() {
         $hello = 'test please';
-        $result = $this->_view->render($this->_file, compact('hello'));
+        $result = $this->_view->render($this->_view_name, compact('hello'));
         $check = "<html>
     <body>\n
         test please yes please <input type='email' class='test' /> test please
