@@ -40,8 +40,11 @@ class View extends Object {
             'classes'   => array(
                 'compiler' => 'nx\lib\Compiler',
                 'form'     => 'nx\lib\Form'
-            )
+            ),
+            'view_dir' => dirname(dirname(__DIR__)) . '/app/view/',
+            'template' => 'web'
         );
+
         parent::__construct($config + $defaults);
     }
 
@@ -62,11 +65,14 @@ class View extends Object {
     *  Renders a given file with the supplied variables.
     *
     *  @param string $file          The file to be rendered.
-    *  @param mixed $vars           Variables to be substituted in the view.
+    *  @param mixed $vars           The variables to be substituted in the view.
     *  @access public
     *  @return string
     */
-    public function render($file, $vars) {
+    public function render($file, $vars = null) {
+        $file = $this->_config['view_dir'] . $this->_config['template'] . '/'
+            . $file . '.html';
+
         if ( is_array($vars) ) {
             extract($vars);
         }

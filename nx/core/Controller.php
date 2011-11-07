@@ -110,8 +110,7 @@ class Controller extends Object {
                 'user'    => 'app\model\User'
             ),
             'http_get'  => $this->_http_get,
-            'http_post' => $this->_http_post,
-            'view_dir'  => dirname(dirname(__DIR__)) . '/app/view/'
+            'http_post' => $this->_http_post
         );
         parent::__construct($config + $defaults);
     }
@@ -172,15 +171,7 @@ class Controller extends Object {
             return false;
         }
 
-        $results += array('token' => $this->_token);
-
-        $to_view = array(
-            'file' => $this->_config['view_dir'] . $this->_template . '/'
-                . lcfirst($this->classname()) . '/' . $method . '.html',
-            'vars' => $results
-        );
-
-        return $to_view;
+        return $results + array('token' => $this->_token);
     }
 
    /**

@@ -20,18 +20,6 @@ namespace nx\lib;
 class Compiler {
 
    /**
-    *  The configuration settings.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected static $_config = array(
-        'classes'   => array(
-            'dispatcher' => 'nx\lib\Dispatcher',
-        )
-    );
-
-   /**
     *  Retrieves the compiled filename, and caches the file
     *  if it is not already cached.
     *
@@ -89,9 +77,7 @@ class Compiler {
     *  @return string
     */
     protected static function _replace($template) {
-        $dispatcher = self::$_config['classes']['dispatcher'];
         $replace = array(
-            '/\<\?=\s*Dispatcher::(.+?)\s*;?\s*\?>/msx' => '<?php echo ' . $dispatcher . '::$1; ?>',
             '/\<\?=\s*\$this->(.+?)\s*;?\s*\?>/msx'     => '<?php echo $this->$1; ?>',
             '/\$e\((.+?)\)\s*;/msx'                     => 'echo $this->_form->escape($1);',
             '/\<\?=\s*(.+?)\s*;?\s*\?>/msx'             => '<?php echo $this->_form->escape($1); ?>'
