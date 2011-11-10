@@ -8,4 +8,6 @@ fi
 DIR=$(dirname $ME)
 
 sudo find $DIR/../../view -type d -exec chgrp http {} \;
-sudo find $DIR/../../view -type d -exec chmod g+w {} \;
+sudo find $DIR/../../view -type d -exec chmod -R g+w {} \;
+sudo find $DIR/../../view -type d -exec chmod g+s {} \;
+sudo find $DIR/../../view -type d -exec umask g=rwx {} \;
