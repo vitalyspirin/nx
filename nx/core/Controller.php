@@ -25,15 +25,6 @@ use nx\lib\Meta;
 class Controller extends Object {
 
    /**
-    *  Whether or not the controller should be
-    *  publicly accessible.
-    *
-    *  @var bool
-    *  @access protected
-    */
-    protected $_accessible = true;
-
-   /**
     *  The typecasted data from $_GET.
     *
     *  @var array
@@ -144,7 +135,8 @@ class Controller extends Object {
 
         if ( $this->_session->is_logged_in() ) {
             $user = $this->_config['classes']['user'];
-            $this->_user = new $user(array('id' => $this->_session->get_user_id()));
+            $id = $this->_session->get_user_id();
+            $this->_user = new $user(compact('id'));
             $this->_template = $this->_user->get_template();
         }
     }
@@ -171,7 +163,12 @@ class Controller extends Object {
             return false;
         }
 
-        return $results + array('token' => $this->_token);
+        $additional = array(
+            'token' => $this->_token,
+            'user'  => $this->_user
+        );
+
+        return $results + $additional;
     }
 
    /**
@@ -193,17 +190,6 @@ class Controller extends Object {
     public function handle_CSRF() {
         // TODO: HTTP 403
         die('CSRF attack!');
-    }
-
-   /**
-    *  Returns whether or not the controller is
-    *  publicly accessible.
-    *
-    *  @access public
-    *  @return bool
-    */
-    public function is_accessible() {
-        return $this->_accessible;
     }
 
    /**
