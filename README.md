@@ -26,9 +26,7 @@ NX supports the following URL constructions:
 			 index   index.html index.htm index.php;
 		 }
 	 
-		 rewrite ^/(.+)\.js$ /$1.js break;
-		 rewrite ^/(.+)\.css$ /$1.css break;
-		 rewrite ^/(.+)\.(jpg|gif|jpeg|png)$ /$1.$2 break;
+		 rewrite ^/(.+)\.(js|css|jpg|gif|jpeg|png)$ /$1.$2 break;
 		 rewrite ^/(.+)$ /index.php?url=$1 break;
 
 		 location ~ \.php$ {
