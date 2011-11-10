@@ -88,6 +88,19 @@ class View extends Object {
         return ob_get_clean();
     }
 
+   /**
+    *  Renders a 404 page.
+    *
+    *  @access public
+    *  @return void
+    */
+    public function throw_404() {
+        ob_start();
+        require $this->_config['view_dir'] . $this->_config['template']
+            . '/404.html';
+        return ob_get_clean();
+    }
+
 }
 
 ?>

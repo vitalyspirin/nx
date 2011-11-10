@@ -49,16 +49,14 @@ class Dispatcher extends Object {
     public function render($url) {
         $router = $this->_config['classes']['router'];
         if ( !$args = $router::parse_url($url) ) {
-            $this->throw_404('web');
-            return false;
+            return $this->throw_404('web');
         }
 
         $controller = $this->_config['locations']['controller']
             . $args['controller'];
 
         if ( !class_exists($controller) ) {
-            $this->throw_404('web');
-            return false;
+            return $this->throw_404('web');
         }
 
         $request = $this->_config['classes']['request'];
@@ -70,16 +68,10 @@ class Dispatcher extends Object {
             'http_post' => $args['post']
         ));
 
-        $template = $controller->get_template();
-        if ( !$controller->is_accessible() ) {
-            $this->throw_404($template);
-            return false;
-        }
-
         $results = $controller->call($args['action'], $args['id']);
+        $template = $controller->get_template();
         if ( !is_array($results) ) {
-            $this->throw_404($template);
-            return false;
+            return $this->throw_404($template);
         }
 
         // AJAX
@@ -104,7 +96,9 @@ class Dispatcher extends Object {
     *  @return void
     */
     public function throw_404($template) {
-        require $this->_config['locations']['view'] . $template . '/404.html';
+        $view = $this->_config['classes']['view'];
+        $view = new $view(compact('template'));
+        return $view->throw_404();
     }
 
 }
