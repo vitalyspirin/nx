@@ -581,6 +581,14 @@ class Model extends Object {
         }
 
         foreach ( $validators as $validator ) {
+            if (
+                isset($validator['optional'])
+                && $validator['optional'] === true
+                && is_null($this->$field)
+            ) {
+                continue;
+            }
+
             $method = $validator[0];
             if ( isset($validator['options']) ) {
                 $valid = Validator::$method($this->$field, $validator['options']);
