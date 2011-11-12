@@ -422,11 +422,22 @@ class Model extends Object {
    /**
     *  Returns the validation errors.
     *
+    *  @param bool $flatten         Whether or not to return the errors as
+    *                               a flattened array.
     *  @access public
     *  @return array
     */
-    public function get_validation_errors() {
-        return $this->_validation_errors;
+    public function get_validation_errors($flatten = false) {
+        if ( !$flatten ) {
+            return $this->_validation_errors;
+        }
+        $errors = array();
+        array_walk_recursive(
+            $this->_validation_errors, function($a) use (&$errors) {
+                $errors[] = $a;
+            }
+        );
+        return $errors;
     }
 
    /**
