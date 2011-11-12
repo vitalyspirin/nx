@@ -33,28 +33,30 @@ class Request {
         foreach ( $data as $child_key => $child ) {
             if ( !is_array($child) ) { // name = 'username'
                 $collection[$child_key] = $child;
-            } else {
-                $loc = strrpos($child_key, '|');
-                if ( $loc !== false ) { // name = 'User|id[username]'
-                    $id = substr($child_key, $loc + 1);
-                    $class_name = substr($child_key, 0, $loc);
-                    $class = $model_location . $class_name;
-                    $obj = new $class(array('id' => $id));
-                    foreach ( $child as $key => $value )
-                    {
-                        $obj->$key = $value;
-                    }
-                    $collection[$class_name][] = $obj;
-                } else { // name = 'User[][username]'
-                    foreach ( $child as $grandchild_array ) {
-                        $obj_name = $model_location . $child_key;
-                        $obj = new $obj_name();
-                        foreach ( $grandchild_array as $key => $value ) {
-                            $obj->$key = $value;
-                        }
-                    }
-                    $collection[$child_key][] = $obj;
+                continue;
+            }
+
+            $loc = strrpos($child_key, '|');
+            if ( $loc !== false ) { // name = 'User|id[username]'
+                $id = substr($child_key, $loc + 1);
+                $class_name = substr($child_key, 0, $loc);
+                $class = $model_location . $class_name;
+                $obj = new $class(array('id' => $id));
+                foreach ( $child as $key => $value ) {
+                    $obj->$key = $value;
                 }
+                $collection[$class_name][] = $obj;
+                continue;
+            }
+
+            // name = 'User[][username]'
+            foreach ( $child as $grandchild_array ) {
+                $obj_name = $model_location . $child_key;
+                $obj = new $obj_name();
+                foreach ( $grandchild_array as $key => $value ) {
+                    $obj->$key = $value;
+                }
+                $collection[$child_key][] = $obj;
             }
         }
 
