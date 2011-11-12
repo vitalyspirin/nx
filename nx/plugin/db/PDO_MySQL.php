@@ -272,6 +272,17 @@ class PDO_MySQL extends \nx\core\Object {
                         switch ( $sign ) {
                             case 'like':
                                 $sql .= 'like ';
+                                break;
+                            case 'like%':
+                                $sql .= 'like ';
+                                $constraint = $constraint . '%';
+                                break;
+                            case '%like':
+                                $sql .= 'like ';
+                                $constraint = '%' . $constraint;
+                                break;
+                            case '%like%':
+                                $sql .= 'like ';
                                 $constraint = '%' . $constraint . '%';
                                 break;
                             case 'gt':
