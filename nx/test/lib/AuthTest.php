@@ -6,6 +6,10 @@ use nx\lib\Auth;
 
 class AuthTest extends \PHPUnit_Framework_TestCase {
 
+    protected function setUp() {
+        $_SESSION = array();
+    }
+
     public function test_ValidateToken_ReturnsBool() {
         $token = Auth::create_token();
         $this->assertTrue(Auth::is_token_valid($token));

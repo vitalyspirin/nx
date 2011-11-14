@@ -4,7 +4,7 @@ namespace nx\test\lib;
 
 use nx\lib\Meta;
 
-class ModelMock {
+class MetaMock {
     protected $id = 42;
     protected $test_name = 'test value';
     protected $_no_access;
@@ -18,7 +18,7 @@ class ModelMock {
     }
 }
 
-class ModelMock2 {
+class MetaMock2 {
     protected $id;
     protected $test_name = 'test value';
     protected $_allow_access;
@@ -35,13 +35,13 @@ class ModelMock2 {
 class MetaTest extends \PHPUnit_Framework_TestCase {
 
     public function test_Classname_ReturnsClassnameWithoutNamepsace() {
-        $model = new ModelMock();
-        $class = 'ModelMock';
+        $model = new MetaMock();
+        $class = 'MetaMock';
         $check = Meta::classname_only($model);
         $this->assertEquals($class, $check);
 
-        $model = new ModelMock2();
-        $class = 'ModelMock2';
+        $model = new MetaMock2();
+        $class = 'MetaMock2';
         $check = Meta::classname_only($model);
         $this->assertEquals($class, $check);
 
@@ -51,7 +51,7 @@ class MetaTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function test_GetColumns_ReturnsArray() {
-        $model = new ModelMock();
+        $model = new MetaMock();
         $columns = array(
             'id'        => 42,
             'test_name' => 'test value'
@@ -59,7 +59,7 @@ class MetaTest extends \PHPUnit_Framework_TestCase {
         $check = Meta::get_columns($model);
         $this->assertEquals($columns, $check);
 
-        $model = new ModelMock2();
+        $model = new MetaMock2();
         $columns = array(
             'id'        => null,
             'test_name' => 'test value'
@@ -69,12 +69,12 @@ class MetaTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function test_GetProtectedMethods_ReturnsArray() {
-        $model = new ModelMock();
+        $model = new MetaMock();
         $methods = array('_set_id');
         $check = Meta::get_protected_methods($model);
         $this->assertEquals($methods, $check);
 
-        $model = new ModelMock2();
+        $model = new MetaMock2();
         $methods = array('_get_id');
         $check = Meta::get_protected_methods($model);
         $this->assertEquals($methods, $check);
