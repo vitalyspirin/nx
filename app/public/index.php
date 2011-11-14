@@ -2,5 +2,5 @@
     require dirname(__DIR__) . '/config/bootstrap.php';
 
     $dispatcher = new \nx\core\Dispatcher();
-    echo $dispatcher->render($_SERVER['REQUEST_URI']);
+    echo $dispatcher->handle(new \nx\core\Request());
 ?>
