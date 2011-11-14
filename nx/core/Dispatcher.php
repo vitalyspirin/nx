@@ -13,7 +13,7 @@ namespace nx\core;
 /*
  *  The `Dispatcher` class is used to handle page rendering.
  *
- *  @package lib
+ *  @package core
  */
 class Dispatcher extends Object {
 
@@ -27,49 +27,42 @@ class Dispatcher extends Object {
 	public function __construct(array $config = array()) {
         $defaults = array(
             'classes'   => array(
-                'request' => 'nx\lib\Request',
-                'router'  => 'nx\lib\Router',
-                'view'    => 'nx\core\View'
-            ),
-            'locations' => array(
-                'controller' => 'app\controller\\',
-                'model'      => 'app\model\\'
+                'router' => 'nx\lib\Router',
+                'view'   => 'nx\core\View'
             )
         );
         parent::__construct($config + $defaults);
 	}
 
+    // TODO: Fix this description.  We should be returning a response.
    /**
-    *  Renders a page.
+    *  Handles an incoming request.
     *
-    *  @param string $url          The url representing the page to be rendered.
+    *  @param obj $request          The incoming request object.
     *  @access public
     *  @return bool
     */
-    public function render($url) {
+    public function handle($request) {
+        $template = ( $request->is('mobile') ) ? 'mobile' : 'web';
+
         $router = $this->_config['classes']['router'];
-        if ( !$args = $router::parse_url($url) ) {
-            return $this->throw_404('web');
+        $url = $request->env('REQUEST_URI');
+        if ( !$parsed = $router::parse($url) ) {
+            return $this->throw_404($template);
         }
 
-        $controller = $this->_config['locations']['controller']
-            . $args['controller'];
+        $request->query = $parsed['query'] + $request->query;
+
+        $controller = $this->_config['namespaces']['controller']
+            . $parsed['controller'];
 
         if ( !class_exists($controller) ) {
-            return $this->throw_404('web');
+            return $this->throw_404($template);
         }
 
-        $request = $this->_config['classes']['request'];
-        $args['post'] = $request::extract_post($_POST,
-            $this->_config['locations']['model']);
+        $controller = new $controller(array('request' => $request));
 
-        $controller = new $controller(array(
-            'http_get'  => $args['get'],
-            'http_post' => $args['post']
-        ));
-
-        $results = $controller->call($args['action'], $args['id']);
-        $template = $controller->get_template();
+        $results = $controller->call($parsed['action'], $parsed['id']);
         if ( !is_array($results) ) {
             return $this->throw_404($template);
         }
@@ -84,7 +77,8 @@ class Dispatcher extends Object {
         $view = $this->_config['classes']['view'];
         $view = new $view(compact('template'));
 
-        $file = lcfirst($args['controller']) . '/' . $args['action'];
+        $file = lcfirst($parsed['controller']) . '/'
+            . $parsed['action'];
         return $view->render($file, $results);
     }
 

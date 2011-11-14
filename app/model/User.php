@@ -11,7 +11,6 @@ class User extends \nx\core\Model {
     protected $ip;
     protected $join_date;
     protected $last_login;
-    protected $template;
 
     protected $_sanitizers = array(
         'username'         => 's',

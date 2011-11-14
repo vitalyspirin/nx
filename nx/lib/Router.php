@@ -52,9 +52,9 @@ class Router {
 
    /**
     *  Parses a query string and returns the controller, action,
-    *  id, and any additional arguments passed via $_GET.
+    *  id, and any additional arguments.
     *
-    *  @param string $query_string        The controller name.
+    *  @param string $query_string  The query string.
     *  @access public
     *  @return array
     */
@@ -64,25 +64,25 @@ class Router {
             $args = substr($query_string, $arg_pos + strlen('&args='));
             $query_string = substr($query_string, 0, $arg_pos);
         }
-        $query = array();
-        parse_str($query_string, $query);
+        $params = array();
+        parse_str($query_string, $params);
 
-        $controller = ( isset($query['controller']) )
-            ? ucfirst($query['controller'])
+        $controller = ( isset($params['controller']) )
+            ? ucfirst($params['controller'])
             : self::$defaults['controller'];
-        $action = ( isset($query['action']) )
-            ? $query['action']
+        $action = ( isset($params['action']) )
+            ? $params['action']
             : self::$defaults['action'];
-        $id = ( isset($query['id']) )
-            ? $query['id']
+        $id = ( isset($params['id']) )
+            ? $params['id']
             : self::$defaults['id'];
 
-        $get = array();
+        $query = array();
         if ( isset($args) && $args != '' ) {
             $args = rawurldecode(str_replace('%20', '+', $args));
-            parse_str($args, $get);
+            parse_str($args, $query);
         }
-        return compact('controller', 'action', 'id', 'get');
+        return compact('controller', 'action', 'id', 'query');
     }
 
    /**
@@ -90,11 +90,11 @@ class Router {
     *  and returns the necessary components to route the request.
     *
     *  @see nx\lib\Router::_parse_query_string()
-    *  @param string $url                 The url.
+    *  @param string $url          The url.
     *  @access public
     *  @return array
     */
-    public static function parse_url($url) {
+    public static function parse($url) {
         $matches = array();
         foreach ( self::$_routes as $pattern => $route ) {
             if ( preg_match($pattern, $url, $matches) ) {

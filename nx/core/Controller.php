@@ -25,20 +25,34 @@ use nx\lib\Meta;
 class Controller extends Object {
 
    /**
-    *  The typecasted data from $_GET.
+    *  The controller methods that are
+    *  accessible to guests (i.e., users
+    *  that are not logged in).
     *
     *  @var array
     *  @access protected
     */
-    protected $_http_get = array();
+    protected $_guest_accessible = array();
 
    /**
-    *  The typecasted data from $_POST.
+    *  The uri to which a guest should be
+    *  redirected if a method is not
+    *  accessible to them.
     *
-    *  @var array
+    *  @var string
     *  @access protected
     */
-    protected $_http_post = array();
+    protected $_guest_redirect = '/login';
+
+   /**
+    *  The request object containing
+    *  all of the information pertinent
+    *  to the incoming request.
+    *
+    *  @var obj
+    *  @access protected
+    */
+    protected $_request;
 
    /**
     *  The session object.
@@ -47,14 +61,6 @@ class Controller extends Object {
     *  @access protected
     */
     protected $_session;
-
-   /**
-    *  The controller template.
-    *
-    *  @var string
-    *  @access protected
-    */
-    protected $_template = 'web';
 
    /**
     *  The request token.
@@ -96,12 +102,11 @@ class Controller extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'classes'   => array(
+            'classes'        => array(
                 'session' => 'app\model\Session',
                 'user'    => 'app\model\User'
             ),
-            'http_get'  => $this->_http_get,
-            'http_post' => $this->_http_post
+            'request' => null
         );
         parent::__construct($config + $defaults);
     }
@@ -121,10 +126,12 @@ class Controller extends Object {
         $this->_session = new $session();
 
         $this->_typecasts += array('token' => 's');
-        $this->_http_get = $this->typecast($this->_config['http_get']);
-        $this->_http_post = $this->typecast($this->_config['http_post']);
 
-        if ( !$this->_is_valid_request($this->_http_post) ) {
+        $this->_request = $this->_config['request'];
+        $this->_request->data = $this->typecast($this->_request->data);
+        $this->_request->query = $this->typecast($this->_request->query);
+
+        if ( !$this->_is_valid_request($this->_request->data) ) {
             $this->handle_CSRF();
             $this->_token = null;
         }
@@ -137,7 +144,6 @@ class Controller extends Object {
             $user = $this->_config['classes']['user'];
             $id = $this->_session->get_user_id();
             $this->_user = new $user(compact('id'));
-            $this->_template = $this->_user->get_template();
         }
     }
 
@@ -153,6 +159,10 @@ class Controller extends Object {
     *  @return mixed
     */
     public function call($method, $id = null) {
+        if ( !$this->_user && !in_array($method, $this->_guest_accessible) ) {
+            $this->redirect($this->_guest_redirect);
+        }
+
         if ( !method_exists($this, $method) || $this->is_protected($method) ) {
             return false;
         }
@@ -169,16 +179,6 @@ class Controller extends Object {
         );
 
         return $results + $additional;
-    }
-
-   /**
-    *  Returns the current template.
-    *
-    *  @access public
-    *  @return string
-    */
-    public function get_template() {
-        return $this->_template;
     }
 
    /**
