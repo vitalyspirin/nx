@@ -63,9 +63,9 @@ class Time {
         // Ensure we're beginning at midnight
         $original_timezone = date_default_timezone_get();
         date_default_timezone_set('UTC');
-        $time = strtotime(date('m-j-Y'));
+        $time = strtotime(date('m/j/Y'));
         $steps = (1440 / $interval) - 1; // (1440 = minutes in a day)
-        for ($i = 0; $i <= $steps; $i++) {
+        for ( $i = 0; $i <= $steps; $i++ ) {
             $list[] = ( $military ) ? date('H:i', $time) : date('g:i A', $time);
             $time += ($interval * 60);
         }
