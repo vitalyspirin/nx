@@ -104,11 +104,19 @@ class Connections {
     *  @return object
     */
     public static function get_cache($name) {
+        if ( !self::$_options['cache'][$name]['enabled'] ) {
+            return false;
+        }
+
         if ( !self::$_initialized['cache'][$name] ) {
             $plugin = self::$_options['cache'][$name]['plugin'];
             $cache = 'nx\plugin\cache\\' . $plugin;
-            unset(self::$_options['cache'][$name]['plugin']);
-            self::$_cache[$name] = new $cache(self::$_options['cache'][$name]);
+
+            $options = self::$_options['cache'][$name];
+            unset($options['enabled']);
+            unset($options['plugin']);
+            self::$_cache[$name] = new $cache($options);
+
             self::$_initialized['cache'][$name] = true;
         }
 
@@ -126,8 +134,11 @@ class Connections {
         if ( !self::$_initialized['db'][$name] ) {
             $plugin = self::$_options['db'][$name]['plugin'];
             $db = 'nx\plugin\db\\' . $plugin;
-            unset(self::$_options['db'][$name]['plugin']);
-            self::$_db[$name] = new $db(self::$_options['db'][$name]);
+
+            $options = self::$_options['db'][$name];
+            unset($options['plugin']);
+            self::$_db[$name] = new $db($options);
+
             self::$_initialized['db'][$name] = true;
         }
 

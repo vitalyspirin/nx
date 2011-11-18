@@ -167,7 +167,9 @@ class Model extends Object {
     protected function _init() {
         parent::_init();
         $this->_db = Connections::get_db($this->_config['db']);
-        $this->_cache = Connections::get_cache($this->_config['cache']);
+        if ( !$this->_cache = Connections::get_cache($this->_config['cache']) ) {
+            $this->_config['no_cache'] = true;
+        }
 
         if ( isset($this->_config['where']) ) {
             $field = '`' . $this->_meta['key'] . '`';
@@ -273,7 +275,10 @@ class Model extends Object {
     */
     public function delete($where = null) {
         $key = $this->classname() . '_' . $this->get_pk();
-        $this->_cache->delete($key);
+
+        if ( !$this->_config['no_cache'] ) {
+            $this->_cache->delete($key);
+        }
 
         if ( is_null($where) ) {
             $id = $this->get_pk();
@@ -515,6 +520,23 @@ class Model extends Object {
     }
 
    /**
+    *  Maps an array of data to `$this`.
+    *
+    *  @param array $data          The array of data, in the format of
+    *                              array('property' => 'value'),
+    *                              where 'property' is the object's property
+    *                              and 'value' is the object's value.
+    *  @access public
+    *  @return bool
+    */
+    public function map($data) {
+        foreach ( $data as $property => $value ) {
+            $this->$property = $value;
+        }
+        return true;
+    }
+
+   /**
     *  Retrieves an object from the cache.
     *
     *  @param object $obj          The object to be populated with the
@@ -559,13 +581,23 @@ class Model extends Object {
    /**
     *  Stores an object in both the database and the cache.
     *
+    *  @see /nx/core/Model->map()
+    *  @param array $map           An array of data to be mapped to the
+    *                              object.  Note that store() will store
+    *                              the entire object, and not just the fields
+    *                              passed in to $map.
     *  @access public
     *  @return bool
     */
-    public function store() {
+    public function store($map = array()) {
+        if ( !empty($map) ) {
+            $this->map($map);
+        }
+
         if ( !$this->is_valid() ) {
             return false;
         }
+
         $this->_db->upsert($this->classname(), $this->get_columns());
         $id = $this->_meta['key'];
         if ( !$this->$id ) {

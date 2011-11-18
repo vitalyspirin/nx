@@ -1,6 +1,7 @@
 <?php
 
 $dev = array(
+    'enabled'       => false,
     'plugin'        => 'Memcached',
     'host'          => 'localhost',
     'persistent_id' => ''
