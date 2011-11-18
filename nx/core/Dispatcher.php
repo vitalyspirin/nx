@@ -77,8 +77,7 @@ class Dispatcher extends Object {
         $view = $this->_config['classes']['view'];
         $view = new $view(compact('template'));
 
-        $file = lcfirst($parsed['controller']) . '/'
-            . $parsed['action'];
+        $file = lcfirst($parsed['controller']) . '/' . $parsed['action'];
         return $view->render($file, $results);
     }
 

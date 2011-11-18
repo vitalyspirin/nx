@@ -25,7 +25,7 @@ use nx\lib\Meta;
 class Controller extends Object {
 
    /**
-    *  The controller methods that are
+    *  The controller actions that are
     *  accessible to guests (i.e., users
     *  that are not logged in).
     *
@@ -36,7 +36,7 @@ class Controller extends Object {
 
    /**
     *  The uri to which a guest should be
-    *  redirected if a method is not
+    *  redirected if an action is not
     *  accessible to them.
     *
     *  @var string
@@ -129,9 +129,10 @@ class Controller extends Object {
 
         $this->_request = $this->_config['request'];
         $this->_request->data = $this->typecast($this->_request->data);
+        die(var_dump($this->_request->data));
         $this->_request->query = $this->typecast($this->_request->query);
 
-        if ( !$this->_is_valid_request($this->_request->data) ) {
+        if ( !$this->_is_valid_request($this->_request) ) {
             $this->handle_CSRF();
             $this->_token = null;
         }
@@ -148,26 +149,26 @@ class Controller extends Object {
     }
 
    /**
-    *  Calls the controller method, whose return values can then
+    *  Calls the controller action, whose return values can then
     *  be passed to and parsed by a view.
     *
-    *  @param string $method       The method.
+    *  @param string $action       The action.
     *  @param int $id              The id (passed from the URL, useful with
     *                              query strings like `http://foobar.com/entry/23`
     *                              or `http://foobar.com/entry/view/23`).
     *  @access public
     *  @return mixed
     */
-    public function call($method, $id = null) {
-        if ( !$this->_user && !in_array($method, $this->_guest_accessible) ) {
+    public function call($action, $id = null) {
+        if ( !$this->_user && !in_array($action, $this->_guest_accessible) ) {
             $this->redirect($this->_guest_redirect);
         }
 
-        if ( !method_exists($this, $method) || $this->is_protected($method) ) {
+        if ( !$action = $this->_determine_action($action, $this->_request) ) {
             return false;
         }
 
-        $results = $this->$method($id);
+        $results = $this->$action($id);
 
         if ( is_null($results) || $results === false ) {
             return false;
@@ -179,6 +180,42 @@ class Controller extends Object {
         );
 
         return $results + $additional;
+    }
+
+   /**
+    *  Determines the appropriate action depending on the
+    *  nature of the request.
+    *
+    *  @param string $action       The action.
+    *  @param obj $request         The request.
+    *  @access public
+    *  @return mixed
+    */
+    protected function _determine_action($action, $request) {
+        if ( $this->is_protected($action) ) {
+            return false;
+        }
+
+        if ( $action != 'index' ) {
+            if ( !method_exists($this, $action) ) {
+                return false;
+            }
+            return $action;
+        }
+
+        $methods = array('get', 'post', 'put', 'delete');
+        foreach ( $methods as $method ) {
+            if ( $request->is($method) ) {
+                $action = '_' . $method;
+                break;
+            }
+        }
+
+        if ( !method_exists($this, $action) ) {
+            return false;
+        }
+
+        return $action;
     }
 
    /**
@@ -207,20 +244,20 @@ class Controller extends Object {
     *  Checks that the token submitted with the
     *  request data is valid.
     *
-    *  @param array $request       The request data.
+    *  @param obj $request       The request object.
     *  @access protected
     *  @return bool
     */
     protected function _is_valid_request($request) {
-        if ( empty($request) ) {
+        if ( $request->is('get') && empty($request->data) ) {
             return true;
         }
 
-        if ( !isset($request['token']) ) {
+        if ( !isset($request->data['token']) ) {
             return false;
         }
 
-        return Auth::is_token_valid($request['token']);
+        return Auth::is_token_valid($request->data['token']);
     }
 
    /**
