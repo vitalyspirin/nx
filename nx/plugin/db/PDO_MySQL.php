@@ -259,60 +259,62 @@ class PDO_MySQL extends \nx\core\Object {
         $sql = ' WHERE ';
         if ( is_string($where) ) {
             $sql .= $where;
-        } elseif ( is_array($where) ) {
-            foreach ( $where as $name => $val ) {
-                if ( is_string($val) || is_numeric($val) ) {
-                    $sql .= '`' . $name . '`=:' . $name . ' and ';
-                } elseif ( is_array($val) ) {
-                    foreach ( $val as $sign => $constraint ) {
-                        do {
-                            $new_name = $name .  '__' . rand();
-                        } while ( isset($where[$new_name]) );
-                        $sql .=  '`' . $name . '` ';
-                        switch ( $sign ) {
-                            case 'like':
-                                $sql .= 'like ';
-                                break;
-                            case 'like%':
-                                $sql .= 'like ';
-                                $constraint = $constraint . '%';
-                                break;
-                            case '%like':
-                                $sql .= 'like ';
-                                $constraint = '%' . $constraint;
-                                break;
-                            case '%like%':
-                                $sql .= 'like ';
-                                $constraint = '%' . $constraint . '%';
-                                break;
-                            case 'gt':
-                                $sql .= '>';
-                                break;
-                            case 'gte':
-                                $sql .= '>=';
-                                break;
-                            case 'lt':
-                                $sql .= '<';
-                                break;
-                            case 'lte':
-                                $sql .= '<=';
-                                break;
-                            case 'ne':
-                                $sql .= '!=';
-                                break;
-                            case 'e':
-                            default:
-                                $sql .= '=';
-                                break;
-                        }
-                        $sql .= ':' . $new_name . ' and ';
-                        $where[$new_name] = $constraint;
-                        unset($where[$name]);
+            return $sql;
+        }
+
+        $bindings = $where;
+        foreach ( $bindings as $name => $val ) {
+            if ( is_string($val) || is_numeric($val) ) {
+                $sql .= '`' . $name . '`=:' . $name . ' and ';
+            } elseif ( is_array($val) ) {
+                foreach ( $val as $sign => $constraint ) {
+                    do {
+                        $new_name = $name .  '__' . rand();
+                    } while ( isset($where[$new_name]) );
+                    $sql .=  '`' . $name . '` ';
+                    switch ( $sign ) {
+                        case 'like':
+                            $sql .= 'like ';
+                            break;
+                        case 'like%':
+                            $sql .= 'like ';
+                            $constraint = $constraint . '%';
+                            break;
+                        case '%like':
+                            $sql .= 'like ';
+                            $constraint = '%' . $constraint;
+                            break;
+                        case '%like%':
+                            $sql .= 'like ';
+                            $constraint = '%' . $constraint . '%';
+                            break;
+                        case 'gt':
+                            $sql .= '>';
+                            break;
+                        case 'gte':
+                            $sql .= '>=';
+                            break;
+                        case 'lt':
+                            $sql .= '<';
+                            break;
+                        case 'lte':
+                            $sql .= '<=';
+                            break;
+                        case 'ne':
+                            $sql .= '!=';
+                            break;
+                        case 'e':
+                        default:
+                            $sql .= '=';
+                            break;
                     }
+                    $sql .= ':' . $new_name . ' and ';
+                    $where[$new_name] = $constraint;
+                    unset($where[$name]);
                 }
             }
-            $sql = substr($sql, 0, strlen($sql) - strlen(' and '));
         }
+        $sql = substr($sql, 0, strlen($sql) - strlen(' and '));
 
         return $sql;
     }
