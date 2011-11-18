@@ -143,7 +143,10 @@ class Request extends Object {
     *  @return mixed
     */
     public function env($key) {
-        return $this->_env[strtoupper($key)];
+        $key = strtoupper($key);
+        return ( isset($this->_env[strtoupper($key)]) )
+            ? $this->_env[strtoupper($key)]
+            : null;
     }
 
    /**
