@@ -37,6 +37,7 @@ class View extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
+            'cache_dir' => dirname(dirname(__DIR__)) . '/app/resource/cache/',
             'classes'   => array(
                 'compiler' => 'nx\lib\Compiler',
                 'form'     => 'nx\lib\Form'
@@ -81,7 +82,8 @@ class View extends Object {
         }
 
         $compiler = $this->_config['classes']['compiler'];
-        $template = $compiler::compile($file);
+        $options = array('path' => $this->_config['cache_dir']);
+        $template = $compiler::compile($file, $options);
 
         ob_start();
         require $template;
@@ -96,8 +98,8 @@ class View extends Object {
     */
     public function throw_404() {
         ob_start();
-        require $this->_config['view_dir'] . $this->_config['template']
-            . '/404.html';
+        require $this->_config['view_dir']
+            . $this->_config['template']  . '/404.html';
         return ob_get_clean();
     }
 

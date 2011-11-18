@@ -6,13 +6,12 @@ use nx\lib\Compiler;
 
 class CompilerTest extends \PHPUnit_Framework_TestCase {
 
-    protected $_compiled_dir = 'compiled/';
+    protected $_compiled_dir;
     protected $_file;
-    protected $_path;
 
     public function setUp() {
-        $this->_path = dirname(__FILE__) . '/';
-        $this->_file = $this->_path . 'test.html';
+        $this->_compiled_dir = dirname(__FILE__) . '/compiled/';
+        $this->_file = dirname(__FILE__) . '/test.html';
         $contents = "<html>
     <body>
         <?=\$hello;?>
@@ -29,11 +28,11 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-        $pattern = $this->_path .$this->_compiled_dir . '*.html';
+        $pattern = $this->_compiled_dir . '*.html';
         foreach ( glob($pattern) as $file ) {
             unlink($file);
         }
-        rmdir($this->_path . $this->_compiled_dir);
+        rmdir($this->_compiled_dir);
         unlink($this->_file);
     }
 
@@ -65,18 +64,18 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         $path = $this->_compiled_dir;
 
         $first = Compiler::compile($this->_file, compact('path'));
-        $first_glob = glob($this->_path . $this->_compiled_dir . '/*');
+        $first_glob = glob($this->_compiled_dir . '/*');
 
         clearstatcache();
         $cached = Compiler::compile($this->_file, compact('path'));
-        $second_glob = glob($this->_path . $this->_compiled_dir . '/*');
+        $second_glob = glob($this->_compiled_dir . '/*');
         $this->assertEquals($cached, $first);
         $this->assertEquals($first_glob, $second_glob);
 
         file_put_contents($this->_file, 'Some new stuff');
         clearstatcache();
         $new = Compiler::compile($this->_file, compact('path'));
-        $new_glob = glob($this->_path . $this->_compiled_dir . '/*');
+        $new_glob = glob($this->_compiled_dir . '/*');
 
         $this->assertNotEquals($cached, $new);
         $this->assertEquals(count($first_glob), count($new_glob));

@@ -26,8 +26,8 @@ class Compiler {
     *  @param string $file          The file location.
     *  @param array $options        The compilation options, which take
     *                               the following keys:
-    *                               'path' - The path relative to the file
-    *                                        where the cached file should be
+    *                               'path' - The path where where the
+    *                                        cached file should be
     *                                        stored.
     *  @access public
     *  @return string
@@ -43,7 +43,7 @@ class Compiler {
             . '_' . basename($file, '.html');
         $template = 'template_' . $location . '_' . $stats['mtime']
             . '_' . $stats['ino'] . '_' . $stats['size'] . '.html';
-        $template = $dir . '/' . $options['path'] . $template;
+        $template = $options['path'] . $template;
 
         if ( file_exists($template) ) {
             return $template;
