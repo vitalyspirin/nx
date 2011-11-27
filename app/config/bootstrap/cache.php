@@ -1,32 +1,30 @@
 <?php
 
-$dev = array(
-    'enabled'       => false,
-    'plugin'        => 'Memcached',
-    'host'          => 'localhost',
-    'persistent_id' => ''
+$config = array(
+
+    'development' => array(
+        'enabled'       => false,
+        'plugin'        => 'Memcached',
+        'host'          => 'localhost',
+        'persistent_id' => ''
+    ),
+
+    'test' => array(
+        'enabled'       => true,
+        'plugin'        => 'Memcached',
+        'host'          => 'localhost',
+        'persistent_id' => ''
+    ),
+
+    'production' => array(
+        'enabled'       => true,
+        'plugin'        => 'Memcached',
+        'host'          => 'localhost',
+        'persistent_id' => ''
+    )
+
 );
 
-/*
-$qa = array(
-    'plugin'        => 'Memcached',
-    'host'          => 'localhost',
-    'persistent_id' => ''
-);
-
-$ci = array(
-    'plugin'        => 'Memcached',
-    'host'          => 'localhost',
-    'persistent_id' => ''
-);
-
-$live = array(
-    'plugin'        => 'Memcached',
-    'host'          => 'localhost',
-    'persistent_id' => ''
-);
-*/
-
-\nx\lib\Connections::add_cache('default', $dev);
+\nx\lib\Connections::add_cache($config);
 
 ?>

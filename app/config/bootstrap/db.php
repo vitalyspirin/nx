@@ -1,39 +1,33 @@
 <?php
 
-$dev = array(
-    'plugin'   => 'PDO_MySQL',
-    'database' => '',
-    'host'     => 'localhost',
-    'username' => 'root',
-    'password' => 'admin'
+$config = array(
+
+    'development' => array(
+        'plugin'   => 'PDO_MySQL',
+        'database' => '',
+        'host'     => 'localhost',
+        'username' => 'root',
+        'password' => 'admin'
+    ),
+
+    'test' => array(
+        'plugin'   => 'PDO_MySQL',
+        'database' => '',
+        'host'     => 'localhost',
+        'username' => 'root',
+        'password' => 'admin'
+    ),
+
+    'production' => array(
+        'plugin'   => 'PDO_MySQL',
+        'database' => '',
+        'host'     => 'localhost',
+        'username' => 'root',
+        'password' => 'admin'
+    )
+
 );
 
-/*
-$qa = array(
-    'plugin'   => 'PDO_MySQL',
-    'database' => '',
-    'host'     => 'localhost',
-    'username' => 'root',
-    'password' => 'admin'
-);
-
-$ci = array(
-    'plugin'   => 'PDO_MySQL',
-    'database' => '',
-    'host'     => 'localhost',
-    'username' => 'root',
-    'password' => 'admin'
-);
-
-$live = array(
-    'plugin'   => 'PDO_MySQL',
-    'database' => '',
-    'host'     => 'localhost',
-    'username' => 'root',
-    'password' => 'admin'
-);
-*/
-
-\nx\lib\Connections::add_db('default', $dev);
+\nx\lib\Connections::add_db($config);
 
 ?>
