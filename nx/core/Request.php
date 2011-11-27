@@ -59,8 +59,11 @@ class Request extends Object {
      */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'data'       => array(),
-            'query'      => array()
+            'classes' => array(
+                'library' => 'nx\lib\Library'
+            ),
+            'data'    => array(),
+            'query'   => array()
         );
         parent::__construct($config + $defaults);
     }
@@ -129,10 +132,9 @@ class Request extends Object {
             fclose($stream);
         }
 
-        $this->data = $this->_extract(
-            $this->data, $this->_config['namespaces']['model']
-        );
-
+        $library = $this->_config['classes']['library'];
+        $model_namespace = $library::get('namespace', 'model');
+        $this->data = $this->_extract($this->data, $model_namespace);
     }
 
    /**
