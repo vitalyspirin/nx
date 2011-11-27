@@ -6,7 +6,7 @@ class Dashboard extends \nx\core\Controller {
 
     protected $_guest_accessible = array('index');
 
-    public function index() {
+    public function _get() {
         return array();
     }
 }
