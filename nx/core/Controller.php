@@ -129,7 +129,6 @@ class Controller extends Object {
 
         $this->_request = $this->_config['request'];
         $this->_request->data = $this->typecast($this->_request->data);
-        die(var_dump($this->_request->data));
         $this->_request->query = $this->typecast($this->_request->query);
 
         if ( !$this->_is_valid_request($this->_request) ) {
@@ -253,11 +252,18 @@ class Controller extends Object {
             return true;
         }
 
-        if ( !isset($request->data['token']) ) {
+        $token = null;
+        if ( $request->is('delete') && isset($request->query['token']) ) {
+            $token = $request->query['token'];
+        } elseif ( isset($request->data['token']) ) {
+            $token = $request->data['token'];
+        }
+
+        if ( is_null($token) ) {
             return false;
         }
 
-        return Auth::is_token_valid($request->data['token']);
+        return Auth::is_token_valid($token);
     }
 
    /**
