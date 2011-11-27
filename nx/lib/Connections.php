@@ -60,40 +60,54 @@ class Connections {
     *  Stores the cache connection details using the defined options.
     *
     *  @see app\config\bootstrap\cache.php
-    *  @param string $name          The name of the cache handler.
-    *  @param array $options        The cache options.  Takes the following
-    *                               parameters:
-    *                               `plugin`        - The name of the cache plugin.
+    *  @param array $options        The cache configuration.  Should be of the
+    *                               following format: `key` => `value`,
+    *                               where `key` is the name of the configuration
+    *                               (i.e., 'development', 'test', 'production'),
+    *                               and `value` is an array which can take
+    *                               the following parameters:
+    *                               `enabled`       - Whether or not the
+    *                                                 plugin should be used.
+    *                               `plugin`        - The name of the cache
+    *                                                 plugin.
     *                               `host`          - The hostname of the server
     *                                                 where the cache resides.
     *                               `persistent_id` - A unique ID used to allow
-    *                                                 persistence between requests.
+    *                                                 persistence between
+    *                                                 requests.
     *  @access public
     *  @return void
     */
-    public static function add_cache($name, array $options = array()) {
-        self::$_options['cache'][$name] = $options;
-        self::$_initialized['cache'][$name] = false;
+    public static function add_cache($config = array()) {
+        foreach ( $config as $name => $options ) {
+            self::$_options['cache'][$name] = $options;
+            self::$_initialized['cache'][$name] = false;
+        }
     }
 
    /**
     *  Stores the database connection details using the defined options.
     *
     *  @see app\config\bootstrap\db.php
-    *  @param string $name          The name of the database handler.
-    *  @param array $options        The database options.  Takes the
+    *  @param array $config         The database configuration.  Should be of
+    *                               the following format: `key` => `value`,
+    *                               where `key` is the name of the configuration
+    *                               (i.e., 'development', 'test', 'production'),
+    *                               and `value` is an array which can take the
     *                               following parameters:
-    *                               `plugin`   - The name of the database plugin.
-    *                               `database` - The name of the database.
+    *                               `plugin`   - The name of the plugin.
+    *                               `database` - The database name.
     *                               `host`     - The database host.
     *                               `username` - The database username.
     *                               `password` - The database password.
     *  @access public
     *  @return void
     */
-    public static function add_db($name, array $options = array()) {
-        self::$_options['db'][$name] = $options;
-        self::$_initialized['db'][$name] = false;
+    public static function add_db($config = array()) {
+        foreach ( $config as $name => $options ) {
+            self::$_options['db'][$name] = $options;
+            self::$_initialized['db'][$name] = false;
+        }
     }
 
    /**

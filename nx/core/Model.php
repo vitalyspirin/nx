@@ -12,6 +12,7 @@ namespace nx\core;
 
 use nx\lib\Connections;
 use nx\lib\Data;
+use nx\lib\Library;
 use nx\lib\Meta;
 use nx\lib\Validator;
 
@@ -145,12 +146,13 @@ class Model extends Object {
     *  @return void
     */
     public function __construct(array $config = array()) {
+        $environment = Library::environment();
         $defaults = array(
             'id'       => null,
             'where'    => null,
             'no_cache' => false,
-            'db'       => 'default',
-            'cache'    => 'default'
+            'db'       => $environment,
+            'cache'    => $environment,
         );
         parent::__construct($config + $defaults);
     }
@@ -565,20 +567,6 @@ class Model extends Object {
     }
 
    /**
-    *  Typecasts an object's properties in accordance with the typecasts
-    *  defined in $this->_typecasts.
-    *
-    *  @access public
-    *  @return object
-    */
-    public function typecast() {
-        foreach ( $this->_typecasts as $property => $type ) {
-            $this->$property = Data::typecast($this->$property, $type);
-        }
-        return $this;
-    }
-
-   /**
     *  Stores an object in both the database and the cache.
     *
     *  @see /nx/core/Model->map()
@@ -605,6 +593,20 @@ class Model extends Object {
         }
         $this->cache();
         return true;
+    }
+
+   /**
+    *  Typecasts an object's properties in accordance with the typecasts
+    *  defined in $this->_typecasts.
+    *
+    *  @access public
+    *  @return object
+    */
+    public function typecast() {
+        foreach ( $this->_typecasts as $property => $type ) {
+            $this->$property = Data::typecast($this->$property, $type);
+        }
+        return $this;
     }
 
    /**

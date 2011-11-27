@@ -37,13 +37,12 @@ class View extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'cache_dir' => dirname(dirname(__DIR__)) . '/app/resource/cache/',
             'classes'   => array(
                 'compiler' => 'nx\lib\Compiler',
-                'form'     => 'nx\lib\Form'
+                'form'     => 'nx\lib\Form',
+                'library'  => 'nx\lib\Library'
             ),
-            'template' => null,
-            'view_dir' => dirname(dirname(__DIR__)) . '/app/view/'
+            'template' => null
         );
 
         parent::__construct($config + $defaults);
@@ -58,8 +57,12 @@ class View extends Object {
     protected function _init() {
         parent::_init();
 
+        $library = $this->_config['classes']['library'];
+        $version = str_replace('.', '', $library::version());
+
         $form = $this->_config['classes']['form'];
-        $this->_form = new $form();
+        $this->_form = new $form(compact('version'));
+
     }
 
    /**
@@ -71,7 +74,8 @@ class View extends Object {
     *  @return string
     */
     public function render($file, $vars = null) {
-        $path = $this->_config['view_dir'];
+        $library = $this->_config['classes']['library'];
+        $path = $library::get('path', 'view');
         if ( !is_null($this->_config['template']) ) {
             $path .= $this->_config['template'] . '/';
         }
@@ -82,7 +86,7 @@ class View extends Object {
         }
 
         $compiler = $this->_config['classes']['compiler'];
-        $options = array('path' => $this->_config['cache_dir']);
+        $options = array('path' => $library::get('path', 'cache'));
         $template = $compiler::compile($file, $options);
 
         ob_start();
@@ -97,9 +101,11 @@ class View extends Object {
     *  @return void
     */
     public function throw_404() {
+        $library = $this->_config['classes']['library'];
+        $path = $library::get('path', 'view');
+
         ob_start();
-        require $this->_config['view_dir']
-            . $this->_config['template']  . '/404.html';
+        require $path . $this->_config['template']  . '/404.html';
         return ob_get_clean();
     }
 

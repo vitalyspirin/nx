@@ -27,8 +27,9 @@ class Dispatcher extends Object {
 	public function __construct(array $config = array()) {
         $defaults = array(
             'classes'   => array(
-                'router' => 'nx\lib\Router',
-                'view'   => 'nx\core\View'
+                'library' => 'nx\lib\Library',
+                'router'  => 'nx\lib\Router',
+                'view'    => 'nx\core\View'
             )
         );
         parent::__construct($config + $defaults);
@@ -53,8 +54,9 @@ class Dispatcher extends Object {
 
         $request->query = $parsed['query'] + $request->query;
 
-        $controller = $this->_config['namespaces']['controller']
-            . $parsed['controller'];
+        $library = $this->_config['classes']['library'];
+        $controller_namespace = $library::get('namespace', 'controller');
+        $controller = $controller_namespace . $parsed['controller'];
 
         if ( !class_exists($controller) ) {
             return $this->throw_404($template);

@@ -49,13 +49,7 @@ class Object {
     *  @return void
     */
     public function __construct(array $config = array()) {
-        $defaults = array(
-            'init'       => true,
-            'namespaces' => array(
-                'controller' => 'app\controller\\',
-                'model'      => 'app\model\\'
-            )
-        );
+        $defaults = array('init' => true);
         $this->_config = $config + $defaults;
 
         if ( $this->_config['init'] ) {
