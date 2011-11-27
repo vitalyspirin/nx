@@ -124,6 +124,31 @@ class PDO_MySQL extends \nx\core\Object {
     }
 
    /**
+    *  Performs a `SELECT COUNT(*) FROM` query.
+    *
+    *  @see /nx/plugin/db/PDO_MySQL->query()
+    *  @see /nx/plugin/db/PDO_MySQL->fetch()
+    *  @see /nx/plugin/db/PDO_MySQL->_format_where()
+    *  @param string $table         The table to SELECT from.
+    *  @param string|array $where   The WHERE clause of the SQL query.
+    *  @param string $additional    Any additional SQL to be added at
+    *                               the end of the query.
+    *  @access public
+    *  @return int
+    */
+    public function count($table, $where = null, $additional = null) {
+        $sql = 'SELECT COUNT(*) FROM ' . '`' . $table . '`';
+        $sql .= $this->_format_where($where);
+        if ( !is_null($additional) ) {
+            $sql .= ' ' . $additional;
+        }
+
+        $this->query($sql, $where);
+        $results = $this->fetch();
+        return (int) $results['COUNT(*)'];
+    }
+
+   /**
     *  Deletes a record from the database.
     *
     *  @see /nx/plugin/db/PDO_MySQL->_format_where()
