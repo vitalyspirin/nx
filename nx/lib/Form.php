@@ -33,6 +33,26 @@ class Form {
     */
     protected $_binding_counter = array();
 
+    /**
+     *  The configuration settings.
+     *
+     *  @var array
+     *  @access protected
+     */
+    protected $_config = array();
+
+   /**
+    *  Loads the configuration settings.
+    *
+    *  @param array $config         The configuration options.
+    *  @access public
+    *  @return void
+    */
+    public function __construct(array $config = array()) {
+        $defaults = array('version' => null);
+        $this->_config = $config + $defaults;
+    }
+
    /**
     * Creates a checkbox.
     *
@@ -55,6 +75,26 @@ class Form {
         ) {
             $html .= "checked='checked' ";
         }
+        $html .= "/>";
+
+        return $html;
+    }
+
+   /**
+    * Creates a link relation for CSS.  Note that this method appends
+    * the version number (if it was supplied to the constructor) to
+    * the href (so as to prevent browser caching).
+    *
+    * @param array $attributes          The HTML attributes.
+    * @access public
+    * @return string
+    */
+    public function css($attributes) {
+        $html = "<link rel='stylesheet' ";
+        if ( !is_null($this->_config['version']) && isset($attributes['href']) ) {
+            $attributes['href'] .= '?v=' . $this->_config['version'];
+        }
+        $html .= $this->_parse_attributes($attributes);
         $html .= "/>";
 
         return $html;
