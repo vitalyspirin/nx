@@ -21,26 +21,28 @@ class Data {
     *  Typecasts input.
     *
     *  @param mixed $data      The data to be typecasted.
-    *  @param string $type     The type.
+    *  @param string $type     The type.  Acceptable types are:
+    *                          'bool', 'float', 'int', and
+    *                          'string'.
     *  @access public
     *  @return mixed
     */
     public static function typecast($data, $type) {
         switch ( $type ) {
-            case 'b':
+            case 'bool':
                 $data = (boolean) filter_var($data, FILTER_SANITIZE_NUMBER_INT);
                 break;
-            case 'f':
+            case 'float':
                 $data = floatval(filter_var(
                     $data,
                     FILTER_SANITIZE_NUMBER_FLOAT,
                     FILTER_FLAG_ALLOW_FRACTION
                 ));
                 break;
-            case 'i':
+            case 'int':
                 $data = intval(filter_var($data, FILTER_SANITIZE_NUMBER_INT));
                 break;
-            case 's':
+            case 'string':
                 $data = trim(strval($data));
                 break;
         }

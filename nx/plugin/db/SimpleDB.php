@@ -242,7 +242,8 @@ class SimpleDB extends \nx\core\Object {
     *  @return mixed
     */
     public function fetch($fetch_style = 'assoc', $obj = null) {
-        if ( empty($this->_select_results) ) {
+        if ( empty($this->_select_results)
+            || ($fetch_style == 'into' && is_null($obj)) ) {
             return false;
         }
 
@@ -253,7 +254,6 @@ class SimpleDB extends \nx\core\Object {
 
         switch ( $fetch_style ) {
             case 'into':
-                // TODO: Throw exception if no object is provided
                 $id = $this->_config['primary_key'];
                 $obj->$id = (string) $result->Name;
                 foreach ( $result->Attribute as $attribute ) {
@@ -560,7 +560,10 @@ class SimpleDB extends \nx\core\Object {
     *  @return array
     */
     protected function _remap_attributes($attributes, $exists = null) {
-        // TODO: Throw exception if no id is specified
+        if ( !isset($attributes[$this->_config['primary_key']]) ) {
+            return false;
+        }
+
         $item_name = $attributes[$this->_config['primary_key']];
         unset($attributes[$this->_config['primary_key']]);
 

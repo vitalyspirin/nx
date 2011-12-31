@@ -36,18 +36,35 @@ class Router {
     *  @access protected
     */
     protected static $_routes = array(
-        '/^\/?$/'                                                  => '', // this will return our defaults
-        '/^\/([A-Za-z0-9\-]+)\/?$/'                                => 'controller=$1',
-        '/^\/([A-Za-z0-9\-]+)\?(.+)$/'                             => 'controller=$1&args=$2',
+        '/^\/?$/'                                                  =>
+            '', // this will return the defaults
 
-        '/^\/([A-Za-z0-9\-]+)\/([\d]+)\/?$/'                       => 'controller=$1&id=$2',
-        '/^\/([A-Za-z0-9\-]+)\/([\d]+)\?(.+)$/'                    => 'controller=$1&id=$2&args=$3',
+        '/^\/\?(.+)$/'                                             =>
+            'args=$1',
 
-        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\/?$/'             => 'controller=$1&action=$2',
-        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\?(.+)$/'          => 'controller=$1&action=$2&args=$3',
+        '/^\/([A-Za-z0-9\-]+)\/?$/'                                =>
+            'controller=$1',
 
-        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\/([\d]+)\/?$/'    => 'controller=$1&action=$2&id=$3',
-        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\/([\d]+)\?(.+)$/' => 'controller=$1&action=$2&id=$3&args=$4'
+        '/^\/([A-Za-z0-9\-]+)\?(.+)$/'                             =>
+            'controller=$1&args=$2',
+
+        '/^\/([A-Za-z0-9\-]+)\/([\d]+)\/?$/'                       =>
+            'controller=$1&id=$2',
+
+        '/^\/([A-Za-z0-9\-]+)\/([\d]+)\?(.+)$/'                    =>
+            'controller=$1&id=$2&args=$3',
+
+        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\/?$/'             =>
+            'controller=$1&action=$2',
+
+        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\?(.+)$/'          =>
+            'controller=$1&action=$2&args=$3',
+
+        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\/([\d]+)\/?$/'    =>
+            'controller=$1&action=$2&id=$3',
+
+        '/^\/([A-Za-z0-9\-]+)\/([A-Za-z0-9\-_]+)\/([\d]+)\?(.+)$/' =>
+            'controller=$1&action=$2&id=$3&args=$4'
     );
 
    /**
@@ -59,10 +76,10 @@ class Router {
     *  @return array
     */
     protected static function _parse_query_string($query_string) {
-        $arg_pos = strpos($query_string, '&args=');
+        $arg_pos = strpos($query_string, 'args=');
         if ( $arg_pos !== false ) {
-            $args = substr($query_string, $arg_pos + strlen('&args='));
-            $query_string = substr($query_string, 0, $arg_pos);
+            $args = substr($query_string, $arg_pos + strlen('args='));
+            $query_string = rtrim(substr($query_string, 0, $arg_pos), '&');
         }
         $params = array();
         parse_str($query_string, $params);

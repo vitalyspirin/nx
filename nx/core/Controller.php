@@ -16,9 +16,8 @@ use nx\lib\Meta;
 
 /*
  *  The `Controller` class is the parent class of all
- *  application controllers.  It provides access to typecasted
- *  $_POST and $_GET data and ensures protection against CSRF
- *  attacks.
+ *  application controllers.  It provides access request
+ *  data and ensures protection against CSRF attacks.
  *
  *  @package core
  */
@@ -71,21 +70,6 @@ class Controller extends Object {
     protected $_token = null;
 
    /**
-    *  The typecasts to be used when parsing
-    *  request data.  Acceptable types are:
-    *  `key` => `b` for booleans
-    *  `key` => `f` for float/decimals
-    *  `key` => `i` for integers
-    *  `key` => `s` for strings
-    *
-    *  @see /nx/lib/Data::typecast()
-    *  @see /nx/core/Controller->typecast()
-    *  @var array
-    *  @access protected
-    */
-    protected $_typecasts = array();
-
-   /**
     *  The user object.
     *
     *  @var object
@@ -102,7 +86,7 @@ class Controller extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'classes'        => array(
+            'classes' => array(
                 'session' => 'app\model\Session',
                 'user'    => 'app\model\User'
             ),
@@ -112,7 +96,7 @@ class Controller extends Object {
     }
 
    /**
-    *  Initializes the controller with typecasted http request data,
+    *  Initializes the controller with http request data,
     *  generates a token to be used to ensure that the next request is valid,
     *  and loads a user object if a valid session is found.
     *
@@ -125,20 +109,13 @@ class Controller extends Object {
         $session = $this->_config['classes']['session'];
         $this->_session = new $session();
 
-        $this->_typecasts += array('token' => 's');
-
         $this->_request = $this->_config['request'];
-        $this->_request->data = $this->typecast($this->_request->data);
-        $this->_request->query = $this->typecast($this->_request->query);
 
         if ( !$this->_is_valid_request($this->_request) ) {
             $this->handle_CSRF();
-            $this->_token = null;
         }
 
-        if ( is_null($this->_token) ) {
-            $this->_token = Auth::create_token();
-        }
+        $this->_token = Auth::create_token();
 
         if ( $this->_session->is_logged_in() ) {
             $user = $this->_config['classes']['user'];
@@ -161,6 +138,7 @@ class Controller extends Object {
     public function call($action, $id = null) {
         if ( !$this->_user && !in_array($action, $this->_guest_accessible) ) {
             $this->redirect($this->_guest_redirect);
+            return false;
         }
 
         if ( !$action = $this->_determine_action($action, $this->_request) ) {
@@ -280,30 +258,6 @@ class Controller extends Object {
             header('Location: ' . $page);
         }
         return false;
-    }
-
-   /**
-    *  Typecasts data according to the typecasts defined in $this->_typecasts.
-    *  If data is an object, the object's typecast() method will be called.
-    *
-    *  @param array $data          The data to be typecasted.
-    *  @access public
-    *  @return array
-    */
-    public function typecast($data) {
-        $typecasted = array();
-        foreach ( $data as $key => $val ) {
-            if ( !is_array($val) ) {
-                if ( isset($this->_typecasts[$key]) ) {
-                    $typecasted[$key] = Data::typecast($val, $this->_typecasts[$key]);
-                }
-            } else {
-                foreach ( $val as $id => $obj ) {
-                    $typecasted[$key][$id] = $obj->typecast();
-                }
-            }
-        }
-        return $typecasted;
     }
 
 }

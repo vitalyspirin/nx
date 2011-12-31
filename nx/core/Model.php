@@ -22,7 +22,7 @@ use nx\lib\Validator;
  *  object relationships, it provides automatic
  *  interfacing with both databases and caches to
  *  allow for convenient object storage and retrieval.
- *  It also provides typecasting and validation mechanisms.
+ *  It also provides validation mechanisms.
  *
  *  @package core
  */
@@ -89,21 +89,6 @@ class Model extends Object {
         'habtm_separator' => '__',
         'model_namespace' => 'app\model\\'
     );
-
-   /**
-    *  The typecasts to be used when parsing
-    *  data.  Acceptable types are:
-    *  `key` => `b` for booleans
-    *  `key` => `f` for float/decimals
-    *  `key` => `i` for integers
-    *  `key` => `s` for strings
-    *
-    *  @see /nx/lib/Data::typecast()
-    *  @see /nx/core/Model->typecast()
-    *  @var array
-    *  @access protected
-    */
-    protected $_typecasts = array();
 
    /**
     *  The validators to be used when validating
@@ -176,7 +161,12 @@ class Model extends Object {
         if ( isset($this->_config['where']) ) {
             $field = '`' . $this->_meta['key'] . '`';
             $table = $this->classname();
-            $this->_db->find($field, $table, $this->_config['where'], 'LIMIT 1');
+            $clauses = array(
+                'where' => $this->_config['where'],
+                'limit' => 1
+            );
+
+            $this->_db->find($field, $table, $clauses);
             $result = $this->_db->fetch('assoc');
             if ( $result ) {
                 $this->_config['id'] = $result[$this->_meta['key']];
@@ -186,7 +176,7 @@ class Model extends Object {
         if ( is_numeric($this->_config['id']) ) {
             if ( !$this->pull_from_cache($this, $this->_config['id']) ) {
                 $where = array($this->_meta['key'] => $this->_config['id']);
-                $this->_db->find('*', $this->classname(), $where);
+                $this->_db->find('*', $this->classname(), compact('where'));
                 $this->_db->fetch('into', $this);
 
                 $this->cache();
@@ -300,14 +290,21 @@ class Model extends Object {
     *  Finds and returns an array of all the objects in the
     *  database that match the conditions provided in `$where`.
     *
-    *  @param string|array $where  The WHERE clause of the SQL query.
+    *  @param array $clauses       Any SQL clauses to be added to
+    *                              the query.  Takes the following keys:
+    *                              'where'    - string
+    *                              'distinct' - true|false
+    *                              'limit'    - int
+    *                              'order_by' - string
+    *                              'group_by' - string
+    *                              'having'   - string
     *  @param string $obj          The name of the objects to retrieve.
     *  @access public
     *  @return array
     */
-    public function find_all($where = null, $obj = null) {
+    public function find_all($clauses = array(), $obj = null) {
         $obj_name = ( is_null($obj) ) ? $this->classname() : $obj;
-        $this->_db->find('`' . $this->_meta['key'] . '`', $obj_name, $where);
+        $this->_db->find('`' . $this->_meta['key'] . '`', $obj_name, $clauses);
         $rows = $this->_db->fetch_all('assoc');
 
         $obj_name = $this->_meta['model_namespace'] . $obj_name;
@@ -363,11 +360,12 @@ class Model extends Object {
             $table_name = $field . $this->_meta['habtm_separator'] . $class_name;
         }
 
-        $lookup_id = $class_name . $this->_meta['pk_separator'] . $this->_meta['key'];
+        $id = $this->_meta['key'];
+        $lookup_id = $class_name . $this->_meta['pk_separator'] . $id;
         $where = array($lookup_id => $this->get_pk());
 
-        $target_id = $field . $this->_meta['pk_separator'] . $this->_meta['key'];
-        $this->_db->find('`' . $target_id . '`', $table_name, $where);
+        $target_id = $field . $this->_meta['pk_separator'] . $id;
+        $this->_db->find('`' . $target_id . '`', $table_name, compact('where'));
 
         $obj_name = $this->_meta['model_namespace'] . $field;
         $rows = $this->_db->fetch_all('assoc');
@@ -388,10 +386,14 @@ class Model extends Object {
     *  @return array
     */
     protected function _get_has_many($field) {
-        $lookup_id = $this->classname() . $this->_meta['pk_separator'] . $this->_meta['key'];
-        $where = array($lookup_id => $this->get_pk());
+        $id = $this->_meta['key'];
+        $lookup_id = $this->classname() . $this->_meta['pk_separator'] . $id;
+        $clauses = array(
+            'where'    => array($lookup_id => $this->get_pk()),
+            'order_by' => '`' . $id . '` DESC'
+        );
 
-        return $this->find_all($where, $field);
+        return $this->find_all($clauses, $field);
     }
 
    /**
@@ -403,12 +405,17 @@ class Model extends Object {
     *  @return object
     */
     protected function _get_has_one($field) {
-        $lookup_id = $this->classname() . $this->_meta['pk_separator'] . $this->_meta['key'];
-        $where = array($lookup_id => $this->get_pk());
+        $id = $this->_meta['key'];
+        $lookup_id = $this->classname() . $this->_meta['pk_separator'] . $id;
+        $clauses = array(
+            'where' => array($lookup_id => $this->get_pk()),
+            'limit' => 1
+        );
 
-        $this->_db->find('`' . $this->_meta['key'] . '`', $field, $where, 'LIMIT 1');
+        $column = '`' . $this->_meta['key'] . '`';
+        $this->_db->find($column, $field, $clauses);
         $result = $this->_db->fetch('assoc');
-        $obj_id = $result[$this->_meta['key']];
+        $obj_id = $result[$id];
 
         $obj_name = $this->_meta['model_namespace'] . $field;
 
@@ -455,7 +462,9 @@ class Model extends Object {
     *  @return array
     */
     protected function _get_validators($field) {
-        return ( isset($this->_validators[$field]) ) ? $this->_validators[$field] : array();
+        return ( isset($this->_validators[$field]) )
+            ? $this->_validators[$field]
+            : array();
     }
 
    /**
@@ -593,20 +602,6 @@ class Model extends Object {
         }
         $this->cache();
         return true;
-    }
-
-   /**
-    *  Typecasts an object's properties in accordance with the typecasts
-    *  defined in $this->_typecasts.
-    *
-    *  @access public
-    *  @return object
-    */
-    public function typecast() {
-        foreach ( $this->_typecasts as $property => $type ) {
-            $this->$property = Data::typecast($this->$property, $type);
-        }
-        return $this;
     }
 
    /**

@@ -82,10 +82,17 @@ class Library {
         return self::$_config[$key][$type];
     }
 
+   /**
+    *  Retrieves the application version.
+    *
+    *  @access public
+    *  @return string
+    */
     public static function version() {
         $version = self::$_config['version'];
         return $version['major'] . '.' . $version['minor']
-           . '.' . $version['status'] . '.' . $version['revision'];
+            . '.' . $version['iteration'] . '.' . $version['status']
+            . '.' . $version['revision'];
     }
 
 }

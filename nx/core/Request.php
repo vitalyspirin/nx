@@ -59,9 +59,6 @@ class Request extends Object {
      */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'classes' => array(
-                'library' => 'nx\lib\Library'
-            ),
             'data'    => array(),
             'query'   => array()
         );
@@ -132,9 +129,6 @@ class Request extends Object {
             fclose($stream);
         }
 
-        $library = $this->_config['classes']['library'];
-        $model_namespace = $library::get('namespace', 'model');
-        $this->data = $this->_extract($this->data, $model_namespace);
     }
 
    /**
@@ -149,51 +143,6 @@ class Request extends Object {
         return ( isset($this->_env[strtoupper($key)]) )
             ? $this->_env[strtoupper($key)]
             : null;
-    }
-
-   /**
-    *  Extracts request data and returns it as a collection of objects (if an
-    *  object was bound to it via the form) and `key` => `value` pairs (if no
-    *  object is bound).
-    *
-    *  @param array $data               The request data.
-    *  @param string $model_namespace   The namespace of the application models.
-    *  @access protected
-    *  @return mixed
-    */
-    protected function _extract($data, $model_namespace) {
-        $collection = array();
-        foreach ( $data as $child_key => $child ) {
-            if ( !is_array($child) ) { // name = 'username'
-                $collection[$child_key] = $child;
-                continue;
-            }
-
-            $loc = strrpos($child_key, '|');
-            if ( $loc !== false ) { // name = 'User|id[username]'
-                $id = substr($child_key, $loc + 1);
-                $class_name = substr($child_key, 0, $loc);
-                $class = $model_namespace . $class_name;
-                $obj = new $class(array('id' => $id));
-                foreach ( $child as $key => $value ) {
-                    $obj->$key = $value;
-                }
-                $collection[$class_name][] = $obj;
-                continue;
-            }
-
-            // name = 'User[][username]'
-            foreach ( $child as $grandchild_array ) {
-                $obj_name = $model_namespace . $child_key;
-                $obj = new $obj_name();
-                foreach ( $grandchild_array as $key => $value ) {
-                    $obj->$key = $value;
-                }
-                $collection[$child_key][] = $obj;
-            }
-        }
-
-        return $collection;
     }
 
    /**

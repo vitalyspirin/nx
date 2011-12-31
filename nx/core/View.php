@@ -29,6 +29,14 @@ class View extends Object {
     protected $_form;
 
    /**
+    *  The environment.
+    *
+    *  @var string
+    *  @access protected
+    */
+    protected $_env;
+
+   /**
     *  Loads the configuration settings for the view.
     *
     *  @param array $config         The configuration options.
@@ -63,6 +71,7 @@ class View extends Object {
         $form = $this->_config['classes']['form'];
         $this->_form = new $form(compact('version'));
 
+        $this->_env = $library::environment();
     }
 
    /**

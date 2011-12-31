@@ -21,18 +21,6 @@ namespace nx\lib;
  */
 class Form {
 
-   /**
-    *  Maintains the array index of bindings.
-    *  (This is used when a Form method [e.g., Form->text()] is called
-    *  multiple times with the same parameters.  An index is needed
-    *  to ensure that both inputs are passed to the server
-    *  under unique names.)
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected $_binding_counter = array();
-
     /**
      *  The configuration settings.
      *
@@ -128,6 +116,39 @@ class Form {
     }
 
    /**
+    * Creates a form.
+    *
+    * @param array $attributes          The HTML attributes.
+    * @param obj $binding               The object to which the form will
+    *                                   be mapped.
+    * @access public
+    * @return string
+    */
+    public function form($attributes, $binding = null) {
+        $html = "<form ";
+
+        if ( !is_null($binding) ) {
+            if ( !is_null($binding->get_pk()) ) {
+                $id = $binding->get_pk();
+                $attributes += array(
+                    'action' => '/' . strtolower($binding->classname()) . '/' . $id,
+                    'method' => 'put'
+                );
+            } else {
+                $attributes += array(
+                    'action' => '/' . strtolower($binding->classname()),
+                    'method' => 'post'
+                );
+            }
+        }
+
+        $html .= $this->_parse_attributes($attributes, $binding);
+        $html .= "/>";
+
+        return $html;
+    }
+
+   /**
     * Creates a hidden input.
     *
     * @param array $attributes          The HTML attributes.
@@ -178,21 +199,14 @@ class Form {
     *                                   hidden input should be mapped.
     * @param array $options             The parsing options.  Takes the
     *                                   following keys:
-    *                                   'is_radio' - whether or not
-    *                                   the HTML element is a radio button
-    *                                   'is_select' - whether or not
-    *                                   the HTML element is a select list
-    *                                   'is_textarea' - whether or not
-    *                                   the HTML element is a textarea
+    *                                   'ignore_binding_value' - whether or not
+    *                                   to ignore the value attribute when a
+    *                                   binding is present
     * @access protected
     * @return string
     */
     protected function _parse_attributes($attributes, $binding = null, $options = array()) {
-        $options += array(
-            'is_radio'    => false,
-            'is_select'   => false,
-            'is_textarea' => false
-        );
+        $options += array('ignore_binding_value' => false);
         $html = '';
         $value_present = false;
         foreach ( $attributes as $key => $setting ) {
@@ -209,25 +223,7 @@ class Form {
                         break;
                     }
 
-                    $b_class = $binding->classname();
-
-                    if ( !is_null($binding->get_pk()) ) {
-                        $setting = $b_class
-                            . '|' . $binding->get_pk()
-                            . '[' . $setting . "]";
-                        break;
-                    }
-
-                    if ( !array_key_exists($b_class, $this->_binding_counter) ) {
-                        $this->_binding_counter[$b_class] = array();
-                    }
-
-                    $object_id = spl_object_hash($binding);
-                    if ( !in_array($object_id, $this->_binding_counter[$b_class]) ) {
-                        $this->_binding_counter[$b_class][] = $object_id;
-                    }
-                    $index = array_search($object_id, $this->_binding_counter[$b_class]);
-                    $setting = $b_class . '[' . $index . '][' . $setting . "]";
+                    $setting = $binding->classname() . '[' . $setting . "]";
                     break;
                 case 'value':
                     $value_present = true;
@@ -238,9 +234,7 @@ class Form {
 
         if (
             !$value_present
-            && !$options['is_radio']
-            && !$options['is_select']
-            && !$options['is_textarea']
+            && !$options['ignore_binding_value']
             && !is_null($binding)
             && isset($attributes['name'])
             && property_exists($binding, $attributes['name'])
@@ -272,7 +266,7 @@ class Form {
     * @return string
     */
     public function radios($attributes, $binding = null) {
-        $options = array('is_radio' => true);
+        $options = array('ignore_binding_value' => true);
         $html = '';
         $values = $attributes['value'];
         unset($attributes['value']);
@@ -335,13 +329,22 @@ class Form {
     *                                   (option value will be set to 'value',
     *                                   and the text within the option will be
     *                                   set to 'display')
+    *                                   Note that this can accept a 'selected'
+    *                                   attribute to set which element is
+    *                                   selected.
     * @param obj $binding               The object to which the value of the
     *                                   dropdown list should be mapped.
     * @access public
     * @return string
     */
     public function select($attributes, $options = array(), $binding = null) {
-        $element_options = array('is_select' => true);
+        $selected = null;
+        if ( isset($attributes['selected']) ) {
+            $selected = $attributes['selected'];
+            unset($attributes['selected']);
+        }
+
+        $element_options = array('ignore_binding_value' => true);
         $html = "<select ";
         $html .= $this->_parse_attributes($attributes, $binding, $element_options);
         $html = rtrim($html) . ">";
@@ -353,10 +356,13 @@ class Form {
             $html .= "<option value='" . $this->escape($value) . "' ";
 
             if (
-                !is_null($binding)
+                (!is_null($selected) && $selected == $value)
+                ||
+                (is_null($selected)
+                && !is_null($binding)
                 && isset($attributes['name'])
                 && property_exists($binding, $attributes['name'])
-                && $binding->$attributes['name'] == $value
+                && $binding->$attributes['name'] == $value)
             ) {
                 $html .= "selected='selected' ";
             }
@@ -395,7 +401,7 @@ class Form {
             unset($attributes['value']);
         }
 
-        $options = array('is_textarea' => true);
+        $options = array('ignore_binding_value' => true);
         $html = "<textarea ";
         $html .= $this->_parse_attributes($attributes, $binding, $options);
         $html = rtrim($html) . '>';

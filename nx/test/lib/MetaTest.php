@@ -28,7 +28,7 @@ class MetaMock2 {
     }
 
     protected function _get_id($val) {
-        $this->id = $val;
+        return $this->id;
     }
 }
 

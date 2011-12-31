@@ -74,6 +74,11 @@ class PDO_MySQL extends \nx\core\Object {
     */
     protected function _init() {
         $this->connect($this->_config);
+        // Prevent dumping
+        unset($this->_config['database']);
+        unset($this->_config['host']);
+        unset($this->_config['username']);
+        unset($this->_config['password']);
     }
 
    /**
@@ -227,14 +232,24 @@ class PDO_MySQL extends \nx\core\Object {
     *  @see /nx/plugin/db/PDO_MySQL->_format_where()
     *  @param string|array $fields  The fields to be retrieved.
     *  @param string $table         The table to SELECT from.
-    *  @param string|array $where   The WHERE clause of the SQL query.
-    *  @param string $additional    Any additional SQL to be added at
-    *                               the end of the query.
+    *  @param array $clauses        Any SQL clauses to be added to
+    *                               the query.  Takes the following keys:
+    *                               'where'    - string|array (mandatory)
+    *                               'distinct' - true|false
+    *                               'limit'    - int
+    *                               'offset'   - int
+    *                               'order_by' - string
+    *                               'group_by' - string
+    *                               'having'   - string
     *  @access public
     *  @return bool
     */
-    public function find($fields, $table, $where = null, $additional = null) {
+    public function find($fields, $table, $clauses = array()) {
         $sql = 'SELECT ';
+        if ( isset($clauses['distinct']) && $clauses['distinct'] ) {
+            $sql .= 'DISTINCT ';
+        }
+
         if ( is_array($fields) ) {
             $sql .= '`' . implode('`, `', $fields) . '`';
         } else {
@@ -242,11 +257,28 @@ class PDO_MySQL extends \nx\core\Object {
         }
 
         $sql .= ' FROM `' . $table . '`';
-        $sql .= $this->_format_where($where);
-        if ( !is_null($additional) ) {
-            $sql .= ' ' . $additional;
+        if ( isset($clauses['where']) ) {
+            $sql .= $this->_format_where($clauses['where']);
+        } else {
+            $clauses['where'] = null;
         }
-        return $this->query($sql, $where);
+
+        if ( isset($clauses['limit']) && is_int($clauses['limit']) ) {
+            $sql .= ' LIMIT ' . $clauses['limit'];
+        }
+        if ( isset($clauses['offset']) && is_int($clauses['offset']) ) {
+            $sql .= ' OFFSET ' . $clauses['offset'];
+        }
+        if ( isset($clauses['order_by']) ) {
+            $sql .= ' ORDER BY ' . $clauses['order_by'];
+        }
+        if ( isset($clauses['group_by']) ) {
+            $sql .= ' GROUP BY ' . $clauses['group_by'];
+        }
+        if ( isset($clauses['having']) ) {
+            $sql .= ' HAVING ' . $clauses['having'];
+        }
+        return $this->query($sql, $clauses['where']);
     }
 
    /**
@@ -293,10 +325,40 @@ class PDO_MySQL extends \nx\core\Object {
                 $sql .= '`' . $name . '`=:' . $name . ' and ';
             } elseif ( is_array($val) ) {
                 foreach ( $val as $sign => $constraint ) {
+
+                    if ( is_array($constraint) ) {
+                        if ( empty($constraint) ) {
+                            unset($where[$name]);
+                            continue;
+                        }
+
+                        $sql .=  '`' . $name . '` ';
+                        $list = '';
+                        foreach ( $constraint as $item ) {
+                            do {
+                                $new_name = $name . '__' . rand();
+                            } while ( isset($where[$new_name]) );
+                            $list .= ':' . $new_name . ',';
+                            $where[$new_name] = $item;
+                        }
+                        $list = rtrim($list, ',');
+
+                        switch ( $sign ) {
+                            case 'in':
+                            case 'not in':
+                                $sql .= $sign . ' (' . $list . ')';
+                                break;
+                        }
+                        $sql .= ' and ';
+                        unset($where[$name]);
+
+                        continue;
+                    }
+
+                    $sql .=  '`' . $name . '` ';
                     do {
                         $new_name = $name .  '__' . rand();
                     } while ( isset($where[$new_name]) );
-                    $sql .=  '`' . $name . '` ';
                     switch ( $sign ) {
                         case 'like':
                             $sql .= 'like ';
@@ -428,18 +490,6 @@ class PDO_MySQL extends \nx\core\Object {
     	$this->_affected_rows = $statement->rowCount();
         $this->_statement = $statement;
     	return true;
-    }
-
-   /**
-    *  Executes SQL query and returns the first row of the results.
-    *
-    *  @param string $sql           The SQL query to be executed.
-    *  @param array $parameters     An array containing the parameters to be bound.
-    *  @access public
-    *  @return mixed
-    */
-    public function query_first($sql, $parameters = null) {
-        $this->query($sql . ' LIMIT 1', $parameters);
     }
 
    /**

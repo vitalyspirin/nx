@@ -15,12 +15,12 @@ $config = array(
         'view'  => dirname(__DIR__) . '/view/'
     ),
     'version'   => array(
-        'major'    => 0,
-        'minor'    => 7,
-        'status'   => 0,
-        'revision' => 0
+        'major'     => 0,
+        'minor'     => 0,
+        'iteration' => 0,
+        'status'    => 0,
+        'revision'  => 1
     )
-
 );
 
 \nx\lib\Library::define($config);
