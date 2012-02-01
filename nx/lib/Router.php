@@ -24,7 +24,7 @@ class Router {
     *  @access protected
     */
     public static $defaults = array(
-        'controller' => 'Dashboard',
+        'controller' => 'Signup',
         'action'     => 'index',
         'id'         => null
     );

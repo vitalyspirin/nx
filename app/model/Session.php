@@ -85,11 +85,6 @@ class Session extends \nx\core\Model {
                 array($this, 'gc')
             );
         }
-
-        // Don't start a new session if one already exists
-        if ( !session_id() ) {
-            session_start();
-        }
     }
 
    /**

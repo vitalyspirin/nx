@@ -78,7 +78,10 @@ class Library {
     *  @access public
     *  @return mixed
     */
-    public static function get($key, $type) {
+    public static function get($key, $type = null) {
+        if ( is_null($type) ) {
+            return self::$_config[$key];
+        }
         return self::$_config[$key][$type];
     }
 

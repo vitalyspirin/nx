@@ -16,7 +16,7 @@ class ModelMock {
         return 'ModelMock';
     }
 
-    public function get_pk() {
+    public function get_primary_key() {
         return $this->id;
     }
 
@@ -38,7 +38,7 @@ class ModelMock2 {
         return 'ModelMock2';
     }
 
-    public function get_pk() {
+    public function get_primary_key() {
         return $this->id;
     }
 

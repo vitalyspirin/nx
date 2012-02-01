@@ -10,7 +10,7 @@ $config = array(
     ),
 
     'test' => array(
-        'enabled'       => true,
+        'enabled'       => false,
         'plugin'        => 'Memcached',
         'host'          => 'localhost',
         'persistent_id' => ''

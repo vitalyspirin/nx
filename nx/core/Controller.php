@@ -41,7 +41,7 @@ class Controller extends Object {
     *  @var string
     *  @access protected
     */
-    protected $_guest_redirect = '/login';
+    protected $_guest_redirect = '/';
 
    /**
     *  The request object containing
@@ -86,11 +86,16 @@ class Controller extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'classes' => array(
+            'classes'      => array(
                 'session' => 'app\model\Session',
                 'user'    => 'app\model\User'
             ),
-            'request' => null
+            'dependencies' => array(
+                'request' => null
+            ),
+            'libraries' => array(
+                'library' => 'nx\lib\Library',
+            )
         );
         parent::__construct($config + $defaults);
     }
@@ -109,7 +114,7 @@ class Controller extends Object {
         $session = $this->_config['classes']['session'];
         $this->_session = new $session();
 
-        $this->_request = $this->_config['request'];
+        $this->_request = $this->_config['dependencies'];
 
         if ( !$this->_is_valid_request($this->_request) ) {
             $this->handle_CSRF();

@@ -3,20 +3,14 @@
 namespace app\model;
 
 class User extends \nx\core\Model {
-    protected $id;
+    public $id;
 
-    protected $username;
-    protected $password;
-    protected $email;
-    protected $ip;
-    protected $join_date;
-    protected $last_login;
-
-    protected $_sanitizers = array(
-        'username'         => 's',
-        'email'            => 's',
-        'password'         => 's'
-    );
+    public $username;
+    public $password;
+    public $email;
+    public $ip;
+    public $join_date;
+    public $last_login;
 
     protected $_validators = array(
         'email' => array(
@@ -40,14 +34,6 @@ class User extends \nx\core\Model {
         'ip' => array(
             array('ip', 'message' => 'ip is invalid.')
         )
-    );
-
-    protected $_options = array(
-        'username_min_length'    => 5,
-        'username_max_length'    => 16,
-        'password_min_length'    => 5,
-        'password_max_length'    => 16,
-        'password_special_chars' => '#@!$%._'
     );
 
 }

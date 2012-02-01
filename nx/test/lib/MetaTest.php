@@ -5,8 +5,8 @@ namespace nx\test\lib;
 use nx\lib\Meta;
 
 class MetaMock {
-    protected $id = 42;
-    protected $test_name = 'test value';
+    public $id = 42;
+    public $test_name = 'test value';
     protected $_no_access;
 
     public function do_nothing() {
@@ -19,8 +19,8 @@ class MetaMock {
 }
 
 class MetaMock2 {
-    protected $id;
-    protected $test_name = 'test value';
+    public $id;
+    public $test_name = 'test value';
     protected $_allow_access;
 
     public function do_something() {
@@ -50,22 +50,22 @@ class MetaTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($class, $check);
     }
 
-    public function test_GetColumns_ReturnsArray() {
+    public function test_GetPublicProperties_ReturnsArray() {
         $model = new MetaMock();
-        $columns = array(
+        $properties = array(
             'id'        => 42,
             'test_name' => 'test value'
         );
-        $check = Meta::get_columns($model);
-        $this->assertEquals($columns, $check);
+        $check = Meta::get_public_properties($model);
+        $this->assertEquals($properties, $check);
 
         $model = new MetaMock2();
-        $columns = array(
+        $properties = array(
             'id'        => null,
             'test_name' => 'test value'
         );
-        $check = Meta::get_columns($model);
-        $this->assertEquals($columns, $check);
+        $check = Meta::get_public_properties($model);
+        $this->assertEquals($properties, $check);
     }
 
     public function test_GetProtectedMethods_ReturnsArray() {

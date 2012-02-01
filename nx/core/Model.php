@@ -84,10 +84,9 @@ class Model extends Object {
     *  @access protected
     */
     protected $_meta = array(
-        'key'             => 'id',
-        'pk_separator'    => '_',
-        'habtm_separator' => '__',
-        'model_namespace' => 'app\model\\'
+        'key'                               => 'id',
+        'primary_key_separator'             => '_',
+        'has_and_belongs_to_many_separator' => '__'
     );
 
    /**
@@ -112,13 +111,6 @@ class Model extends Object {
 
    /**
     *  Initializes an object.  Takes the following configuration options:
-    *  `id`       - The primary key of an existing object, used if you
-    *               want to load an instance of an object with its
-    *               properties from the cache/database.
-    *  `where`    - A WHERE clause to be used if the primary key of the
-    *               object desired is unknown.  Also used if you
-    *               want to load an instance of an object with its
-    *               properties from the cache/database.
     *  `no_cache` - Whether or not to use the cache to store/retrieve the object.
     *  `db`       - The name of the db connection to use as defined
     *               in app/config/bootstrap/db.php.
@@ -133,8 +125,6 @@ class Model extends Object {
     public function __construct(array $config = array()) {
         $environment = Library::environment();
         $defaults = array(
-            'id'       => null,
-            'where'    => null,
             'no_cache' => false,
             'db'       => $environment,
             'cache'    => $environment,
@@ -153,34 +143,10 @@ class Model extends Object {
     */
     protected function _init() {
         parent::_init();
+
         $this->_db = Connections::get_db($this->_config['db']);
         if ( !$this->_cache = Connections::get_cache($this->_config['cache']) ) {
             $this->_config['no_cache'] = true;
-        }
-
-        if ( isset($this->_config['where']) ) {
-            $field = '`' . $this->_meta['key'] . '`';
-            $table = $this->classname();
-            $clauses = array(
-                'where' => $this->_config['where'],
-                'limit' => 1
-            );
-
-            $this->_db->find($field, $table, $clauses);
-            $result = $this->_db->fetch('assoc');
-            if ( $result ) {
-                $this->_config['id'] = $result[$this->_meta['key']];
-            }
-        }
-
-        if ( is_numeric($this->_config['id']) ) {
-            if ( !$this->pull_from_cache($this, $this->_config['id']) ) {
-                $where = array($this->_meta['key'] => $this->_config['id']);
-                $this->_db->find('*', $this->classname(), compact('where'));
-                $this->_db->fetch('into', $this);
-
-                $this->cache();
-            }
         }
     }
 
@@ -193,7 +159,7 @@ class Model extends Object {
     *  @see /nx/core/Model->_get_belongs_to()
     *  @see /nx/core/Model->_get_has_many()
     *  @see /nx/core/Model->_get_has_one()
-    *  @see /nx/core/Model->_get_habtm()
+    *  @see /nx/core/Model->_get_has_and_belongs_to_many()
     *  @param string $field        The property name.
     *  @access public
     *  @return mixed
@@ -205,23 +171,11 @@ class Model extends Object {
             return $this->_get_has_many($field);
         } elseif ( $this->has_one($field) ) {
             return $this->_get_has_one($field);
-        } elseif ( $this->habtm($field) ) {
-            return $this->_get_habtm($field);
+        } elseif ( $this->has_and_belongs_to_many($field) ) {
+            return $this->_get_has_and_belongs_to_many($field);
         }
 
         return $this->$field;
-    }
-
-   /**
-    *  Sets an object's property.
-    *
-    *  @param string $field        The property name.
-    *  @param mixed $value         The property value.
-    *  @access public
-    *  @return mixed
-    */
-    public function __set($field, $value) {
-        $this->$field = $value;
     }
 
    /**
@@ -237,11 +191,10 @@ class Model extends Object {
     }
 
    /**
-    *  Stores an object in the cache.  Only the object's
-    *  "columns" (i.e., protected properties that are not prefixed
-    *  with an underscore) are serialized and stored.
+    *  Stores an object in the cache.  Only the object's "columns"
+    *  (i.e., public properties) are serialized and stored.
     *
-    *  @see /nx/lib/Meta::get_columns()
+    *  @see /nx/lib/Meta::get_public_properties()
     *  @access public
     *  @return bool
     */
@@ -253,7 +206,7 @@ class Model extends Object {
         $properties = $this->get_columns();
         $data = json_encode($properties);
 
-        $key = $this->classname() . '_' . $this->get_pk();
+        $key = $this->classname() . '_' . $this->get_primary_key();
         return $this->_cache->store($key, $data);
     }
 
@@ -266,14 +219,14 @@ class Model extends Object {
     *  @return bool
     */
     public function delete($where = null) {
-        $key = $this->classname() . '_' . $this->get_pk();
+        $key = $this->classname() . '_' . $this->get_primary_key();
 
         if ( !$this->_config['no_cache'] ) {
             $this->_cache->delete($key);
         }
 
         if ( is_null($where) ) {
-            $id = $this->get_pk();
+            $id = $this->get_primary_key();
             if ( is_null($id) ) {
                 return false;
             }
@@ -298,20 +251,20 @@ class Model extends Object {
     *                              'order_by' - string
     *                              'group_by' - string
     *                              'having'   - string
-    *  @param string $obj          The name of the objects to retrieve.
+    *  @param string $object       The name of the objects to retrieve.
     *  @access public
     *  @return array
     */
-    public function find_all($clauses = array(), $obj = null) {
-        $obj_name = ( is_null($obj) ) ? $this->classname() : $obj;
-        $this->_db->find('`' . $this->_meta['key'] . '`', $obj_name, $clauses);
+    public function find_all($clauses = array(), $object = null) {
+        $object_name = ( is_null($object) ) ? $this->classname() : $object;
+        $this->_db->find($this->_meta['key'], $object_name, $clauses);
         $rows = $this->_db->fetch_all('assoc');
 
-        $obj_name = $this->_meta['model_namespace'] . $obj_name;
+        $object_name = Library::get('namespace', 'model') . $object_name;
         $collection = array();
         foreach ( $rows as $row ) {
             $new_id = $row[$this->_meta['key']];
-            $collection[$new_id] = new $obj_name(array('id' => $new_id));
+            $collection[$new_id] = new $object_name(array('id' => $new_id));
         }
         return $collection;
     }
@@ -325,23 +278,23 @@ class Model extends Object {
     *  @return object
     */
     protected function _get_belongs_to($field) {
-        $lookup_id = $field . $this->_meta['pk_separator'] . $this->_meta['key'];
-        $obj_id = $this->$lookup_id;
+        $lookup_id = $field . $this->_meta['primary_key_separator']
+            . $this->_meta['key'];
+        $object_id = $this->$lookup_id;
 
-        $obj_name = $this->_meta['model_namespace'] . $field;
-        return new $obj_name(array('id' => $obj_id));
+        $object_name = Library::get('namespace', 'model') . $field;
+        return new $object_name(array('id' => $object_id));
     }
 
    /**
-    *  Retrieves the "columns" (i.e., protected properties
-    *  that are not prefixed with an underscore) belonging
+    *  Retrieves the "columns" (i.e., public properties) belonging
     *  to `$this`.
     *
     *  @access public
     *  @return array
     */
     public function get_columns() {
-        return Meta::get_columns($this);
+        return Meta::get_public_properties($this);
     }
 
    /**
@@ -352,27 +305,30 @@ class Model extends Object {
     *  @access protected
     *  @return array
     */
-    protected function _get_habtm($field) {
+    protected function _get_has_and_belongs_to_many($field) {
         $class_name = $this->classname();
         if ( $class_name < $field ) {
-            $table_name = $class_name . $this->_meta['habtm_separator'] . $field;
+            $table_name = $class_name
+                . $this->_meta['has_and_belongs_to_many_separator'] . $field;
         } else {
-            $table_name = $field . $this->_meta['habtm_separator'] . $class_name;
+            $table_name = $field
+                . $this->_meta['has_and_belongs_to_many_separator']
+                . $class_name;
         }
 
         $id = $this->_meta['key'];
-        $lookup_id = $class_name . $this->_meta['pk_separator'] . $id;
-        $where = array($lookup_id => $this->get_pk());
+        $lookup_id = $class_name . $this->_meta['primary_key_separator'] . $id;
+        $where = array($lookup_id => $this->get_primary_key());
 
-        $target_id = $field . $this->_meta['pk_separator'] . $id;
-        $this->_db->find('`' . $target_id . '`', $table_name, compact('where'));
+        $target_id = $field . $this->_meta['primary_key_separator'] . $id;
+        $this->_db->find($target_id, $table_name, compact('where'));
 
-        $obj_name = $this->_meta['model_namespace'] . $field;
+        $object_name = Library::get('namespace', 'model') . $field;
         $rows = $this->_db->fetch_all('assoc');
         $collection = array();
         foreach ( $rows as $row ) {
             $new_id = $row[$target_id];
-            $collection[$new_id] = new $obj_name(array('id' => $new_id));
+            $collection[$new_id] = new $object_name(array('id' => $new_id));
         }
         return $collection;
     }
@@ -387,10 +343,11 @@ class Model extends Object {
     */
     protected function _get_has_many($field) {
         $id = $this->_meta['key'];
-        $lookup_id = $this->classname() . $this->_meta['pk_separator'] . $id;
+        $lookup_id = $this->classname() . $this->_meta['primary_key_separator']
+            . $id;
         $clauses = array(
-            'where'    => array($lookup_id => $this->get_pk()),
-            'order_by' => '`' . $id . '` DESC'
+            'where'    => array($lookup_id => $this->get_primary_key()),
+            'order_by' => $id . ' DESC'
         );
 
         return $this->find_all($clauses, $field);
@@ -406,20 +363,20 @@ class Model extends Object {
     */
     protected function _get_has_one($field) {
         $id = $this->_meta['key'];
-        $lookup_id = $this->classname() . $this->_meta['pk_separator'] . $id;
+        $lookup_id = $this->classname() . $this->_meta['primary_key_separator']
+            . $id;
         $clauses = array(
-            'where' => array($lookup_id => $this->get_pk()),
+            'where' => array($lookup_id => $this->get_primary_key()),
             'limit' => 1
         );
 
-        $column = '`' . $this->_meta['key'] . '`';
-        $this->_db->find($column, $field, $clauses);
+        $this->_db->find($this->_meta['key'], $field, $clauses);
         $result = $this->_db->fetch('assoc');
-        $obj_id = $result[$id];
+        $object_id = $result[$id];
 
-        $obj_name = $this->_meta['model_namespace'] . $field;
+        $object_name = Library::get('namespace', 'model') . $field;
 
-        return new $obj_name(array('id' => $obj_id));
+        return new $object_name(array('id' => $object_id));
     }
 
    /**
@@ -428,7 +385,7 @@ class Model extends Object {
     *  @access public
     *  @return int
     */
-    public function get_pk() {
+    public function get_primary_key() {
         $id = $this->_meta['key'];
         return $this->$id;
     }
@@ -475,7 +432,7 @@ class Model extends Object {
     *  @access public
     *  @return bool
     */
-    public function habtm($field) {
+    public function has_and_belongs_to_many($field) {
         return ( in_array($field, $this->_has_and_belongs_to_many) );
     }
 
@@ -505,9 +462,9 @@ class Model extends Object {
 
    /**
     *  Checks that a specific object property is valid.  If no property
-    *  is supplied, then all of the object's "columns" (i.e., protected
-    *  properties that are not prefixed with an underscore) will be validated.
-    *  Corresponding errors are stored in $this->_validation_errors.
+    *  is supplied, then all of the object's "columns" (i.e., public
+    *  properties) will be validated.  Corresponding errors are stored
+    *  in $this->_validation_errors.
     *
     *  @see /nx/lib/Validator
     *  @param string|null $field   The object property to be validated.
@@ -531,6 +488,47 @@ class Model extends Object {
     }
 
    /**
+    *  Loads an object, first by checking the cache, and then, if that
+    *  fails, by retrieving the values from the database.
+    *
+    *  @param int $primary_key        The primary key.
+    *  @access public
+    *  @return object
+    */
+    public function load_by_primary_key($primary_key) {
+        if ( $this = $this->pull_from_cache($this, $primary_key) ) {
+            return $this;
+        }
+
+        $where = array($this->_meta['key'] => $primary_key);
+        $this->_db->find('*', $this->classname(), compact('where'));
+        $this->_db->fetch('into', $this);
+
+        $this->cache();
+
+        return $this;
+    }
+
+    public function load() {
+
+        if ( !is_numeric($identifier) ) {
+            $clauses = array(
+                'where' => $identifier,
+                'limit' => 1
+            );
+
+            $this->_db->find($this->_meta['key'], $this->classname(), $clauses);
+            $result = $this->_db->fetch('assoc');
+            if ( !$result ) {
+                return false;
+            }
+
+            $identifier = $result[$this->_meta['key']];
+        }
+
+    }
+
+   /**
     *  Maps an array of data to `$this`.
     *
     *  @param array $data          The array of data, in the format of
@@ -550,29 +548,29 @@ class Model extends Object {
    /**
     *  Retrieves an object from the cache.
     *
-    *  @param object $obj          The object to be populated with the
+    *  @param object $object       The object to be populated with the
     *                              retrieved values.
     *  @param int $id              The unique identifier of the object
     *                              to be retrieved.
     *  @access public
     *  @return object
     */
-    public function pull_from_cache($obj, $id) {
+    public function pull_from_cache($object, $id) {
         if ( $this->_config['no_cache'] ) {
             return false;
         }
 
-        $key = $obj->classname() . '_' . $id;
-        $cached_data = $obj->_cache->retrieve($key);
+        $key = $object->classname() . '_' . $id;
+        $cached_data = $object->_cache->retrieve($key);
         if ( !$cached_data ) {
             return false;
         }
 
-        $cached_obj = json_decode($cached_data, true);
-        foreach ( $cached_obj as $key => $val ) {
-            $obj->$key = $val;
+        $cached_object = json_decode($cached_data, true);
+        foreach ( $cached_object as $key => $val ) {
+            $object->$key = $val;
         }
-        return $obj;
+        return $object;
     }
 
    /**

@@ -128,8 +128,8 @@ class Form {
         $html = "<form ";
 
         if ( !is_null($binding) ) {
-            if ( !is_null($binding->get_pk()) ) {
-                $id = $binding->get_pk();
+            if ( !is_null($binding->get_primary_key()) ) {
+                $id = $binding->get_primary_key();
                 $attributes += array(
                     'action' => '/' . strtolower($binding->classname()) . '/' . $id,
                     'method' => 'put'
