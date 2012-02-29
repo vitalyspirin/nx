@@ -132,13 +132,35 @@ class Request extends Object {
     }
 
    /**
+    *  Determines the environment (development, test, or
+    *  production).
+    *
+    *  @access public
+    *  @return string
+    */
+    public function environment() {
+        $local = array('::1', '127.0.0.1');
+        $is_local = in_array($this->_env['SERVER_ADDR'], $local);
+        $uri = $this->_env['REQUEST_URI'];
+        $is_test = (preg_match('/^test\//', $uri) && $is_local)
+            || preg_match('/^test/', $this->_env['HTTP_HOST']);
+
+        if ( $is_test ) {
+            return 'test';
+        } elseif ( $is_local ) {
+            return 'development';
+        }
+        return 'production';
+    }
+
+   /**
     *  Returns an environment variable.
     *
     *  @param string $key           The environment variable.
     *  @access public
     *  @return mixed
     */
-    public function env($key) {
+    public function get_env($key) {
         $key = strtoupper($key);
         return ( isset($this->_env[strtoupper($key)]) )
             ? $this->_env[strtoupper($key)]
@@ -155,15 +177,19 @@ class Request extends Object {
     public function is($characteristic) {
         switch ( $characteristic ) {
             case 'ajax':
-                return ( $this->env('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest' );
+                return (
+                    $this->get_env('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+                );
             case 'delete':
-                return ( $this->env('REQUEST_METHOD') == 'DELETE' );
+                return ( $this->get_env('REQUEST_METHOD') == 'DELETE' );
             case 'flash':
-                return ( $this->env('HTTP_USER_AGENT') == 'Shockwave Flash' );
+                return (
+                    $this->get_env('HTTP_USER_AGENT') == 'Shockwave Flash'
+                );
             case 'get':
-                return ( $this->env('REQUEST_METHOD') == 'GET' );
+                return ( $this->get_env('REQUEST_METHOD') == 'GET' );
             case 'head':
-                return ( $this->env('REQUEST_METHOD') == 'HEAD' );
+                return ( $this->get_env('REQUEST_METHOD') == 'HEAD' );
             case 'mobile':
                 $mobile_user_agents = array(
                     'Android', 'AvantGo', 'Blackberry', 'DoCoMo', 'iPod',
@@ -174,16 +200,16 @@ class Request extends Object {
                 );
                 $pattern = '/' . implode('|', $mobile_user_agents) . '/i';
                 return (boolean) preg_match(
-                    $pattern, $this->env('HTTP_USER_AGENT')
+                    $pattern, $this->get_env('HTTP_USER_AGENT')
                 );
             case 'options':
-                return ( $this->env('REQUEST_METHOD') == 'OPTIONS' );
+                return ( $this->get_env('REQUEST_METHOD') == 'OPTIONS' );
             case 'post':
-                return ( $this->env('REQUEST_METHOD') == 'POST' );
+                return ( $this->get_env('REQUEST_METHOD') == 'POST' );
             case 'put':
-                return ( $this->env('REQUEST_METHOD') == 'PUT' );
+                return ( $this->get_env('REQUEST_METHOD') == 'PUT' );
             case 'ssl':
-                return $this->env('HTTPS');
+                return $this->get_env('HTTPS');
             default:
                 return false;
         }

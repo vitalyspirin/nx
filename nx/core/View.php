@@ -21,20 +21,20 @@ namespace nx\core;
 class View extends Object {
 
    /**
-    *  The form helper object.
-    *
-    *  @var object
-    *  @access protected
-    */
-    protected $_form;
-
-   /**
     *  The environment.
     *
     *  @var string
-    *  @access protected
+    *  @access public
     */
-    protected $_env;
+    public $env;
+
+   /**
+    *  The form helper object.
+    *
+    *  @var object
+    *  @access public
+    */
+    public $form;
 
    /**
     *  Loads the configuration settings for the view.
@@ -49,8 +49,7 @@ class View extends Object {
                 'compiler' => 'nx\lib\Compiler',
                 'form'     => 'nx\lib\Form',
                 'library'  => 'nx\lib\Library'
-            ),
-            'template' => null
+            )
         );
 
         parent::__construct($config + $defaults);
@@ -63,15 +62,13 @@ class View extends Object {
     *  @return void
     */
     protected function _init() {
-        parent::_init();
-
         $library = $this->_config['classes']['library'];
         $version = str_replace('.', '', $library::version());
 
         $form = $this->_config['classes']['form'];
-        $this->_form = new $form(compact('version'));
+        $this->form = new $form(compact('version'));
 
-        $this->_env = $library::environment();
+        $this->env = $library::environment();
     }
 
    /**
@@ -85,9 +82,6 @@ class View extends Object {
     public function render($file, $vars = null) {
         $library = $this->_config['classes']['library'];
         $path = $library::get('path', 'view');
-        if ( !is_null($this->_config['template']) ) {
-            $path .= $this->_config['template'] . '/';
-        }
         $file = $path . $file . '.html';
 
         if ( is_array($vars) ) {

@@ -67,6 +67,13 @@ class Router {
             'controller=$1&action=$2&id=$3&args=$4'
     );
 
+    // TODO: Convert
+    /*
+    protected static $_routes = array(
+        array('GET', '/login', 'Login::index')
+    );
+     */
+
    /**
     *  Parses a query string and returns the controller, action,
     *  id, and any additional arguments.

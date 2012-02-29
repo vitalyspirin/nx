@@ -4,13 +4,11 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
 namespace nx\core;
-
-use nx\lib\Meta;
 
 /*
  *  The `Object` class is the class from which the other
@@ -26,6 +24,14 @@ use nx\lib\Meta;
 class Object {
 
    /**
+    *  The object classname.
+    *
+    *  @var string
+    *  @access protected
+    */
+    protected $_classname;
+
+   /**
     *  The configuration settings.
     *
     *  @var array
@@ -34,17 +40,10 @@ class Object {
     protected $_config = array();
 
    /**
-    *  The object's classname.
+    *  Loads the configuration settings for the class and
+    *  sets the classname.
     *
-    *  @var string
-    *  @access protected
-    */
-    protected $_classname;
-
-   /**
-    *  Loads the configuration settings for the class.
-    *
-    *  @param array $config        The configuration options.
+    *  @param array $config    The configuration options.
     *  @access public
     *  @return void
     */
@@ -52,19 +51,12 @@ class Object {
         $defaults = array('init' => true);
         $this->_config = $config + $defaults;
 
+        $class = explode('\\', get_called_class());
+        $this->_classname = array_pop($class);
+
         if ( $this->_config['init'] ) {
             $this->_init();
         }
-    }
-
-   /**
-    *  Initializes the class.
-    *
-    *  @access public
-    *  @return void
-    */
-    protected function _init() {
-        $this->_classname = Meta::classname_only(get_called_class());
     }
 
    /**
