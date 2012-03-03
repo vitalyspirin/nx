@@ -33,7 +33,7 @@ class Auth {
    /**
     *  Creates a unique token for a given session.
     *
-    *  @param string $salt          The token salt.
+    *  @param string $salt    The token salt.
     *  @access public
     *  @return string
     */
@@ -53,9 +53,9 @@ class Auth {
    /**
     *  Cleans out any tokens that have expired.
     *
-    *  @param array $tokens         The tokens to check for expiration.
-    *  @param int $expiration       The number of seconds after which
-    *                               the tokens should expire.
+    *  @param array $tokens      The tokens to check for expiration.
+    *  @param int $expiration    The number of seconds after which the tokens
+    *                            should expire.
     *  @access public
     *  @return string
     */
@@ -75,7 +75,7 @@ class Auth {
    /**
     *  Checks that the supplied token is valid for a given request.
     *
-    *  @param string $token         The token.
+    *  @param string $token    The token.
     *  @access public
     *  @return bool
     */

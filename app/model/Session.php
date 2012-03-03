@@ -10,49 +10,45 @@ class Session extends \nx\core\Model {
     *  The session id.
     *
     *  @var int $id
-    *  @access protected
+    *  @access public
     */
-    protected $id;
+    public $id;
 
    /**
     *  The session data.
     *
     *  @var string $data
-    *  @access protected
+    *  @access public
     */
-    protected $data = '';
+    public $data = '';
 
    /**
     *  The timestamp of the user's last activity.
     *
     *  @var string $last_active
-    *  @access protected
+    *  @access public
     */
-    protected $last_active;
+    public $last_active;
 
    /**
     *  The user's id.
     *
     *  @var int $User_id
-    *  @access protected
+    *  @access public
     */
-    protected $User_id = 0;
+    public $User_id = 0;
 
    /**
     *  Loads the configuration settings for the session.
     *
-    *  @param array $config         The configuration settings,
-    *                               which can take five options:
-    *                               `use_db`            - Whether or not to
-    *                                                     use the database
-    *                                                     to manage sessions.
-    *                                                     Falls back to the
-    *                                                     session.save_handler
-    *                                                     setting defined
-    *                                                     within php.ini if
-    *                                                     set to false.
-    *                               `session_lifetime`  - The length of a
-    *                                                     session.
+    *  @param array $config    The configuration settings, which can take
+    *                          five options:
+    *                          `use_db` - Whether or not to use the database
+    *                                     to manage sessions.  Falls back to
+    *                                     the session.save_handler setting
+    *                                     defined within php.ini if set to
+    *                                     false.
+    *                          `session_lifetime` - The length of a session.
     *  @access public
     *  @return void
     */
@@ -100,7 +96,7 @@ class Session extends \nx\core\Model {
    /**
     *  Creates a new login session.
     *
-    *  @param int $user_id          The user's ID.
+    *  @param int $user_id    The user's ID.
     *  @access private
     *  @return bool
     */
@@ -132,7 +128,7 @@ class Session extends \nx\core\Model {
    /**
     *  Executes when the garbage collector is executed.
     *
-    *  @param int $max_lifetime     The max session lifetime.
+    *  @param int $max_lifetime    The max session lifetime.
     *  @access public
     *  @return bool
     */
@@ -211,8 +207,8 @@ class Session extends \nx\core\Model {
    /**
     *  Logs a user in.
     *
-    *  @param obj $user             The user object to check against.
-    *  @param string $password      The password to check against.
+    *  @param obj $user           The user object to check against.
+    *  @param string $password    The password to check against.
     *  @access public
     *  @return bool
     */

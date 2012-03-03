@@ -11,8 +11,7 @@
 namespace nx\lib;
 
 /*
- *  The `Time` class contains methods that deal with
- *  presentation of data involving time.
+ *  The `Time` class contains methods that help with manipulating time.
  *
  *  @package lib
  */
@@ -22,8 +21,8 @@ class Time {
      *  Calculates the amount of time between two dates.
      *
      *
-     *  @param string $date_1       The first date.
-     *  @param string $date_2       The second date.  Defaults to now.
+     *  @param string $date_1    The first date.
+     *  @param string $date_2    The second date.  Defaults to now.
      *  @access public
      *  @return array
      */
@@ -47,16 +46,15 @@ class Time {
    /**
     *  Returns an array of times separated by a constant interval.
     *
-    *  @param int $interval          The interval (in minutes) between
-    *                                each time.
-    *  @param bool $military         Whether or not to output time using
-    *                                24-hour format.
+    *  @param int $interval     The interval (in minutes) between each time.
+    *  @param bool $military    Whether or not to output time using 24-hour
+    *                           format.
     *  @access public
     *  @return array
     */
     public static function get_with_interval($interval = 15, $military = false) {
         if ( $interval % 60 !== 0 ) {
-            return false;
+            return array();
         }
 
         $list = array();

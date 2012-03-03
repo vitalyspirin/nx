@@ -34,22 +34,6 @@ class MetaMock2 {
 
 class MetaTest extends \PHPUnit_Framework_TestCase {
 
-    public function test_Classname_ReturnsClassnameWithoutNamepsace() {
-        $model = new MetaMock();
-        $class = 'MetaMock';
-        $check = Meta::classname_only($model);
-        $this->assertEquals($class, $check);
-
-        $model = new MetaMock2();
-        $class = 'MetaMock2';
-        $check = Meta::classname_only($model);
-        $this->assertEquals($class, $check);
-
-        $class = 'MetaTest';
-        $check = Meta::classname_only($this);
-        $this->assertEquals($class, $check);
-    }
-
     public function test_GetPublicProperties_ReturnsArray() {
         $model = new MetaMock();
         $properties = array(
@@ -66,18 +50,6 @@ class MetaTest extends \PHPUnit_Framework_TestCase {
         );
         $check = Meta::get_public_properties($model);
         $this->assertEquals($properties, $check);
-    }
-
-    public function test_GetProtectedMethods_ReturnsArray() {
-        $model = new MetaMock();
-        $methods = array('_set_id');
-        $check = Meta::get_protected_methods($model);
-        $this->assertEquals($methods, $check);
-
-        $model = new MetaMock2();
-        $methods = array('_get_id');
-        $check = Meta::get_protected_methods($model);
-        $this->assertEquals($methods, $check);
     }
 
 }

@@ -11,8 +11,6 @@
 namespace nx\core;
 
 use nx\lib\Auth;
-use nx\lib\Data;
-use nx\lib\Meta;
 
 /*
  *  The `Controller` class is the parent class of all
@@ -24,58 +22,38 @@ use nx\lib\Meta;
 class Controller extends Object {
 
    /**
-    *  The controller actions that are
-    *  accessible to guests (i.e., users
-    *  that are not logged in).
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected $_guest_accessible = array();
-
-   /**
-    *  The uri to which a guest should be
-    *  redirected if an action is not
-    *  accessible to them.
-    *
-    *  @var string
-    *  @access protected
-    */
-    protected $_guest_redirect = '/';
-
-   /**
     *  The request object containing
     *  all of the information pertinent
     *  to the incoming request.
     *
     *  @var obj
-    *  @access protected
+    *  @access public
     */
-    protected $_request;
+    public $request;
 
    /**
     *  The session object.
     *
     *  @var object
-    *  @access protected
+    *  @access public
     */
-    protected $_session;
+    public $session;
 
    /**
     *  The request token.
     *
     *  @var string
-    *  @access protected
+    *  @access public
     */
-    protected $_token = null;
+    public $token = null;
 
    /**
-    *  The user object.
+    *  The user object representing the user currently logged in.
     *
     *  @var object
-    *  @access protected
+    *  @access public
     */
-    protected $_user;
+    public $current_user;
 
    /**
     *  Loads the configuration settings for the controller.
@@ -86,15 +64,10 @@ class Controller extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'classes'      => array(
-                'session' => 'app\model\Session',
-                'user'    => 'app\model\User'
-            ),
             'dependencies' => array(
+                'session' => new app\model\Session(),
+                'user'    => new app\model\User(),
                 'request' => null
-            ),
-            'libraries' => array(
-                'library' => 'nx\lib\Library',
             )
         );
         parent::__construct($config + $defaults);
@@ -111,21 +84,19 @@ class Controller extends Object {
     protected function _init() {
         parent::_init();
 
-        $session = $this->_config['classes']['session'];
-        $this->_session = new $session();
+        $this->session = $this->_config['dependencies']['session'];
+        $this->request = $this->_config['dependencies']['request'];
 
-        $this->_request = $this->_config['dependencies'];
-
-        if ( !$this->_is_valid_request($this->_request) ) {
+        if ( !$this->_is_valid_request($this->request) ) {
             $this->handle_CSRF();
         }
 
-        $this->_token = Auth::create_token();
+        $this->token = Auth::create_token();
 
         if ( $this->_session->is_logged_in() ) {
-            $user = $this->_config['classes']['user'];
-            $id = $this->_session->get_user_id();
-            $this->_user = new $user(compact('id'));
+            $user = $this->_config['dependencies']['user'];
+            $id = $this->session->get_user_id();
+            $this->current_user = $user->load_by_primary_key($id);
         }
     }
 
@@ -134,70 +105,23 @@ class Controller extends Object {
     *  be passed to and parsed by a view.
     *
     *  @param string $action       The action.
-    *  @param int $id              The id (passed from the URL, useful with
-    *                              query strings like `http://foobar.com/entry/23`
-    *                              or `http://foobar.com/entry/view/23`).
+    *  @param array $args          The arguments extracted from the URI.
     *  @access public
     *  @return mixed
     */
-    public function call($action, $id = null) {
-        if ( !$this->_user && !in_array($action, $this->_guest_accessible) ) {
-            $this->redirect($this->_guest_redirect);
-            return false;
-        }
+    public function call($action, $args = array()) {
+        $results = $this->$action($args);
 
-        if ( !$action = $this->_determine_action($action, $this->_request) ) {
-            return false;
-        }
-
-        $results = $this->$action($id);
-
-        if ( is_null($results) || $results === false ) {
+        if ( !is_array($results) ) {
             return false;
         }
 
         $additional = array(
-            'token' => $this->_token,
-            'user'  => $this->_user
+            'token' => $this->token,
+            'user'  => $this->current_user
         );
 
         return $results + $additional;
-    }
-
-   /**
-    *  Determines the appropriate action depending on the
-    *  nature of the request.
-    *
-    *  @param string $action       The action.
-    *  @param obj $request         The request.
-    *  @access public
-    *  @return mixed
-    */
-    protected function _determine_action($action, $request) {
-        if ( $this->is_protected($action) ) {
-            return false;
-        }
-
-        if ( $action != 'index' ) {
-            if ( !method_exists($this, $action) ) {
-                return false;
-            }
-            return $action;
-        }
-
-        $methods = array('get', 'post', 'put', 'delete');
-        foreach ( $methods as $method ) {
-            if ( $request->is($method) ) {
-                $action = '_' . $method;
-                break;
-            }
-        }
-
-        if ( !method_exists($this, $action) ) {
-            return false;
-        }
-
-        return $action;
     }
 
    /**
@@ -209,17 +133,6 @@ class Controller extends Object {
     public function handle_CSRF() {
         // TODO: HTTP 403
         die('CSRF attack!');
-    }
-
-   /**
-    *  Checks if a method is protected.
-    *
-    *  @param string $method       The method.
-    *  @access public
-    *  @return bool
-    */
-    public function is_protected($method) {
-        return ( in_array($method, Meta::get_protected_methods($this)) );
     }
 
    /**
@@ -254,15 +167,11 @@ class Controller extends Object {
     *
     *  @param string $page         The page to be redirected to.
     *  @access public
-    *  @return bool
+    *  @return void
     */
     public function redirect($page) {
-        if ( headers_sent() ) {
-            echo '<meta content="0; url=' . $page . '" http-equiv="refresh"/>';
-        } else {
-            header('Location: ' . $page);
-        }
-        return false;
+        header('Location: ' . $page);
+        exit;
     }
 
 }

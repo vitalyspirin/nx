@@ -59,7 +59,7 @@ class Dispatcher extends Object {
             return $this->throw_404($template);
         }
 
-        $dependencies = array('request' => $request);
+        $dependencies = compact('request');
         $controller = new $controller(compact('dependencies'));
 
         $results = $controller->call($parsed['action'], $parsed['id']);

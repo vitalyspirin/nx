@@ -4,15 +4,14 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
 namespace nx\lib;
 
 /*
- *  The `Validator` class contains methods that validate
- *  data.
+ *  The `Validator` class contains methods that validate data.
  *
  *  @package lib
  */
@@ -21,7 +20,7 @@ class Validator {
    /**
     *  Checks a string to see if it consists of nothing but alphanumeric characters.
     *
-    *  @param string $value         The string to be checked.
+    *  @param string $value    The string to be checked.
     *  @access public
     *  @return bool
     */
@@ -33,35 +32,35 @@ class Validator {
    /**
     *  Checks a date to see if it is in the specified format.
     *
-    *  @param string $value         The string to be checked.
-    *  @param array $options        Accepts `format` as a key.
-    *                               Possible formats are as follows:
-    *                               'dmy' - 20-10-2011 or 20-10-11
-    *                               (separator: space, period, dash,
-    *                               or forward slash)
+    *  @param string $value     The string to be checked.
+    *  @param array $options    Accepts `format` as a key.
+    *                           Possible formats are as follows:
+    *                           'dmy' - 20-10-2011 or 20-10-11
+    *                           (separator: space, period, dash, or forward
+    *                           slash)
     *
-    *                               'mdy' - 10-20-2011 or 10-20-11
-    *                               (separator: space, period, dash,
-    *                               or forward slash)
+    *                           'mdy' - 10-20-2011 or 10-20-11
+    *                           (separator: space, period, dash, or forward
+    *                           slash)
     *
-    *                               'ymd' - 2011-10-20 or 11-10-20
-    *                               (separator: space, period, dash,
-    *                               or forward slash)
+    *                           'ymd' - 2011-10-20 or 11-10-20
+    *                           (separator: space, period, dash, or forward
+    *                           slash)
     *
-    *                               'dMy' - 20 October 2011 or 20 Oct 2011
+    *                           'dMy' - 20 October 2011 or 20 Oct 2011
     *
-    *                               'Mdy' - October 20, 2011 or Oct 20, 2011
-    *                               (comma is optional)
+    *                           'Mdy' - October 20, 2011 or Oct 20, 2011
+    *                           (comma is optional)
     *
-    *                               'My'  - October 2011 or Oct 2011
+    *                           'My'  - October 2011 or Oct 2011
     *
-    *                               'my'  - 10/2011
-    *                               (separator: space, period, dash,
-    *                               or forward slash)
+    *                           'my'  - 10/2011
+    *                           (separator: space, period, dash, or forward
+    *                           slash)
     *
-    *                               'dmy hms' - 20/10-2011 17:21:12
-    *                               (date separator: period, dash,
-    *                               or forward slash)
+    *                           'dmy hms' - 20/10-2011 17:21:12
+    *                           (date separator: period, dash, or forward
+    *                           slash)
     *  @access public
     *  @return bool
     */
@@ -129,10 +128,10 @@ class Validator {
    /**
     *  Checks a decimal number.
     *
-    *  @param mixed $value          The value to be checked.
-    *  @param array $options        Accepts `precision` as a key.
-    *                               If supplied, a check that the decimal has
-    *                               the same level of precision will be made.
+    *  @param mixed $value      The value to be checked.
+    *  @param array $options    Accepts `precision` as a key.
+    *                           If supplied, a check that the decimal has
+    *                           the same level of precision will be made.
     *  @access public
     *  @return bool
     */
@@ -165,9 +164,8 @@ class Validator {
    /**
     *  Checks an ip address.
     *
-    *  @param string $value          The ip address to be checked.
-    *  @param array $options         The options to be used by the filter. See
-    *                                http://us3.php.net/manual/en/filter.filters.validate.php
+    *  @param string $value     The ip address to be checked.
+    *  @param array $options    The options to be used by the filter.
     *  @access public
     *  @return bool
     */
@@ -179,9 +177,9 @@ class Validator {
    /**
     *  Checks that a string is between a certain length.
     *
-    *  @param string $value          The string to be checked.
-    *  @param array $options         The options by which to constrain the check.
-    *                                Takes `min` and/or `max` as keys.
+    *  @param string $value     The string to be checked.
+    *  @param array $options    The options by which to constrain the check.
+    *                           Takes `min` and/or `max` as keys.
     *  @access public
     *  @return bool
     */
@@ -195,7 +193,7 @@ class Validator {
    /**
     *  Checks that a string is not empty.
     *
-    *  @param string $value          The string to be checked.
+    *  @param string $value    The string to be checked.
     *  @access public
     *  @return bool
     */
@@ -206,7 +204,7 @@ class Validator {
    /**
     *  Checks that a value is numeric.
     *
-    *  @param mixed $value          The value to be checked.
+    *  @param mixed $value    The value to be checked.
     *  @access public
     *  @return bool
     */
@@ -217,9 +215,9 @@ class Validator {
    /**
     *  Checks that a number is within certain bounds.
     *
-    *  @param mixed $value           The value to be checked.
-    *  @param array $options         The options by which to constrain the check.
-    *                                Takes `upper` and/or `lower` as keys.
+    *  @param mixed $value      The value to be checked.
+    *  @param array $options    The options by which to constrain the check.
+    *                           Takes `upper` and/or `lower` as keys.
     *  @access public
     *  @return bool
     */
@@ -244,7 +242,7 @@ class Validator {
    /**
     *  Checks a zip code.
     *
-    *  @param string $value            The zip code to be checked.
+    *  @param string $value    The zip code to be checked.
     *  @access public
     *  @return bool
     */

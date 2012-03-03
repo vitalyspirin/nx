@@ -1,6 +1,6 @@
 <?php
 
-namespace nx\test\lib;
+namespace nx\test\unit\lib;
 
 use nx\lib\Validator;
 
@@ -200,6 +200,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 
         $check = '29/02/2011 12:21:13';
         $this->assertFalse(Validator::date($check, compact('format')));
+
+
+        $format = 'gibberish';
+        $check = '20.10.2011 12:21:13';
+        $this->assertFalse(Validator::date($check, compact('format')));
     }
 
     public function test_Decimal_ReturnsBool() {
@@ -366,6 +371,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
         $check = 0;
         $options = array();
 		$this->assertTrue(Validator::within_bounds($check, $options));
+
+        $check = 'garbage';
+        $options = array();
+		$this->assertFalse(Validator::within_bounds($check, $options));
     }
 
     public function test_ZipCode_ReturnsBool() {

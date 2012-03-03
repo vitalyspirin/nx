@@ -39,7 +39,7 @@ class View extends Object {
    /**
     *  Loads the configuration settings for the view.
     *
-    *  @param array $config         The configuration options.
+    *  @param array $config    The configuration options.
     *  @access public
     *  @return void
     */
@@ -74,8 +74,8 @@ class View extends Object {
    /**
     *  Renders a given file with the supplied variables.
     *
-    *  @param string $file          The file to be rendered.
-    *  @param mixed $vars           The variables to be substituted in the view.
+    *  @param string $file    The file to be rendered.
+    *  @param mixed $vars     The variables to be substituted in the view.
     *  @access public
     *  @return string
     */

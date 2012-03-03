@@ -93,7 +93,7 @@ class TimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($result, $check);
 
         $result = Time::get_with_interval(97, false);
-        $this->assertFalse($result);
+        $this->assertEquals($result, array());
     }
 
 }
