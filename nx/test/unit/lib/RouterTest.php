@@ -6,160 +6,6 @@ use nx\lib\Router;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
-    /*
-    public function test_ParseUrl_ReturnsArray() {
-        $query_string = '';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => Router::$defaults['controller'],
-            'action'     => Router::$defaults['action'],
-            'id'         => Router::$defaults['id'],
-            'query'      => array()
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => Router::$defaults['controller'],
-            'action'     => Router::$defaults['action'],
-            'id'         => Router::$defaults['id'],
-            'query'      => array()
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/?code=42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => Router::$defaults['controller'],
-            'action'     => Router::$defaults['action'],
-            'id'         => Router::$defaults['id'],
-            'query'      => array(
-                'code' => 42
-            )
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => Router::$defaults['action'],
-            'id'         => Router::$defaults['id'],
-            'query'      => array()
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => Router::$defaults['action'],
-            'id'         => '42',
-            'query'      => array()
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register?username=test';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => Router::$defaults['action'],
-            'id'         => Router::$defaults['id'],
-            'query'      => array('username' => 'test')
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register?username=test&token=42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => Router::$defaults['action'],
-            'id'         => Router::$defaults['id'],
-            'query'      => array(
-                'username' => 'test',
-                'token'    => '42'
-            )
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/index';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => 'index',
-            'id'         => Router::$defaults['id'],
-            'query'      => array()
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/42?username=test&token=42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => Router::$defaults['action'],
-            'id'         => '42',
-            'query'      => array(
-                'username' => 'test',
-                'token'    => '42'
-            )
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/index/42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => 'index',
-            'id'         => '42',
-            'query'      => array()
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/index?username=test&token=42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => 'index',
-            'id'         => Router::$defaults['id'],
-            'query'      => array(
-                'username' => 'test',
-                'token'    => '42'
-            )
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/index/42?username=test&token=42';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => 'index',
-            'id'         => '42',
-            'query'      => array(
-                'username' => 'test',
-                'token'    => '42'
-            )
-        );
-        $this->assertEquals($args, $check);
-
-        $query_string = '/register/query_value?name=high%20tide*&start=0&count=20';
-        $args = Router::parse($query_string);
-        $check = array(
-            'controller' => 'Register',
-            'action'     => 'query_value',
-            'id'         => Router::$defaults['id'],
-            'query'      => array(
-                'name'  => 'high tide*',
-                'start' => '0',
-                'count' => '20'
-            )
-        );
-        $this->assertEquals($args, $check);
-
-    }
-     */
-
-
     public function test_Parse_ReturnsArray() {
         $routes = array(
             array('GET', '/', 'app\controller\Login::index'),
@@ -167,10 +13,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             array('PUT', '/', 'app\controller\Login::update'),
             array('GET', '/users', 'app\controller\User::index'),
             array('GET', '/users/[i:id]', 'app\controller\User::index'),
-            array(array('GET', 'PUT'), '/name', 'app\controller\User::name'),
-            array('get', '/name/[a:name]', 'app\controller\User::name'),
+            array('GET', '/name', 'app\controller\User::name'),
+            array(array('get', 'put'), '/name/[a:name]', 'app\controller\User::name'),
             array('delete', '/name/[h:id]', 'app\controller\User::name'),
             array('get', '/phone/[a:type]', 'app\controller\User::phone'),
+            array('get', '/type/[:type]', 'app\controller\Type::handle'),
+            array('get', '/friends/[*:friends][i:id]', 'app\controller\Friends::load'),
+            array('post', '/entry/[new|create:action]', 'app\controller\Entry::new'),
+            array('put', '/entry/[:id]/[*:params]', 'app\controller\Entry::update'),
+            array('get', '/file[\.jpg|\.gif|\.png:image]?', 'app\controller\File::download'),
+            array('get', '/news[:params]?', 'app\controller\News::index'),
         );
         Router::set_routes($routes);
 
@@ -219,7 +71,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $input = Router::parse($request_uri, $request_method);
         $this->assertEquals($check, $input);
 
-        $request_uri = '/users/adfsfsk';
+        $request_uri = '/users/bob';
         $request_method = 'GET';
         $check = array(
             'args'     => null,
@@ -228,10 +80,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $input = Router::parse($request_uri, $request_method);
         $this->assertEquals($check, $input);
 
-        $request_uri = '/name';
+        $request_uri = '/name/jimmy';
         $request_method = 'PUT';
         $check = array(
-            'args'     => array(),
+            'args'     => array('name' => 'jimmy'),
             'callback' => 'app\controller\User::name'
         );
         $input = Router::parse($request_uri, $request_method);
@@ -285,8 +137,8 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $request_uri = '/phone';
         $request_method = 'GET';
         $check = array(
-            'args'     => array(),
-            'callback' => 'app\controller\User::phone'
+            'args'     => null,
+            'callback' => null
         );
         $input = Router::parse($request_uri, $request_method);
         $this->assertEquals($check, $input);
@@ -300,6 +152,95 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $input = Router::parse($request_uri, $request_method);
         $this->assertEquals($check, $input);
 
+        $request_uri = '/type/somethingnew';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array('type' => 'somethingnew'),
+            'callback' => 'app\controller\Type::handle'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/friends/sally-382';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array('friends' => 'sally-', 'id' => '382'),
+            'callback' => 'app\controller\Friends::load'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/entry/create';
+        $request_method = 'POST';
+        $check = array(
+            'args'     => array('action' => 'create'),
+            'callback' => 'app\controller\Entry::new'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/entry/new';
+        $request_method = 'POST';
+        $check = array(
+            'args'     => array('action' => 'new'),
+            'callback' => 'app\controller\Entry::new'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/entry/87/date/tomorrow';
+        $request_method = 'PUT';
+        $check = array(
+            'args'     => array('id' => '87', 'params' => 'date/tomorrow'),
+            'callback' => 'app\controller\Entry::update'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/file';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\File::download'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/file.jpg';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array('image' => '.jpg'),
+            'callback' => 'app\controller\File::download'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/file.bmp';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => null,
+            'callback' => null
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/news';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\News::index'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/news';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\News::index'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
 
 
         $catchall_route = array(
@@ -316,7 +257,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $input = Router::parse($request_uri, $request_method);
         $this->assertEquals($check, $input);
     }
-
 
 }
 ?>

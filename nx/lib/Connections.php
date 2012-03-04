@@ -127,6 +127,7 @@ class Connections {
     */
     public static function set_cache($config = array()) {
         self::$_options['cache'] = $config;
+        self::$_initialized['cache'] = false;
     }
 
    /**
@@ -149,6 +150,7 @@ class Connections {
     */
     public static function set_db($config = array()) {
         self::$_options['db'] = $config;
+        self::$_initialized['db'] = false;
     }
 }
 

@@ -12,7 +12,6 @@ namespace nx\core;
 
 use nx\lib\Connections;
 use nx\lib\Data;
-use nx\lib\Meta;
 use nx\lib\Validator;
 
 /*
@@ -188,7 +187,6 @@ class Model extends Object {
     *  Stores an object in the cache.  Only the object's "columns"
     *  (i.e., public properties) are serialized and stored.
     *
-    *  @see /nx/lib/Meta::get_public_properties()
     *  @access public
     *  @return bool
     */
@@ -287,8 +285,16 @@ class Model extends Object {
     *  @access public
     *  @return array
     */
+    // TODO: Cache these so that it's not being retrieved every time
     public function get_columns() {
-        return Meta::get_public_properties($this);
+        $reflection = new \ReflectionClass($this);
+        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $collection = array();
+        foreach ( $properties as $property ) {
+            $name = $property->getName();
+            $collection[$name] = $property->getValue($object);
+        }
+        return $collection;
     }
 
    /**

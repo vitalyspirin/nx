@@ -46,8 +46,9 @@ class Dispatcher extends Object {
     */
     public function handle($request) {
         $router = $this->_config['libs']['router'];
-        $url = $request->get_env('REQUEST_URI');
+        $url = $request->url;
         $method = $request->get_env('REQUEST_METHOD');
+        die(var_dump($request));
 
         $parsed = $router::parse($url, $method);
         if ( is_null($parsed['callback']) ) {

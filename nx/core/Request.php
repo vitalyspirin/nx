@@ -93,18 +93,16 @@ class Request extends Object {
             $this->_env['DOCUMENT_ROOT'], '', $this->_env['SCRIPT_FILENAME']
         ));
 
-        if ( !empty($_GET['url']) ) {
-            $this->url = rtrim($_GET['url'], '/');
-        } elseif ( $uri = $this->_env['REQUEST_URI'] ) {
-            $this->url = parse_url($uri, PHP_URL_PATH);
-        } else {
-            $this->url = '/';
-        }
+        $uri = $this->_env['REQUEST_URI'];
+        $parsed = parse_url($uri);
 
-        $this->query = $this->_config['query'];
-        if ( isset($_GET) ) {
-            $this->query += $_GET;
-        }
+        $this->url = $parsed['path'];
+
+        $query_string = rawurldecode(str_replace('%20', '+', $parsed['query']));
+        $query = array();
+        parse_str($query_string, $query);
+
+        $this->query = $this->_config['query'] + $query;
 
         $this->data = $this->_config['data'];
         if ( isset($_POST) ) {

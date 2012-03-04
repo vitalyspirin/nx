@@ -54,8 +54,8 @@ class Session extends \nx\core\Model {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'use_db'              => false,
-            'session_lifetime'    => 3600   // 60 minutes
+            'use_db'           => true,
+            'session_lifetime' => 3600   // 60 minutes
         );
         parent::__construct($config + $defaults);
     }
