@@ -20,7 +20,7 @@ class Dispatcher extends Object {
    /**
     *  Sets the configuration options for the dispatcher.
     *
-    *  @param array $config        The configuration options.
+    *  @param array $config    The configuration options.
     *  @access public
     *  @return void
     */
@@ -30,7 +30,7 @@ class Dispatcher extends Object {
                 'router'  => 'nx\lib\Router'
             ),
             'dependencies' => array(
-                //'view' => new \nx\core\View()
+                'view' => new \nx\core\View()
             )
         );
         parent::__construct($config + $defaults);
@@ -40,29 +40,32 @@ class Dispatcher extends Object {
    /**
     *  Handles an incoming request.
     *
-    *  @param obj $request          The incoming request object.
+    *  @param obj $request    The incoming request object.
     *  @access public
     *  @return bool
     */
     public function handle($request) {
         $router = $this->_config['libs']['router'];
-        $url = $request->env('REQUEST_URI');
-        if ( !$parsed = $router::parse($url) ) {
+        $url = $request->get_env('REQUEST_URI');
+        $method = $request->get_env('REQUEST_METHOD');
+
+        $parsed = $router::parse($url, $method);
+        if ( is_null($parsed['callback']) ) {
+            // TODO: Fix this
             return $this->throw_404($template);
         }
 
-        $request->query = $parsed['query'] + $request->query;
+        // TODO: Fix this?  Depends on what $_GET pulls in
+        // $request->query = $parsed['query'] + $request->query;
+        // TODO: Merge in $parsed['args'] into $request
 
-        $controller = 'app\controller\\' . $parsed['controller'];
-
+        list($controller, $action) = explode('::', $parsed['callback']);
         if ( !class_exists($controller) ) {
             return $this->throw_404($template);
         }
 
-        $dependencies = compact('request');
-        $controller = new $controller(compact('dependencies'));
-
-        $results = $controller->call($parsed['action'], $parsed['id']);
+        $controller = new $controller();
+        $results = $controller->call($action, $request);
         if ( !is_array($results) ) {
             return $this->throw_404($template);
         }
@@ -74,14 +77,14 @@ class Dispatcher extends Object {
         }
 
         $view = $this->_config['dependencies']['view'];
-        $file = lcfirst($parsed['controller']) . '/' . $parsed['action'];
+        $file = lcfirst($controller->classname()) . "/{$action}";
         return $view->render($file, $results);
     }
 
    /**
     *  Renders a 404 page.
     *
-    *  @param string $template     The view template to use.
+    *  @param string $template    The view template to use.
     *  @access public
     *  @return void
     */

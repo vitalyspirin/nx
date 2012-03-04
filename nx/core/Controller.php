@@ -10,8 +10,6 @@
 
 namespace nx\core;
 
-use nx\lib\Auth;
-
 /*
  *  The `Controller` class is the parent class of all
  *  application controllers.  It provides access request
@@ -32,15 +30,18 @@ class Controller extends Object {
    /**
     *  Loads the configuration settings for the controller.
     *
-    *  @param array $config        The configuration options.
+    *  @param array $config    The configuration options.
     *  @access public
     *  @return void
     */
     public function __construct(array $config = array()) {
         $defaults = array(
             'dependencies' => array(
-                'session' => new app\model\Session(),
-                'user'    => new app\model\User()
+                'session' => new \app\model\Session(),
+                'user'    => new \app\model\User()
+            ),
+            'libs' => array(
+                'auth' => 'nx\lib\Auth'
             )
         );
         parent::__construct($config + $defaults);
@@ -62,17 +63,19 @@ class Controller extends Object {
     *  Calls the controller action, whose return values can then
     *  be passed to and parsed by a view.
     *
-    *  @param string $action       The action.
-    *  @param array $args          The arguments extracted from the URI.
+    *  @param string $action    The action.
+    *  @param obj $request      The request.
     *  @access public
     *  @return mixed
     */
-    public function call($action, $args = array()) {
+    public function call($action, $request) {
         if ( !$this->_is_valid_request($request) ) {
             $this->handle_CSRF();
         }
 
-        $token = Auth::create_token();
+        // TODO: Fix this
+        $auth = $this->_config['libs']['auth'];
+        $token = $auth::create_token();
 
         $user = null;
         if ( $this->session->is_logged_in() ) {
@@ -81,7 +84,7 @@ class Controller extends Object {
             $user = $user->load_by_primary_key($id);
         }
 
-        $results = $this->$action($request, $args, $user);
+        $results = $this->$action($request, $user);
 
         if ( !is_array($results) ) {
             return false;
@@ -102,10 +105,9 @@ class Controller extends Object {
     }
 
    /**
-    *  Checks that the token submitted with the
-    *  request data is valid.
+    *  Checks that the token submitted with the request data is valid.
     *
-    *  @param obj $request       The request object.
+    *  @param obj $request    The request object.
     *  @access protected
     *  @return bool
     */
@@ -131,7 +133,7 @@ class Controller extends Object {
    /**
     *  Redirects the page.
     *
-    *  @param string $page         The page to be redirected to.
+    *  @param string $page    The redirect location.
     *  @access public
     *  @return void
     */

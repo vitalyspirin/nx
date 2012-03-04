@@ -12,7 +12,6 @@ namespace nx\core;
 
 use nx\lib\Connections;
 use nx\lib\Data;
-use nx\lib\Library;
 use nx\lib\Meta;
 use nx\lib\Validator;
 
@@ -123,11 +122,8 @@ class Model extends Object {
     *  @return void
     */
     public function __construct(array $config = array()) {
-        $environment = Library::environment();
         $defaults = array(
-            'no_cache' => false,
-            'db'       => $environment,
-            'cache'    => $environment,
+            'no_cache' => false
         );
         parent::__construct($config + $defaults);
     }
@@ -142,10 +138,8 @@ class Model extends Object {
     *  @return void
     */
     protected function _init() {
-        parent::_init();
-
-        $this->_db = Connections::get_db($this->_config['db']);
-        if ( !$this->_cache = Connections::get_cache($this->_config['cache']) ) {
+        $this->_db = Connections::get_db();
+        if ( !$this->_cache = Connections::get_cache() ) {
             $this->_config['no_cache'] = true;
         }
     }
@@ -496,7 +490,7 @@ class Model extends Object {
     *  @return object
     */
     public function load_by_primary_key($primary_key) {
-        if ( $this = $this->pull_from_cache($this, $primary_key) ) {
+        if ( $this->pull_from_cache($this, $primary_key) ) {
             return $this;
         }
 

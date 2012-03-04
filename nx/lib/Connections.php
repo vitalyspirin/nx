@@ -19,20 +19,20 @@ namespace nx\lib;
 class Connections {
 
    /**
-    *  The collection of cache handlers.
+    *  The cache handler.
     *
     *  @var array
     *  @access protected
     */
-    protected static $_cache = array();
+    protected static $_cache;
 
    /**
-    *  The collection of database handlers.
+    *  The database handler.
     *
     *  @var array
     *  @access protected
     */
-    protected static $_db = array();
+    protected static $_db;
 
    /**
     *  The initialization status of the handlers.
@@ -41,8 +41,8 @@ class Connections {
     *  @access protected
     */
     protected static $_initialized = array(
-        'cache' => array(),
-        'db'    => array()
+        'cache' => false,
+        'db'    => false
     );
 
    /**
@@ -57,106 +57,98 @@ class Connections {
     );
 
    /**
+    *  Returns the cache handler.
+    *
+    *  @access public
+    *  @return object
+    */
+    public static function get_cache() {
+        if ( !self::$_options['cache']['enabled'] ) {
+            return false;
+        }
+
+        if ( !self::$_initialized['cache'] ) {
+            $plugin = self::$_options['cache']['plugin'];
+            $cache = 'nx\plugin\cache\\' . $plugin;
+
+            $options = self::$_options['cache'];
+            unset($options['enabled']);
+            unset($options['plugin']);
+            self::$_cache = new $cache($options);
+
+            self::$_initialized['cache'] = true;
+        }
+
+        return self::$_cache;
+    }
+
+   /**
+    *  Returns the database handler.
+    *
+    *  @access public
+    *  @return object
+    */
+    public static function get_db() {
+        if ( !self::$_initialized['db'] ) {
+            $plugin = self::$_options['db']['plugin'];
+            $db = 'nx\plugin\db\\' . $plugin;
+
+            $options = self::$_options['db'];
+            unset($options['plugin']);
+            self::$_db = new $db($options);
+
+            self::$_initialized['db'] = true;
+        }
+
+        return self::$_db;
+    }
+
+   /**
     *  Stores the cache connection details using the defined options.
     *
     *  @see app\config\bootstrap\cache.php
-    *  @param array $options        The cache configuration.  Should be of the
-    *                               following format: `key` => `value`,
-    *                               where `key` is the name of the configuration
-    *                               (i.e., 'development', 'test', 'production'),
-    *                               and `value` is an array which can take
-    *                               the following parameters:
-    *                               `enabled`       - Whether or not the
-    *                                                 plugin should be used.
-    *                               `plugin`        - The name of the cache
-    *                                                 plugin.
-    *                               `host`          - The hostname of the server
-    *                                                 where the cache resides.
-    *                               `persistent_id` - A unique ID used to allow
-    *                                                 persistence between
-    *                                                 requests.
+    *  @param array $options    The cache configuration.  Should be of the
+    *                           following format: `key` => `value`,
+    *                           where `key` is the name of the configuration
+    *                           (i.e., 'development', 'test', 'production'),
+    *                           and `value` is an array which can take
+    *                           the following parameters:
+    *                           `enabled`       - Whether or not the
+    *                                             plugin should be used.
+    *                           `plugin`        - The name of the cache
+    *                                             plugin.
+    *                           `host`          - The hostname of the server
+    *                                             where the cache resides.
+    *                           `persistent_id` - A unique ID used to allow
+    *                                             persistence between
+    *                                             requests.
     *  @access public
     *  @return void
     */
-    public static function add_cache($config = array()) {
-        foreach ( $config as $name => $options ) {
-            self::$_options['cache'][$name] = $options;
-            self::$_initialized['cache'][$name] = false;
-        }
+    public static function set_cache($config = array()) {
+        self::$_options['cache'] = $config;
     }
 
    /**
     *  Stores the database connection details using the defined options.
     *
     *  @see app\config\bootstrap\db.php
-    *  @param array $config         The database configuration.  Should be of
-    *                               the following format: `key` => `value`,
-    *                               where `key` is the name of the configuration
-    *                               (i.e., 'development', 'test', 'production'),
-    *                               and `value` is an array which can take the
-    *                               following parameters:
-    *                               `plugin`   - The name of the plugin.
-    *                               `database` - The database name.
-    *                               `host`     - The database host.
-    *                               `username` - The database username.
-    *                               `password` - The database password.
+    *  @param array $config    The database configuration.  Should be of
+    *                          the following format: `key` => `value`,
+    *                          where `key` is the name of the configuration
+    *                          (i.e., 'development', 'test', 'production'),
+    *                          and `value` is an array which can take the
+    *                          following parameters:
+    *                          `plugin`   - The name of the plugin.
+    *                          `database` - The database name.
+    *                          `host`     - The database host.
+    *                          `username` - The database username.
+    *                          `password` - The database password.
     *  @access public
     *  @return void
     */
-    public static function add_db($config = array()) {
-        foreach ( $config as $name => $options ) {
-            self::$_options['db'][$name] = $options;
-            self::$_initialized['db'][$name] = false;
-        }
-    }
-
-   /**
-    *  Returns the cache handler.
-    *
-    *  @param string $name          The name of the cache handler.
-    *  @access public
-    *  @return object
-    */
-    public static function get_cache($name) {
-        if ( !self::$_options['cache'][$name]['enabled'] ) {
-            return false;
-        }
-
-        if ( !self::$_initialized['cache'][$name] ) {
-            $plugin = self::$_options['cache'][$name]['plugin'];
-            $cache = 'nx\plugin\cache\\' . $plugin;
-
-            $options = self::$_options['cache'][$name];
-            unset($options['enabled']);
-            unset($options['plugin']);
-            self::$_cache[$name] = new $cache($options);
-
-            self::$_initialized['cache'][$name] = true;
-        }
-
-        return self::$_cache[$name];
-    }
-
-   /**
-    *  Returns the database handler.
-    *
-    *  @param string $name          The name of the database handler.
-    *  @access public
-    *  @return object
-    */
-    public static function get_db($name) {
-        if ( !self::$_initialized['db'][$name] ) {
-            $plugin = self::$_options['db'][$name]['plugin'];
-            $db = 'nx\plugin\db\\' . $plugin;
-
-            $options = self::$_options['db'][$name];
-            unset($options['plugin']);
-            self::$_db[$name] = new $db($options);
-
-            self::$_initialized['db'][$name] = true;
-        }
-
-        return self::$_db[$name];
+    public static function set_db($config = array()) {
+        self::$_options['db'] = $config;
     }
 }
 

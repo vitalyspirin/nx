@@ -53,7 +53,7 @@ class Request extends Object {
     /**
      *  Sets the configuration options.
      *
-     *  @param array $config        The configuration options.
+     *  @param array $config    The configuration options.
      *  @access public
      *  @return void
      */
@@ -82,8 +82,9 @@ class Request extends Object {
             $this->_env['HTTPS'] =
                 ( strpos($this->_env['SCRIPT_URI'], 'https://') === 0 );
         } elseif ( isset($this->_env['HTTPS']) ) {
-            $this->_env['HTTPS'] =
-                ( !empty($this->_env['HTTPS']) && $this->_env['HTTPS'] !== 'off' );
+            $this->_env['HTTPS'] = (
+                !empty($this->_env['HTTPS']) && $this->_env['HTTPS'] !== 'off'
+            );
         } else {
             $this->_env['HTTPS'] = false;
         }
@@ -130,8 +131,7 @@ class Request extends Object {
     }
 
    /**
-    *  Determines the environment (development, test, or
-    *  production).
+    *  Determines the environment (development, test, or  production).
     *
     *  @access public
     *  @return string
@@ -154,7 +154,7 @@ class Request extends Object {
    /**
     *  Returns an environment variable.
     *
-    *  @param string $key           The environment variable.
+    *  @param string $key    The environment variable.
     *  @access public
     *  @return mixed
     */
@@ -168,7 +168,7 @@ class Request extends Object {
    /**
     *  Checks for request characteristics.
     *
-    *  @param string $characteristic     The characteristic.
+    *  @param string $characteristic    The characteristic.
     *  @access public
     *  @return bool
     */

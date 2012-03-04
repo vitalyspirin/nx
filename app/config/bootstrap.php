@@ -8,11 +8,11 @@ spl_autoload_register(function($class) {
     require_once $file;
 });
 
-
-/*
+require __DIR__ . '/routes.php';
 require __DIR__ . '/bootstrap/cache.php';
 require __DIR__ . '/bootstrap/db.php';
 
+/*
 
 $config = array(
     'guest_redirect' => '/login',

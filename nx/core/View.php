@@ -45,7 +45,7 @@ class View extends Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'classes'   => array(
+            'libs'   => array(
                 'compiler' => 'nx\lib\Compiler',
                 'form'     => 'nx\lib\Form',
                 'library'  => 'nx\lib\Library'
@@ -62,13 +62,8 @@ class View extends Object {
     *  @return void
     */
     protected function _init() {
-        $library = $this->_config['classes']['library'];
-        $version = str_replace('.', '', $library::version());
-
-        $form = $this->_config['classes']['form'];
-        $this->form = new $form(compact('version'));
-
-        $this->env = $library::environment();
+        $form = $this->_config['libs']['form'];
+        $this->form = new $form();
     }
 
    /**
@@ -80,16 +75,15 @@ class View extends Object {
     *  @return string
     */
     public function render($file, $vars = null) {
-        $library = $this->_config['classes']['library'];
-        $path = $library::get('path', 'view');
-        $file = $path . $file . '.html';
+        $root = dirname(dirname(__DIR__));
+        $file = "{$root}/app/view/{$file}.html";
 
         if ( is_array($vars) ) {
             extract($vars);
         }
 
-        $compiler = $this->_config['classes']['compiler'];
-        $options = array('path' => $library::get('path', 'cache'));
+        $compiler = $this->_config['libs']['compiler'];
+        $options = array('path' => "{$root}/app/resource/cache/");
         $template = $compiler::compile($file, $options);
 
         ob_start();
