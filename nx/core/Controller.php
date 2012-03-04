@@ -22,38 +22,12 @@ use nx\lib\Auth;
 class Controller extends Object {
 
    /**
-    *  The request object containing
-    *  all of the information pertinent
-    *  to the incoming request.
-    *
-    *  @var obj
-    *  @access public
-    */
-    public $request;
-
-   /**
     *  The session object.
     *
     *  @var object
     *  @access public
     */
     public $session;
-
-   /**
-    *  The request token.
-    *
-    *  @var string
-    *  @access public
-    */
-    public $token = null;
-
-   /**
-    *  The user object representing the user currently logged in.
-    *
-    *  @var object
-    *  @access public
-    */
-    public $current_user;
 
    /**
     *  Loads the configuration settings for the controller.
@@ -66,8 +40,7 @@ class Controller extends Object {
         $defaults = array(
             'dependencies' => array(
                 'session' => new app\model\Session(),
-                'user'    => new app\model\User(),
-                'request' => null
+                'user'    => new app\model\User()
             )
         );
         parent::__construct($config + $defaults);
@@ -82,22 +55,7 @@ class Controller extends Object {
     *  @return void
     */
     protected function _init() {
-        parent::_init();
-
         $this->session = $this->_config['dependencies']['session'];
-        $this->request = $this->_config['dependencies']['request'];
-
-        if ( !$this->_is_valid_request($this->request) ) {
-            $this->handle_CSRF();
-        }
-
-        $this->token = Auth::create_token();
-
-        if ( $this->_session->is_logged_in() ) {
-            $user = $this->_config['dependencies']['user'];
-            $id = $this->session->get_user_id();
-            $this->current_user = $user->load_by_primary_key($id);
-        }
     }
 
    /**
@@ -110,18 +68,26 @@ class Controller extends Object {
     *  @return mixed
     */
     public function call($action, $args = array()) {
-        $results = $this->$action($args);
+        if ( !$this->_is_valid_request($request) ) {
+            $this->handle_CSRF();
+        }
+
+        $token = Auth::create_token();
+
+        $user = null;
+        if ( $this->session->is_logged_in() ) {
+            $user = $this->_config['dependencies']['user'];
+            $id = $this->session->get_user_id();
+            $user = $user->load_by_primary_key($id);
+        }
+
+        $results = $this->$action($request, $args, $user);
 
         if ( !is_array($results) ) {
             return false;
         }
 
-        $additional = array(
-            'token' => $this->token,
-            'user'  => $this->current_user
-        );
-
-        return $results + $additional;
+        return $results + compact('token', 'user');
     }
 
    /**

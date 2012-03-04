@@ -59,8 +59,8 @@ class Request extends Object {
      */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'data'    => array(),
-            'query'   => array()
+            'data'  => array(),
+            'query' => array()
         );
         parent::__construct($config + $defaults);
     }
@@ -72,8 +72,6 @@ class Request extends Object {
     *  @return void
     */
     protected function _init() {
-        parent::_init();
-
         $defaults = array(
             'CONTENT_TYPE'   => 'text/html',
             'REQUEST_METHOD' => 'GET'

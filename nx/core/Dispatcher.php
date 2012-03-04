@@ -30,7 +30,7 @@ class Dispatcher extends Object {
                 'router'  => 'nx\lib\Router'
             ),
             'dependencies' => array(
-                'view' => new nx\core\View()
+                //'view' => new \nx\core\View()
             )
         );
         parent::__construct($config + $defaults);

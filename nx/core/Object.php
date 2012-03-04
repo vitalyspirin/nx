@@ -54,7 +54,7 @@ class Object {
         $class = explode('\\', get_called_class());
         $this->_classname = array_pop($class);
 
-        if ( $this->_config['init'] ) {
+        if ( $this->_config['init'] && method_exists($this, '_init') ) {
             $this->_init();
         }
     }

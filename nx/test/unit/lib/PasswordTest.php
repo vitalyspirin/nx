@@ -1,6 +1,6 @@
 <?php
 
-namespace nx\test\lib;
+namespace nx\test\unit\lib;
 
 use nx\lib\Password;
 
@@ -10,13 +10,22 @@ class PasswordTest extends \PHPUnit_Framework_TestCase {
         $correct = 'test1234';
         $hash = Password::get_hash($correct);
         $check = Password::check($correct, $hash);
-        $this->assertTrue($check, 'Hashing a password and then checking it
-            does not return true!');
+        $this->assertTrue($check);
 
         $wrong = 'wrong!';
         $check = Password::check($wrong, $hash);
-        $this->assertFalse($check, 'Hashing a password and then checking it
-            with an incorrect password does not return false!');
+        $this->assertFalse($check);
+    }
+
+    public function test_GetRandomBytes_ReturnsRandomBytes() {
+        $check = 16;
+        $input = strlen(Password::get_random_bytes($check));
+        $this->assertEquals($check, $input);
+
+        // Use invalid entropy source
+        $check = 16;
+        $input = strlen(Password::get_random_bytes($check, '?'));
+        $this->assertEquals($check, $input);
     }
 
 }

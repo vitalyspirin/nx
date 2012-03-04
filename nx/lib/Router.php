@@ -118,6 +118,7 @@ class Router {
     *  @access public
     *  @return array
     */
+    /*
     public static function parse($url) {
         $matches = array();
         foreach ( self::$_routes as $pattern => $route ) {
@@ -130,6 +131,109 @@ class Router {
             }
         }
         return false;
+    }
+     */
+
+
+    public static function set_routes($routes) {
+        self::$_routes = $routes;
+    }
+
+    public static function parse($request_uri, $request_method) {
+        foreach ( self::$_routes as $route ) {
+            list($method, $uri, $callback) = $route;
+
+            if ( is_array($method) ) {
+                $found = false;
+                foreach ( $method as $value ) {
+                    if ( strcasecmp($request_method, $value) == 0 ) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if ( !$found ) {
+                    continue;
+                }
+            } elseif ( strcasecmp($request_method, $method) != 0 ) {
+                continue;
+            }
+
+            if ( is_null($uri) || $uri == '*' || $uri == '404' ) {
+                $args = array();
+                return compact('args', 'callback');
+            }
+
+            $route_to_match = '';
+            $len = strlen($uri);
+
+            for ( $i = 0; $i < $len; $i++ ) {
+                $char = $uri[$i];
+                $is_regex = (
+                    $char == '[' || $char == '(' || $char == '.'
+                    || $char == '?' || $char == '+' || $char == '{'
+                );
+                if ( $is_regex ) {
+                    $route_to_match = $uri;
+                    break;
+                } elseif (
+                    !isset($request_uri[$i]) || $char != $request_uri[$i]
+                ) {
+                    continue 2;
+                }
+                $route_to_match .= $char;
+            }
+
+            $regex = self::_compile_regex($route_to_match);
+            if ( preg_match($regex, $request_uri, $args) ) {
+                foreach ( $args as $key => $arg ) {
+                    if ( is_numeric($key) ) {
+                        unset($args[$key]);
+                    }
+                }
+                return compact('args', 'callback');
+            }
+        }
+        return array(
+            'args'     => null,
+            'callback' => null
+        );
+    }
+
+    protected static function _compile_regex($route) {
+        $pattern = '`(/|\.|)\[([^:\]]*+)(?::([^:\]]*+))?\](\?|)`';
+
+        if ( preg_match_all($pattern, $route, $matches, PREG_SET_ORDER) ) {
+            $match_types = array(
+                'i'  => '[0-9]++',
+                'a'  => '[0-9A-Za-z]++',
+                'h'  => '[0-9A-Fa-f]++',
+                '*'  => '.+?',
+                '**' => '.++',
+                ''   => '[^/]++'
+            );
+            foreach ( $matches as $match ) {
+                list($block, $pre, $type, $param, $optional) = $match;
+
+                if ( isset($match_types[$type]) ) {
+                    $type = $match_types[$type];
+                }
+                if ( $pre == '.' ) {
+                    $pre = '\.';
+                }
+                if ( $param ) {
+                    $param = '?<' . $param . '>';
+                }
+                if ( $optional ) {
+                    $optional = '?';
+                }
+
+                $replaced = '(?:' . $pre . '(' . $param . $type . '))'
+                    . $optional;
+
+                $route = str_replace($block, $replaced, $route);
+            }
+        }
+        return '`^' . $route . '$`';
     }
 
 }

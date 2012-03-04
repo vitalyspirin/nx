@@ -6,6 +6,7 @@ use nx\lib\Router;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
+    /*
     public function test_ParseUrl_ReturnsArray() {
         $query_string = '';
         $args = Router::parse($query_string);
@@ -156,6 +157,166 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($args, $check);
 
     }
+     */
+
+
+    public function test_Parse_ReturnsArray() {
+        $routes = array(
+            array('GET', '/', 'app\controller\Login::index'),
+            array('POST', '/', 'app\controller\Login::create'),
+            array('PUT', '/', 'app\controller\Login::update'),
+            array('GET', '/users', 'app\controller\User::index'),
+            array('GET', '/users/[i:id]', 'app\controller\User::index'),
+            array(array('GET', 'PUT'), '/name', 'app\controller\User::name'),
+            array('get', '/name/[a:name]', 'app\controller\User::name'),
+            array('delete', '/name/[h:id]', 'app\controller\User::name'),
+            array('get', '/phone/[a:type]', 'app\controller\User::phone'),
+        );
+        Router::set_routes($routes);
+
+        $request_uri = '/';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\Login::index'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/';
+        $request_method = 'POST';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\Login::create'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/';
+        $request_method = 'PUT';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\Login::update'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/users';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\User::index'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/users/37';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array('id' => '37'),
+            'callback' => 'app\controller\User::index'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/users/adfsfsk';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => null,
+            'callback' => null
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/name';
+        $request_method = 'PUT';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\User::name'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/name/john';
+        $request_method = 'POST';
+        $check = array(
+            'args'     => null,
+            'callback' => null
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/name/john';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array('name' => 'john'),
+            'callback' => 'app\controller\User::name'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/name/42?options=none';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => null,
+            'callback' => null
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/name/af0928';
+        $request_method = 'DELETE';
+        $check = array(
+            'args'     => array('id' => 'af0928'),
+            'callback' => 'app\controller\User::name'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/name/AJ';
+        $request_method = 'DELETE';
+        $check = array(
+            'args'     => null,
+            'callback' => null
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/phone';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\User::phone'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/phone/home';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array('type' => 'home'),
+            'callback' => 'app\controller\User::phone'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+
+
+
+        $catchall_route = array(
+            array('get', '*', 'app\controller\Error::show')
+        );
+        Router::set_routes(array_merge($routes, $catchall_route));
+
+        $request_uri = '/something/that/doesnt/exist';
+        $request_method = 'GET';
+        $check = array(
+            'args'     => array(),
+            'callback' => 'app\controller\Error::show'
+        );
+        $input = Router::parse($request_uri, $request_method);
+        $this->assertEquals($check, $input);
+    }
+
 
 }
 ?>

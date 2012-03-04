@@ -4,7 +4,7 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -22,8 +22,8 @@ class Password {
    /**
     *  Checks a password against a stored hash.
     *
-    *  @param string $password          The password to be checked.
-    *  @param string $stored_hash       The stored hash to be checked against.
+    *  @param string $password       The password to be checked.
+    *  @param string $stored_hash    The stored hash to be checked against.
     *  @access public
     *  @return bool
     */
@@ -33,14 +33,15 @@ class Password {
     }
 
    /**
-    *  Generates a salt.
+    *  Generates a salt based on an provided input.
     *
-    *  @param string $input             The input string upon which the salt will be based.
-    *  @access protected
+    *  @param string $input    The input.
+    *  @access public
     *  @return string
     */
-    protected static function _gensalt_blowfish($input) {
-        $itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    public static function gensalt_blowfish($input) {
+        $itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            . 'abcdefghijklmnopqrstuvwxyz0123456789';
         $iteration_count_log2 = 8;
 
         $output = '$2a$';
@@ -75,46 +76,39 @@ class Password {
    /**
     *  Gets the hash of a password.
     *
-    *  @param string $password          The password to be hashed.
+    *  @param string $password    The password to be hashed.
     *  @access public
     *  @return string
     */
     public static function get_hash($password) {
-        $random = self::_get_random_bytes(16);
-        $hash = crypt($password, self::_gensalt_blowfish($random));
-        if ( strlen($hash) == 60 ) {
-            return $hash;
-        }
-
-        return false;
+        $random = self::get_random_bytes(16);
+        return crypt($password, self::gensalt_blowfish($random));
     }
 
    /**
-    *  Gets random bytes - uses /dev/urandom if available,  falls back
+    *  Gets random bytes from a provided source if available, falls back
     *  to hashing microtime otherwise.
     *
-    *  @param int $count                The number of bytes to generate.
-    *  @access protected
+    *  @param int $count        The number of bytes to generate.
+    *  @param string $source    The source of entropy.
+    *  @access public
     *  @return string
     */
-    protected static function _get_random_bytes($count) {
+    public static function get_random_bytes($count, $source = '/dev/urandom') {
         $output = '';
-        $random_state = microtime() . getmypid();
-        if ( is_readable('/dev/urandom') && ($fh = @fopen('/dev/urandom', 'rb')) ) {
+        if ( is_readable($source) && ($fh = @fopen($source, 'rb')) ) {
             $output = fread($fh, $count);
             fclose($fh);
+            return $output;
         }
 
-        if ( strlen($output) < $count ) {
-            $output = '';
-            for ( $i = 0; $i < $count; $i += 16 ) {
-                $random_state = hash('sha256', microtime() . $random_state);
-                $output .= pack('H*', hash('sha256', $random_state));
-            }
-            $output = substr($output, 0, $count);
+        $output = '';
+        $random_state = microtime() . getmypid();
+        for ( $i = 0; $i < $count; $i += 16 ) {
+            $random_state = hash('sha256', microtime() . $random_state);
+            $output .= pack('H*', hash('sha256', $random_state));
         }
-
-        return $output;
+        return substr($output, 0, $count);
     }
 
 }
