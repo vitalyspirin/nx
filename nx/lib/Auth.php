@@ -4,7 +4,7 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -19,16 +19,6 @@ namespace nx\lib;
  *  @package lib
  */
 class Auth {
-
-   /**
-    *  The configuration settings.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected static $_config = array(
-        'gc_collect' => 3600
-    );
 
    /**
     *  Creates a unique token for a given session.
@@ -61,7 +51,7 @@ class Auth {
     */
     public static function garbage_collect($tokens, $expiration = null) {
         if ( is_null($expiration) ) {
-            $expiration = self::$_config['gc_collect'];
+            $expiration = 3600;
         }
 
         foreach ( $tokens as $timestamp => $token ) {

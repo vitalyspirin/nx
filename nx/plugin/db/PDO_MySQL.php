@@ -45,14 +45,12 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Loads the configuration settings for a MySQL connection.
     *
-    *  @param array $config         The configuration settings,
-    *                               which can take four options:
-    *                               `database` - The name of the database.
-    *                               `host`     - The database host.
-    *                               `username` - The database username.
-    *                               `password` - The database password.
-    *                               (By default, instances are
-    *                               destroyed at the end of the request.)
+    *  @param array $config    The configuration settings, which can take
+    *                          four options:
+    *                          'database' - The name of the database.
+    *                          'host'     - The database host.
+    *                          'username' - The database username.
+    *                          'password' - The database password.
     *  @access public
     *  @return void
     */
@@ -84,17 +82,18 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Connects and selects database.
     *
-    *  @param array $options       Contains the connection information.
-    *                              Takes the following options:
-    *                              `database` - The name of the database.
-    *                              `host`     - The database host.
-    *                              `username` - The database username.
-    *                              `password` - The database password.
+    *  @param array $options    Contains the connection information.  Takes the
+    *                           following options:
+    *                           'database' - The name of the database.
+    *                           'host'     - The database host.
+    *                           'username' - The database username.
+    *                           'password' - The database password.
     *  @access public
     *  @return bool
     */
     public function connect($options) {
-        $dsn = 'mysql:host=' . $options['host'] . ';dbname=' . $options['database'];
+        // TODO: Add port
+        $dsn = "mysql:host={$options['host']};dbname={$options['database']}";
         try {
             $this->_dbh = new \PDO($dsn, $options['username'], $options['password']);
             $this->_dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -129,23 +128,20 @@ class PDO_MySQL extends \nx\core\Object {
     }
 
    /**
-    *  Performs a `SELECT COUNT(*) FROM` query.
+    *  Performs a 'SELECT COUNT(*) FROM' query.
     *
-    *  @see /nx/plugin/db/PDO_MySQL->query()
-    *  @see /nx/plugin/db/PDO_MySQL->fetch()
-    *  @see /nx/plugin/db/PDO_MySQL->_format_where()
-    *  @param string $table         The table to SELECT from.
-    *  @param string|array $where   The WHERE clause of the SQL query.
-    *  @param string $additional    Any additional SQL to be added at
-    *                               the end of the query.
+    *  @param string $table          The table to SELECT from.
+    *  @param string|array $where    The WHERE clause of the SQL query.
+    *  @param string $additional     Any additional SQL to be added at the end
+    *                                of the query.
     *  @access public
     *  @return int
     */
     public function count($table, $where = null, $additional = null) {
-        $sql = 'SELECT COUNT(*) FROM ' . '`' . $table . '`';
+        $sql = "SELECT COUNT(*) FROM {$table}";
         $sql .= $this->_format_where($where);
         if ( !is_null($additional) ) {
-            $sql .= ' ' . $additional;
+            $sql .= " {$additional}";
         }
 
         $this->query($sql, $where);
@@ -156,9 +152,10 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Deletes a record from the database.
     *
-    *  @see /nx/plugin/db/PDO_MySQL->_format_where()
-    *  @param string $table         The table containing the record to be deleted.
-    *  @param string|array $where   The WHERE clause to be included in the DELETE query.
+    *  @param string $table          The table containing the record to be
+    *                                deleted.
+    *  @param string|array $where    The WHERE clause to be included in the
+    *                                DELETE query.
     *  @access public
     *  @return bool
     */
@@ -167,7 +164,7 @@ class PDO_MySQL extends \nx\core\Object {
             return false;
         }
 
-        $sql = 'DELETE FROM `' . $table . '`';
+        $sql = "DELETE FROM {$table}";
 
         $sql .= $this->_format_where($where);
 
@@ -182,9 +179,9 @@ class PDO_MySQL extends \nx\core\Object {
     *  Fetches the next row from the result set in memory (i.e., the one
     *  that was created after running query()).
     *
-    *  @param string $fetch_style   Controls how the rows will be returned.
-    *  @param obj $obj              The object to be fetched into if
-    *                               $fetch_style is set to 'into'.
+    *  @param string $fetch_style    Controls how the rows will be returned.
+    *  @param obj $obj               The object to be fetched into if
+    *                                $fetch_style is set to 'into'.
     *  @access public
     *  @return mixed
     */
@@ -198,7 +195,7 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Returns an array containing all of the result set rows.
     *
-    *  @param string $fetch_style   Controls how the rows will be returned.
+    *  @param string $fetch_style    Controls how the rows will be returned.
     *  @access public
     *  @return mixed
     */
@@ -225,22 +222,19 @@ class PDO_MySQL extends \nx\core\Object {
     }
 
    /**
-    *  Performs a `SELECT FROM` query.
+    *  Performs a 'SELECT FROM' query.
     *
-    *  @see /nx/plugin/db/PDO_MySQL->query()
-    *  @see /nx/plugin/db/PDO_MySQL->fetch()
-    *  @see /nx/plugin/db/PDO_MySQL->_format_where()
-    *  @param string|array $fields  The fields to be retrieved.
-    *  @param string $table         The table to SELECT from.
-    *  @param array $clauses        Any SQL clauses to be added to
-    *                               the query.  Takes the following keys:
-    *                               'where'    - string|array (mandatory)
-    *                               'distinct' - true|false
-    *                               'limit'    - int
-    *                               'offset'   - int
-    *                               'order_by' - string
-    *                               'group_by' - string
-    *                               'having'   - string
+    *  @param string|array $fields    The fields to be retrieved.
+    *  @param string $table           The table to SELECT from.
+    *  @param array $clauses          Any SQL clauses to be added to
+    *                                 the query.  Takes the following keys:
+    *                                 'where'    - string|array
+    *                                 'distinct' - true|false
+    *                                 'limit'    - int
+    *                                 'offset'   - int
+    *                                 'order_by' - string
+    *                                 'group_by' - string
+    *                                 'having'   - string
     *  @access public
     *  @return bool
     */
@@ -251,12 +245,12 @@ class PDO_MySQL extends \nx\core\Object {
         }
 
         if ( is_array($fields) ) {
-            $sql .= '`' . implode('`, `', $fields) . '`';
+            $sql .= implode(', ', $fields);
         } else {
             $sql .= $fields;
         }
 
-        $sql .= ' FROM `' . $table . '`';
+        $sql .= " FROM {$table}";
         if ( isset($clauses['where']) ) {
             $sql .= $this->_format_where($clauses['where']);
         } else {
@@ -264,19 +258,19 @@ class PDO_MySQL extends \nx\core\Object {
         }
 
         if ( isset($clauses['limit']) && is_int($clauses['limit']) ) {
-            $sql .= ' LIMIT ' . $clauses['limit'];
+            $sql .= " LIMIT {$clauses['limit']}";
         }
         if ( isset($clauses['offset']) && is_int($clauses['offset']) ) {
-            $sql .= ' OFFSET ' . $clauses['offset'];
+            $sql .= " OFFSET {$clauses['offset']}";
         }
         if ( isset($clauses['order_by']) ) {
-            $sql .= ' ORDER BY ' . $clauses['order_by'];
+            $sql .= " ORDER BY {$clauses['order_by']}";
         }
         if ( isset($clauses['group_by']) ) {
-            $sql .= ' GROUP BY ' . $clauses['group_by'];
+            $sql .= " GROUP BY {$clauses['group_by']}";
         }
         if ( isset($clauses['having']) ) {
-            $sql .= ' HAVING ' . $clauses['having'];
+            $sql .= " HAVING {$clauses['having']}";
         }
         return $this->query($sql, $clauses['where']);
     }
@@ -285,13 +279,13 @@ class PDO_MySQL extends \nx\core\Object {
     *  Parses a WHERE clause, which can be of any of the following formats:
     *
     *  $where = 'id = 3';
-    *  (produces ` WHERE id = 3`)
+    *  (produces ' WHERE id = 3')
     *
     *  $where = array(
     *      'id'       => 3,
     *      'username' => 'test'
     *  );
-    *  (produces ` WHERE id = 3 and username = 'test'`)
+    *  (produces ' WHERE id = 3 and username = "test"')
     *
     *  $where = array(
     *      'id' => array(
@@ -300,9 +294,9 @@ class PDO_MySQL extends \nx\core\Object {
     *      ),
     *      'username' => 'test'
     *  );
-    *  (produces ` WHERE id >= 20 and id < 30 and username = 'test'`)
+    *  (produces ' WHERE id >= 20 and id < 30 and username = "test"')
     *
-    *  @param string|array $where   The clause to be parsed.
+    *  @param string|array $where    The clause to be parsed.
     *  @access protected
     *  @return string
     */
@@ -322,7 +316,7 @@ class PDO_MySQL extends \nx\core\Object {
         $bindings = $where;
         foreach ( $bindings as $name => $val ) {
             if ( is_string($val) || is_numeric($val) ) {
-                $sql .= '`' . $name . '`=:' . $name . ' and ';
+                $sql .= "{$name}=:{$name} and ";
             } elseif ( is_array($val) ) {
                 foreach ( $val as $sign => $constraint ) {
 
@@ -332,13 +326,13 @@ class PDO_MySQL extends \nx\core\Object {
                             continue;
                         }
 
-                        $sql .=  '`' . $name . '` ';
+                        $sql .= "{$name} ";
                         $list = '';
                         foreach ( $constraint as $item ) {
                             do {
-                                $new_name = $name . '__' . rand();
+                                $new_name = "{$name}__" . rand();
                             } while ( isset($where[$new_name]) );
-                            $list .= ':' . $new_name . ',';
+                            $list .= ":{$new_name},";
                             $where[$new_name] = $item;
                         }
                         $list = rtrim($list, ',');
@@ -346,7 +340,7 @@ class PDO_MySQL extends \nx\core\Object {
                         switch ( $sign ) {
                             case 'in':
                             case 'not in':
-                                $sql .= $sign . ' (' . $list . ')';
+                                $sql .= "{$sign} ({$list})";
                                 break;
                         }
                         $sql .= ' and ';
@@ -355,9 +349,9 @@ class PDO_MySQL extends \nx\core\Object {
                         continue;
                     }
 
-                    $sql .=  '`' . $name . '` ';
+                    $sql .= "{$name} ";
                     do {
-                        $new_name = $name .  '__' . rand();
+                        $new_name = "{$name}__" . rand();
                     } while ( isset($where[$new_name]) );
                     switch ( $sign ) {
                         case 'like':
@@ -365,15 +359,15 @@ class PDO_MySQL extends \nx\core\Object {
                             break;
                         case 'like%':
                             $sql .= 'like ';
-                            $constraint = $constraint . '%';
+                            $constraint = "{$constraint}%";
                             break;
                         case '%like':
                             $sql .= 'like ';
-                            $constraint = '%' . $constraint;
+                            $constraint = "%{$constraint}";
                             break;
                         case '%like%':
                             $sql .= 'like ';
-                            $constraint = '%' . $constraint . '%';
+                            $constraint = "%{$constraint}%";
                             break;
                         case 'gt':
                             $sql .= '>';
@@ -395,7 +389,7 @@ class PDO_MySQL extends \nx\core\Object {
                             $sql .= '=';
                             break;
                     }
-                    $sql .= ':' . $new_name . ' and ';
+                    $sql .= ":{$new_name} and ";
                     $where[$new_name] = $constraint;
                     unset($where[$name]);
                 }
@@ -409,22 +403,21 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Inserts a record into the database.
     *
-    *  @param string $table         The table containing the record to be
-    *                               inserted.
-    *  @param array $data           An array containing the data to be inserted.
-    *                               Format should be as follows:
-    *                               array('column_name' => 'column_value');
+    *  @param string $table    The table containing the record to be inserted.
+    *  @param array $data      An array containing the data to be inserted.
+    *                          Format should be as follows:
+    *                          array('column_name' => 'column_value');
     *  @access public
     *  @return bool
     */
     public function insert($table, $data) {
-        $sql = 'INSERT INTO `' . $table . '` ';
+        $sql = "INSERT INTO {$table} ";
 
         $key_names = array_keys($data);
-    	$fields = '`' . implode('`, `', $key_names) . '`';
+    	$fields = implode(', ', $key_names);
         $values = ':' . implode(', :', $key_names);
 
-    	$sql .= '(' . $fields . ') VALUES (' . $values . ')';
+    	$sql .= "({$fields}) VALUES ({$values})";
 
     	$statement = $this->_dbh->prepare($sql);
 
@@ -465,8 +458,9 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Executes SQL query.
     *
-    *  @param string $sql           The SQL query to be executed.
-    *  @param array $parameters     An array containing the parameters to be bound.
+    *  @param string $sql          The SQL query to be executed.
+    *  @param array $parameters    An array containing the parameters to be
+    *                              bound.
     *  @access public
     *  @return bool
     */
@@ -495,8 +489,9 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Sets the fetch mode.
     *
-    *  @param string $fetch_style   Controls how the rows will be returned.
-    *  @param obj $obj              The object to be fetched into for use with FETCH_INTO.
+    *  @param string $fetch_style    Controls how the rows will be returned.
+    *  @param obj $obj               The object to be fetched into for use with
+    *                                FETCH_INTO.
     *  @access protected
     *  @return int
     */
@@ -529,20 +524,20 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Updates a record in the database.
     *
-    *  @param string $table         The table containing the record to be inserted.
-    *  @param array $data           An array containing the data to be inserted. Format
-    *                               should be as follows:
-    *                               array('column_name' => 'column_value');
-    *  @param array $where          The WHERE clause of the SQL query.
+    *  @param string $table    The table containing the record to be inserted.
+    *  @param array $data      An array containing the data to be inserted.
+    *                          Format should be as follows:
+    *                          array('column_name' => 'column_value');
+    *  @param array $where     The WHERE clause of the SQL query.
     *  @access public
     *  @return bool
     */
     public function update($table, $data, $where = null) {
-        $sql = 'UPDATE `' . $table . '` SET ';
+        $sql = "UPDATE {$table} SET ";
 
         $key_names = array_keys($data);
     	foreach ( $key_names as $name ) {
-            $sql .= '`' . $name . '`=:' . $name . ', ';
+            $sql .= "{$name}=:{$name}, ";
     	}
 
         $sql = rtrim($sql, ', ');
@@ -550,8 +545,8 @@ class PDO_MySQL extends \nx\core\Object {
         if ( !is_null($where) ) {
     	    $sql .= ' WHERE ';
             foreach ( $where as $name => $val ) {
-                $sql .= '`' . $name . '`=:' . $name . '_where, ';
-                $data[$name . '_where'] = $val;
+                $sql .= "{$name}=:{$name}_where, ";
+                $data["{$name}_where"] = $val;
             }
         }
     	$statement = $this->_dbh->prepare($sql);
@@ -571,25 +566,25 @@ class PDO_MySQL extends \nx\core\Object {
    /**
     *  Inserts or updates (if exists) a record in the database.
     *
-    *  @param string $table         The table containing the record to be inserted.
-    *  @param array $data           An array containing the data to be inserted. Format
-    *                               should be as follows:
-    *                               array('column_name' => 'column_value');
+    *  @param string $table    The table containing the record to be inserted.
+    *  @param array $data      An array containing the data to be inserted.
+    *                          Format should be as follows:
+    *                          array('column_name' => 'column_value');
     *  @access public
     *  @return bool
     */
     public function upsert($table, $data) {
-        $sql = 'INSERT INTO `' . $table . '` ';
+        $sql = "INSERT INTO {$table}";
 
         $key_names = array_keys($data);
-    	$fields = '`' . implode('`, `', $key_names) . '`';
+    	$fields = implode(', ', $key_names);
         $values = ':' . implode(', :', $key_names);
 
 
-        $sql .= '(' . $fields . ') VALUES (' . $values . ') ON DUPLICATE KEY UPDATE ';
+        $sql .= "({$fields}) VALUES ({$values}) ON DUPLICATE KEY UPDATE ";
 
     	foreach ( $key_names as $name ) {
-            $sql .= '`' . $name . '`=:' . $name . ', ';
+            $sql .= "{$name}=:{$name}, ";
     	}
 
         $sql = rtrim($sql, ', ');

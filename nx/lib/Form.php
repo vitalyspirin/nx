@@ -68,27 +68,6 @@ class Form {
     }
 
    /**
-    * Creates a link relation for CSS.  Note that this method appends
-    * the version number (if it was supplied to the constructor) to
-    * the href (so as to prevent browser caching).
-    *
-    * @param array $attributes    The HTML attributes.
-    * @access public
-    * @return string
-    */
-    public static function css($attributes) {
-        $html = "<link rel='stylesheet' ";
-        // TODO: Use MD5 of contents, or other caching mechanism (see compiler)
-        if ( !is_null($this->_config['version']) && isset($attributes['href']) ) {
-            $attributes['href'] .= '?v=' . $this->_config['version'];
-        }
-        $html .= self::_parse_attributes($attributes);
-        $html .= "/>";
-
-        return $html;
-    }
-
-   /**
     * Creates an email textbox.
     *
     * @param array $attributes    The HTML attributes.

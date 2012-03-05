@@ -43,6 +43,14 @@ class Request extends Object {
     public $query = array();
 
    /**
+    *  The parameters parsed from the request url.
+    *
+    *  @var array
+    *  @access public
+    */
+    public $params;
+
+   /**
     *  The url of the request.
     *
     *  @var string
@@ -98,10 +106,11 @@ class Request extends Object {
 
         $this->url = $parsed['path'];
 
-        $query_string = rawurldecode(str_replace('%20', '+', $parsed['query']));
         $query = array();
-        parse_str($query_string, $query);
-
+        if ( isset($parsed['query']) ) {
+            $query_string = str_replace('%20', '+', $parsed['query']);
+            parse_str(rawurldecode($query_string), $query);
+        }
         $this->query = $this->_config['query'] + $query;
 
         $this->data = $this->_config['data'];

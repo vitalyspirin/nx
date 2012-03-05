@@ -4,7 +4,7 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -76,8 +76,8 @@ class Router {
             }
 
             if ( is_null($uri) || $uri == '*' || $uri == '404' ) {
-                $args = array();
-                return compact('args', 'callback');
+                $params = array();
+                return compact('params', 'callback');
             }
 
             $route_to_match = '';
@@ -101,17 +101,17 @@ class Router {
             }
 
             $regex = self::_compile_regex($route_to_match);
-            if ( preg_match($regex, $request_uri, $args) ) {
-                foreach ( $args as $key => $arg ) {
+            if ( preg_match($regex, $request_uri, $params) ) {
+                foreach ( $params as $key => $arg ) {
                     if ( is_numeric($key) ) {
-                        unset($args[$key]);
+                        unset($params[$key]);
                     }
                 }
-                return compact('args', 'callback');
+                return compact('params', 'callback');
             }
         }
         return array(
-            'args'     => null,
+            'params'     => null,
             'callback' => null
         );
     }

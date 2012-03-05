@@ -83,8 +83,8 @@ class View extends Object {
         }
 
         $compiler = $this->_config['libs']['compiler'];
-        $options = array('path' => "{$root}/app/resource/cache/");
-        $template = $compiler::compile($file, $options);
+        $path = "{$root}/app/resource/cache/";
+        $template = $compiler::compile($file, $path);
 
         ob_start();
         require $template;

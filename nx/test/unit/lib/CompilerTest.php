@@ -10,8 +10,9 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     protected $_file;
 
     public function setUp() {
-        $this->_compiled_dir = dirname(__FILE__) . '/compiled/';
-        $this->_file = dirname(__FILE__) . '/test.html';
+        $dir = dirname(dirname(dirname(__FILE__)));
+        $this->_compiled_dir = "{$dir}/resource/cache/";
+        $this->_file = "{$dir}/resource/test.html";
         $contents = "<html>
     <body>
         <?=\$hello;?>
@@ -38,13 +39,13 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
 
     public function test_CompileFile_ReturnsFileLocation() {
         $path = $this->_compiled_dir;
-        $result = Compiler::compile($this->_file, compact('path'));
+        $result = Compiler::compile($this->_file, $path);
         $this->assertTrue(file_exists($result));
     }
 
     public function test_CompileFile_ReturnsCompiledContents() {
         $path = $this->_compiled_dir;
-        $result = Compiler::compile($this->_file, compact('path'));
+        $result = Compiler::compile($this->_file, $path);
         $result = file_get_contents($result);
         $check = "<html>
     <body>
@@ -63,18 +64,18 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     public function test_CompileFile_HitsCache() {
         $path = $this->_compiled_dir;
 
-        $first = Compiler::compile($this->_file, compact('path'));
+        $first = Compiler::compile($this->_file, $path);
         $first_glob = glob($this->_compiled_dir . '/*');
 
         clearstatcache();
-        $cached = Compiler::compile($this->_file, compact('path'));
+        $cached = Compiler::compile($this->_file, $path);
         $second_glob = glob($this->_compiled_dir . '/*');
         $this->assertEquals($cached, $first);
         $this->assertEquals($first_glob, $second_glob);
 
         file_put_contents($this->_file, 'Some new stuff');
         clearstatcache();
-        $new = Compiler::compile($this->_file, compact('path'));
+        $new = Compiler::compile($this->_file, $path);
         $new_glob = glob($this->_compiled_dir . '/*');
 
         $this->assertNotEquals($cached, $new);

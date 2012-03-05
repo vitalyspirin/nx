@@ -48,7 +48,6 @@ class Dispatcher extends Object {
         $router = $this->_config['libs']['router'];
         $url = $request->url;
         $method = $request->get_env('REQUEST_METHOD');
-        die(var_dump($request));
 
         $parsed = $router::parse($url, $method);
         if ( is_null($parsed['callback']) ) {
@@ -56,14 +55,12 @@ class Dispatcher extends Object {
             return $this->throw_404($template);
         }
 
-        // TODO: Fix this?  Depends on what $_GET pulls in
-        // $request->query = $parsed['query'] + $request->query;
-        // TODO: Merge in $parsed['args'] into $request
-
         list($controller, $action) = explode('::', $parsed['callback']);
         if ( !class_exists($controller) ) {
             return $this->throw_404($template);
         }
+
+        $request->params = $parsed['params'];
 
         $controller = new $controller();
         $results = $controller->call($action, $request);
