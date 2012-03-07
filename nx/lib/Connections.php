@@ -19,20 +19,20 @@ namespace nx\lib;
 class Connections {
 
    /**
-    *  The cache handler.
+    *  The collection of cache handlers.
     *
     *  @var array
     *  @access protected
     */
-    protected static $_cache;
+    protected static $_cache = array();
 
    /**
-    *  The database handler.
+    *  The collection of database handlers.
     *
     *  @var array
     *  @access protected
     */
-    protected static $_db;
+    protected static $_db = array();
 
    /**
     *  The initialization status of the handlers.
@@ -41,8 +41,8 @@ class Connections {
     *  @access protected
     */
     protected static $_initialized = array(
-        'cache' => false,
-        'db'    => false
+        'cache' => array(),
+        'db'    => array()
     );
 
    /**
@@ -55,53 +55,6 @@ class Connections {
         'cache' => array(),
         'db'    => array()
     );
-
-   /**
-    *  Returns the cache handler.
-    *
-    *  @access public
-    *  @return object
-    */
-    public static function get_cache() {
-        if ( !self::$_options['cache']['enabled'] ) {
-            return false;
-        }
-
-        if ( !self::$_initialized['cache'] ) {
-            $plugin = self::$_options['cache']['plugin'];
-            $cache = 'nx\plugin\cache\\' . $plugin;
-
-            $options = self::$_options['cache'];
-            unset($options['enabled']);
-            unset($options['plugin']);
-            self::$_cache = new $cache($options);
-
-            self::$_initialized['cache'] = true;
-        }
-
-        return self::$_cache;
-    }
-
-   /**
-    *  Returns the database handler.
-    *
-    *  @access public
-    *  @return object
-    */
-    public static function get_db() {
-        if ( !self::$_initialized['db'] ) {
-            $plugin = self::$_options['db']['plugin'];
-            $db = 'nx\plugin\db\\' . $plugin;
-
-            $options = self::$_options['db'];
-            unset($options['plugin']);
-            self::$_db = new $db($options);
-
-            self::$_initialized['db'] = true;
-        }
-
-        return self::$_db;
-    }
 
    /**
     *  Stores the cache connection details using the defined options.
@@ -125,9 +78,11 @@ class Connections {
     *  @access public
     *  @return void
     */
-    public static function set_cache($config = array()) {
-        self::$_options['cache'] = $config;
-        self::$_initialized['cache'] = false;
+    public static function add_cache($config = array()) {
+        foreach ( $config as $name => $options ) {
+            self::$_options['cache'][$name] = $options;
+            self::$_initialized['cache'][$name] = false;
+        }
     }
 
    /**
@@ -148,9 +103,60 @@ class Connections {
     *  @access public
     *  @return void
     */
-    public static function set_db($config = array()) {
-        self::$_options['db'] = $config;
-        self::$_initialized['db'] = false;
+    public static function add_db($config = array()) {
+        foreach ( $config as $name => $options ) {
+            self::$_options['db'][$name] = $options;
+            self::$_initialized['db'][$name] = false;
+        }
+    }
+
+   /**
+    *  Returns the cache handler.
+    *
+    *  @param string $name    The name of the cache handler.
+    *  @access public
+    *  @return object
+    */
+    public static function get_cache($name) {
+        if ( !self::$_options['cache'][$name]['enabled'] ) {
+            return false;
+        }
+
+        if ( !self::$_initialized['cache'][$name] ) {
+            $plugin = self::$_options['cache'][$name]['plugin'];
+            $cache = 'nx\plugin\cache\\' . $plugin;
+
+            $options = self::$_options['cache'][$name];
+            unset($options['enabled']);
+            unset($options['plugin']);
+            self::$_cache[$name] = new $cache($options);
+
+            self::$_initialized['cache'][$name] = true;
+        }
+
+        return self::$_cache[$name];
+    }
+
+   /**
+    *  Returns the database handler.
+    *
+    *  @param string $name    The name of the database handler.
+    *  @access public
+    *  @return object
+    */
+    public static function get_db($name) {
+        if ( !self::$_initialized['db'][$name] ) {
+            $plugin = self::$_options['db'][$name]['plugin'];
+            $db = 'nx\plugin\db\\' . $plugin;
+
+            $options = self::$_options['db'][$name];
+            unset($options['plugin']);
+            self::$_db[$name] = new $db($options);
+
+            self::$_initialized['db'][$name] = true;
+        }
+
+        return self::$_db[$name];
     }
 }
 

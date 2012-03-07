@@ -71,10 +71,10 @@ class Compiler {
                 '<?php echo $this->$1; ?>',
 
             '/\$e\((.+?)\)\s*;/msx'                 =>
-                'echo $this->_form->escape($1);',
+                'echo $this->form->escape($1);',
 
             '/\<\?=\s*(.+?)\s*;?\s*\?>/msx'         =>
-                '<?php echo $this->_form->escape($1); ?>'
+                '<?php echo $this->form->escape($1); ?>'
         );
 
         return preg_replace(

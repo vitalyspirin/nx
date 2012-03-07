@@ -17,7 +17,7 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
     <body>
         <?=\$hello;?>
         <?=str_replace('hi', 'howdy', \$hello);?>
-        <?=\$this->_form->email(array('class' => 'test'));?>
+        <?=\$this->form->email(array('class' => 'test'));?>
         <?php foreach ( \$items as \$item ) {
             \$e(\$item);
         } ?>
@@ -49,11 +49,11 @@ class CompilerTest extends \PHPUnit_Framework_TestCase {
         $result = file_get_contents($result);
         $check = "<html>
     <body>
-        <?php echo \$this->_form->escape(\$hello); ?>
-        <?php echo \$this->_form->escape(str_replace('hi', 'howdy', \$hello)); ?>
-        <?php echo \$this->_form->email(array('class' => 'test')); ?>
+        <?php echo \$this->form->escape(\$hello); ?>
+        <?php echo \$this->form->escape(str_replace('hi', 'howdy', \$hello)); ?>
+        <?php echo \$this->form->email(array('class' => 'test')); ?>
         <?php foreach ( \$items as \$item ) {
-            echo \$this->_form->escape(\$item);
+            echo \$this->form->escape(\$item);
         } ?>
         <?php echo \$hello; ?>
     </body>

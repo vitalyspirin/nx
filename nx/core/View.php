@@ -44,11 +44,16 @@ class View extends Object {
     *  @return void
     */
     public function __construct(array $config = array()) {
+        $root = dirname(dirname(__DIR__));
         $defaults = array(
             'libs'   => array(
                 'compiler' => 'nx\lib\Compiler',
                 'form'     => 'nx\lib\Form',
                 'library'  => 'nx\lib\Library'
+            ),
+            'paths' => array(
+                'cache' => "{$root}/app/resource/cache/",
+                'view'  => "{$root}/app/view/"
             )
         );
 
@@ -75,34 +80,18 @@ class View extends Object {
     *  @return string
     */
     public function render($file, $vars = null) {
-        $root = dirname(dirname(__DIR__));
-        $file = "{$root}/app/view/{$file}.html";
+        $file = "{$this->_config['paths']['view']}{$file}.html";
 
         if ( is_array($vars) ) {
             extract($vars);
         }
 
         $compiler = $this->_config['libs']['compiler'];
-        $path = "{$root}/app/resource/cache/";
-        $template = $compiler::compile($file, $path);
+        $cache_path = $this->_config['paths']['cache'];
+        $template = $compiler::compile($file, $cache_path);
 
         ob_start();
         require $template;
-        return ob_get_clean();
-    }
-
-   /**
-    *  Renders a 404 page.
-    *
-    *  @access public
-    *  @return void
-    */
-    public function throw_404() {
-        $library = $this->_config['classes']['library'];
-        $path = $library::get('path', 'view');
-
-        ob_start();
-        require $path . $this->_config['template']  . '/404.html';
         return ob_get_clean();
     }
 
