@@ -37,8 +37,8 @@ class Controller extends Object {
     public function __construct(array $config = array()) {
         $defaults = array(
             'dependencies' => array(
-                'session' => new \app\model\Session(),
-                'user'    => new \app\model\User()
+                'response' => new \nx\core\Response(),
+                'session'  => new \nx\core\Session()
             ),
             'libs' => array(
                 'auth' => 'nx\lib\Auth'
@@ -48,9 +48,7 @@ class Controller extends Object {
     }
 
    /**
-    *  Initializes the controller with http request data,
-    *  generates a token to be used to ensure that the next request is valid,
-    *  and loads a user object if a valid session is found.
+    *  Makes the session object publicly available.
     *
     *  @access protected
     *  @return void
@@ -77,20 +75,15 @@ class Controller extends Object {
         $auth = $this->_config['libs']['auth'];
         $token = $auth::create_token();
 
-        $user = null;
-        if ( $this->session->is_logged_in() ) {
-            $user = $this->_config['dependencies']['user'];
-            $id = $this->session->get_user_id();
-            $user = $user->load_by_primary_key($id);
-        }
-
-        $results = $this->$action($request, $user);
+        $response = $this->_config['dependencies']['response'];
+        // TODO: Fix this to handle response
+        $results = $this->$action($request, $response);
 
         if ( !is_array($results) ) {
             return false;
         }
 
-        return $results + compact('token', 'user');
+        return $results + compact('token');
     }
 
    /**

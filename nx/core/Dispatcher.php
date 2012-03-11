@@ -89,7 +89,8 @@ class Dispatcher extends Object {
     public function throw_404($template) {
         $view = $this->_config['classes']['view'];
         $view = new $view(compact('template'));
-        return $view->throw_404();
+        // TODO: Fix this
+        //return $view->throw_404();
     }
 
 }

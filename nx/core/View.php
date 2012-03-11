@@ -21,14 +21,6 @@ namespace nx\core;
 class View extends Object {
 
    /**
-    *  The environment.
-    *
-    *  @var string
-    *  @access public
-    */
-    public $env;
-
-   /**
     *  The form helper object.
     *
     *  @var object
