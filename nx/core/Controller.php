@@ -77,12 +77,13 @@ class Controller extends Object {
 
         $response = $this->_config['dependencies']['response'];
         // TODO: Fix this to handle response
-        $results = $this->$action($request, $response);
+        $response = $this->$action($request, $response);
 
-        if ( !is_array($results) ) {
+        if ( !$response ) {
             return false;
         }
 
+        // TODO: Fix this
         return $results + compact('token');
     }
 
@@ -133,6 +134,12 @@ class Controller extends Object {
     public function redirect($page) {
         header('Location: ' . $page);
         exit;
+    }
+
+    public function to_json($array) {
+        $options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
+            | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
+        return json_encode($array, $options);
     }
 
 }

@@ -63,17 +63,18 @@ class Dispatcher extends Object {
         $request->params = $parsed['params'];
 
         $controller = new $controller();
-        $results = $controller->call($action, $request);
-        if ( !is_array($results) ) {
-            return $this->throw_404($template);
+        $response = $controller->call($action, $request);
+        // TODO: Fix this
+        // Allow for $response->set_404();
+        if ( !$response ) {
+            return $this->throw_404();
         }
 
         if ( $request->is('ajax') ) {
-            $options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
-                | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
-            return json_encode($results, $options);
+            return $response;
         }
 
+        // TODO: Fix this
         $view = $this->_config['dependencies']['view'];
         $file = lcfirst($controller->classname()) . "/{$action}";
         return $view->render($file, $results);
