@@ -3,28 +3,7 @@
 namespace nx\test\unit\lib;
 
 use nx\lib\Form;
-
-class ModelMock {
-    protected $id;
-    protected $test_name = 'test value';
-
-    public function __get($property) {
-        return $this->$property;
-    }
-
-    public function classname() {
-        return 'ModelMock';
-    }
-
-    public function get_primary_key() {
-        return $this->id;
-    }
-
-    public function set_id($val) {
-        $this->id = $val;
-    }
-
-}
+use nx\test\mock\lib\ModelMock;
 
 class FormTest extends \PHPUnit_Framework_TestCase {
 

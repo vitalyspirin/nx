@@ -11,7 +11,7 @@
 namespace nx\lib;
 
 /*
- *  The `Connections` class contains methods that assist
+ *  The 'Connections' class contains methods that assist
  *  in accessing database and cache connections.
  *
  *  @package lib
@@ -61,20 +61,17 @@ class Connections {
     *
     *  @see app\config\bootstrap\cache.php
     *  @param array $options    The cache configuration.  Should be of the
-    *                           following format: `key` => `value`,
-    *                           where `key` is the name of the configuration
+    *                           following format: 'key' => 'value',
+    *                           where 'key' is the name of the configuration
     *                           (i.e., 'development', 'test', 'production'),
-    *                           and `value` is an array which can take
+    *                           and 'value' is an array which can take
     *                           the following parameters:
-    *                           `enabled`       - Whether or not the
+    *                           'enabled'       - Whether or not the
     *                                             plugin should be used.
-    *                           `plugin`        - The name of the cache
+    *                           'plugin'        - The name of the cache
     *                                             plugin.
-    *                           `host`          - The hostname of the server
+    *                           'host'          - The hostname of the server
     *                                             where the cache resides.
-    *                           `persistent_id` - A unique ID used to allow
-    *                                             persistence between
-    *                                             requests.
     *  @access public
     *  @return void
     */
@@ -90,16 +87,16 @@ class Connections {
     *
     *  @see app\config\bootstrap\db.php
     *  @param array $config    The database configuration.  Should be of
-    *                          the following format: `key` => `value`,
-    *                          where `key` is the name of the configuration
+    *                          the following format: 'key' => 'value',
+    *                          where 'key' is the name of the configuration
     *                          (i.e., 'development', 'test', 'production'),
-    *                          and `value` is an array which can take the
+    *                          and 'value' is an array which can take the
     *                          following parameters:
-    *                          `plugin`   - The name of the plugin.
-    *                          `database` - The database name.
-    *                          `host`     - The database host.
-    *                          `username` - The database username.
-    *                          `password` - The database password.
+    *                          'plugin'   - The name of the plugin.
+    *                          'database' - The database name.
+    *                          'host'     - The database host.
+    *                          'username' - The database username.
+    *                          'password' - The database password.
     *  @access public
     *  @return void
     */
@@ -124,12 +121,11 @@ class Connections {
 
         if ( !self::$_initialized['cache'][$name] ) {
             $plugin = self::$_options['cache'][$name]['plugin'];
-            $cache = 'nx\plugin\cache\\' . $plugin;
 
             $options = self::$_options['cache'][$name];
             unset($options['enabled']);
             unset($options['plugin']);
-            self::$_cache[$name] = new $cache($options);
+            self::$_cache[$name] = new $plugin($options);
 
             self::$_initialized['cache'][$name] = true;
         }
@@ -147,11 +143,10 @@ class Connections {
     public static function get_db($name) {
         if ( !self::$_initialized['db'][$name] ) {
             $plugin = self::$_options['db'][$name]['plugin'];
-            $db = 'nx\plugin\db\\' . $plugin;
 
             $options = self::$_options['db'][$name];
             unset($options['plugin']);
-            self::$_db[$name] = new $db($options);
+            self::$_db[$name] = new $plugin($options);
 
             self::$_initialized['db'][$name] = true;
         }

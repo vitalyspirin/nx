@@ -23,14 +23,6 @@ use nx\lib\Validator;
 class Model extends Object {
 
    /**
-    *  The cache handler.
-    *
-    *  @var object
-    *  @access protected
-    */
-    protected $_cache;
-
-   /**
     *  The database handler.
     *
     *  @var object
@@ -39,49 +31,14 @@ class Model extends Object {
     protected $_db;
 
    /**
-    *  The 'belongs to' relationships pertaining to '$this'.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected $_belongs_to = array();
-
-   /**
-    *  The 'has one' relationships pertaining to '$this'.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected $_has_one = array();
-
-   /**
-    *  The 'has many' relationships pertaining to '$this'.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected $_has_many = array();
-
-   /**
-    *  The 'has and belongs to many' relationships pertaining to '$this'.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected $_has_and_belongs_to_many = array();
-
-   /**
     *  The meta information pertinent to objects and their relationships with
     *  other objects.
     *
     *  @var array
     *  @access protected
     */
-    protected $_meta = array(
-        'key'                               => 'id',
-        'primary_key_separator'             => '_',
-        'has_and_belongs_to_many_separator' => '__'
-    );
+    // TODO: Change this to just be $key
+    protected $_meta = array('key' => 'id');
 
    /**
     *  The validators to be used when validating data.
@@ -104,8 +61,6 @@ class Model extends Object {
 
    /**
     *  Initializes an object.  Takes the following configuration options:
-    *  'no_cache' - Whether or not to use the cache to store/retrieve the
-    *               object.
     *  'db'       - The name of the db connection to use as defined
     *               in app/config/bootstrap/db.php.
     *  'cache'    - The name of the cache connection to use as defined
@@ -119,8 +74,7 @@ class Model extends Object {
         $defaults = array(
             'libs' => array(
                 'connections' => 'nx\lib\Connections'
-            ),
-            'no_cache' => false
+            )
         );
         parent::__construct($config + $defaults);
     }
@@ -136,88 +90,34 @@ class Model extends Object {
     protected function _init() {
         $connections = $this->_config['libs']['connections'];
         $this->_db = $connections::get_db();
-        if ( !$this->_cache = $connections::get_cache() ) {
-            $this->_config['no_cache'] = true;
-        }
     }
 
    /**
-    *  Returns an object's property.  If the property is bound to '$this'
-    *  via an object relationship, the appropriate object (or array of objects)
-    *  is returned.  If the property is an actual property belonging to '$this',
-    *  it will be returned.
+    *  Returns an object's property.
     *
     *  @param string $field    The property name.
     *  @access public
     *  @return mixed
     */
     public function __get($field) {
-        if ( $this->belongs_to($field) ) {
-            return $this->_get_belongs_to($field);
-        } elseif ( $this->has_many($field) ) {
-            return $this->_get_has_many($field);
-        } elseif ( $this->has_one($field) ) {
-            return $this->_get_has_one($field);
-        } elseif ( $this->has_and_belongs_to_many($field) ) {
-            return $this->_get_has_and_belongs_to_many($field);
-        }
-
         return $this->$field;
-    }
-
-   /**
-    *  Checks if '$this' has a "belongs to" relationship with the
-    *  object defined in '$field'.
-    *
-    *  @param string $field    The class name of the foreign object.
-    *  @access public
-    *  @return bool
-    */
-    public function belongs_to($field) {
-        return ( in_array($field, $this->_belongs_to) );
-    }
-
-   /**
-    *  Stores an object in the cache.  Only the object's "columns"
-    *  (i.e., public properties) are serialized and stored.
-    *
-    *  @access public
-    *  @return bool
-    */
-    public function cache() {
-        if ( $this->_config['no_cache'] ) {
-            return false;
-        }
-
-        $properties = $this->get_columns();
-        $data = json_encode($properties);
-
-        $key = $this->classname() . '_' . $this->get_primary_key();
-        return $this->_cache->store($key, $data);
     }
 
    /**
     *  Deletes an object from both the cache and the database.
     *
-    *  @param string|array $where    The WHERE clause to be included in the
-    *                                DELETE query.
     *  @access public
     *  @return bool
     */
-    public function delete($where = null) {
+    public function delete() {
         $key = $this->classname() . '_' . $this->get_primary_key();
 
-        if ( !$this->_config['no_cache'] ) {
-            $this->_cache->delete($key);
+        // TODO: FIX THIS ($where crap)
+        $id = $this->get_primary_key();
+        if ( is_null($id) ) {
+            return false;
         }
-
-        if ( is_null($where) ) {
-            $id = $this->get_primary_key();
-            if ( is_null($id) ) {
-                return false;
-            }
-            $where = array($this->_meta['key'] => $id);
-        }
+        $where = array($this->_meta['key'] => $id);
 
         if ( !$this->_db->delete($this->classname(), $where) ) {
             return false;
@@ -256,23 +156,6 @@ class Model extends Object {
     }
 
    /**
-    *  Returns the object associated with '$this' via a "belongs to"
-    *  relationship.
-    *
-    *  @param string $field    The object name.
-    *  @access protected
-    *  @return object
-    */
-    protected function _get_belongs_to($field) {
-        $lookup_id = $field . $this->_meta['primary_key_separator']
-            . $this->_meta['key'];
-        $object_id = $this->$lookup_id;
-
-        $object_name = Library::get('namespace', 'model') . $field;
-        return new $object_name(array('id' => $object_id));
-    }
-
-   /**
     *  Retrieves the "columns" (i.e., public properties) belonging to '$this'.
     *
     *  @access public
@@ -288,87 +171,6 @@ class Model extends Object {
             $collection[$name] = $property->getValue($object);
         }
         return $collection;
-    }
-
-   /**
-    *  Returns an array of objects associated with '$this' via a
-    *  "has and belongs to many" relationship.
-    *
-    *  @param string $field    The object name.
-    *  @access protected
-    *  @return array
-    */
-    protected function _get_has_and_belongs_to_many($field) {
-        $class_name = $this->classname();
-        if ( $class_name < $field ) {
-            $table_name = $class_name
-                . $this->_meta['has_and_belongs_to_many_separator'] . $field;
-        } else {
-            $table_name = $field
-                . $this->_meta['has_and_belongs_to_many_separator']
-                . $class_name;
-        }
-
-        $id = $this->_meta['key'];
-        $lookup_id = $class_name . $this->_meta['primary_key_separator'] . $id;
-        $where = array($lookup_id => $this->get_primary_key());
-
-        $target_id = $field . $this->_meta['primary_key_separator'] . $id;
-        $this->_db->find($target_id, $table_name, compact('where'));
-
-        $object_name = Library::get('namespace', 'model') . $field;
-        $rows = $this->_db->fetch_all('assoc');
-        $collection = array();
-        foreach ( $rows as $row ) {
-            $new_id = $row[$target_id];
-            $collection[$new_id] = new $object_name(array('id' => $new_id));
-        }
-        return $collection;
-    }
-
-   /**
-    *  Returns an array of objects associated with '$this' via a "has many"
-    *  relationship.
-    *
-    *  @param string $field    The object name.
-    *  @access protected
-    *  @return array
-    */
-    protected function _get_has_many($field) {
-        $id = $this->_meta['key'];
-        $lookup_id = $this->classname() . $this->_meta['primary_key_separator']
-            . $id;
-        $clauses = array(
-            'where'    => array($lookup_id => $this->get_primary_key()),
-            'order_by' => $id . ' DESC'
-        );
-
-        return $this->find_all($clauses, $field);
-    }
-
-   /**
-    *  Returns the object associated with '$this' via a "has one" relationship.
-    *
-    *  @param string $field    The object name.
-    *  @access protected
-    *  @return object
-    */
-    protected function _get_has_one($field) {
-        $id = $this->_meta['key'];
-        $lookup_id = $this->classname() . $this->_meta['primary_key_separator']
-            . $id;
-        $clauses = array(
-            'where' => array($lookup_id => $this->get_primary_key()),
-            'limit' => 1
-        );
-
-        $this->_db->find($this->_meta['key'], $field, $clauses);
-        $result = $this->_db->fetch('assoc');
-        $object_id = $result[$id];
-
-        $object_name = Library::get('namespace', 'model') . $field;
-
-        return new $object_name(array('id' => $object_id));
     }
 
    /**
@@ -417,42 +219,6 @@ class Model extends Object {
     }
 
    /**
-    *  Checks if '$this' has a "has and belongs to many" relationship with the
-    *  object defined in '$field'.
-    *
-    *  @param string $field    The class name of the foreign object.
-    *  @access public
-    *  @return bool
-    */
-    public function has_and_belongs_to_many($field) {
-        return ( in_array($field, $this->_has_and_belongs_to_many) );
-    }
-
-   /**
-    *  Checks if '$this' has a "has many" relationship with the object defined
-    *  in '$field'.
-    *
-    *  @param string $field        The class name of the foreign object.
-    *  @access public
-    *  @return bool
-    */
-    public function has_many($field) {
-        return ( in_array($field, $this->_has_many) );
-    }
-
-   /**
-    *  Checks if '$this' has a "has one" relationship with the object defined
-    *  in '$field'.
-    *
-    *  @param string $field    The class name of the foreign object.
-    *  @access public
-    *  @return bool
-    */
-    public function has_one($field) {
-        return ( in_array($field, $this->_has_one) );
-    }
-
-   /**
     *  Checks that a specific object property is valid.  If no property
     *  is supplied, then all of the object's "columns" (i.e., public
     *  properties) will be validated.  Corresponding errors are stored
@@ -488,15 +254,9 @@ class Model extends Object {
     *  @return object
     */
     public function load_by_primary_key($primary_key) {
-        if ( $this->pull_from_cache($this, $primary_key) ) {
-            return $this;
-        }
-
         $where = array($this->_meta['key'] => $primary_key);
         $this->_db->find('*', $this->classname(), compact('where'));
         $this->_db->fetch('into', $this);
-
-        $this->cache();
 
         return $this;
     }
@@ -538,34 +298,6 @@ class Model extends Object {
     }
 
    /**
-    *  Retrieves an object from the cache.
-    *
-    *  @param object $object    The object to be populated with the retrieved
-    *                           values.
-    *  @param int $id           The unique identifier of the object to be
-    *                           retrieved.
-    *  @access public
-    *  @return object
-    */
-    public function pull_from_cache($object, $id) {
-        if ( $this->_config['no_cache'] ) {
-            return false;
-        }
-
-        $key = $object->classname() . '_' . $id;
-        $cached_data = $object->_cache->retrieve($key);
-        if ( !$cached_data ) {
-            return false;
-        }
-
-        $cached_object = json_decode($cached_data, true);
-        foreach ( $cached_object as $key => $val ) {
-            $object->$key = $val;
-        }
-        return $object;
-    }
-
-   /**
     *  Stores an object in both the database and the cache.
     *
     *  @param array $map    An array of data to be mapped to the object.  Note
@@ -588,7 +320,6 @@ class Model extends Object {
         if ( !$this->$id ) {
             $this->$id = $this->_db->insert_id();
         }
-        $this->cache();
         return true;
     }
 

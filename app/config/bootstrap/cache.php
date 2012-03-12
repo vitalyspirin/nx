@@ -4,9 +4,8 @@ $config = array(
 
     'default' => array(
         'enabled'       => false,
-        'plugin'        => 'Memcached',
-        'host'          => 'localhost',
-        'persistent_id' => ''
+        'plugin'        => 'nx\plugin\cache\Memcached',
+        'host'          => 'localhost'
     )
 
 );

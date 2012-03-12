@@ -56,7 +56,7 @@ class PDO_MySQL extends \nx\core\Object {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'database' => 'journal',
+            'database' => '',
             'host'     => 'localhost',
             'username' => 'root',
             'password' => 'admin'
@@ -128,54 +128,6 @@ class PDO_MySQL extends \nx\core\Object {
     }
 
    /**
-    *  Performs a 'SELECT COUNT(*) FROM' query.
-    *
-    *  @param string $table          The table to SELECT from.
-    *  @param string|array $where    The WHERE clause of the SQL query.
-    *  @param string $additional     Any additional SQL to be added at the end
-    *                                of the query.
-    *  @access public
-    *  @return int
-    */
-    public function count($table, $where = null, $additional = null) {
-        $sql = "SELECT COUNT(*) FROM {$table}";
-        $sql .= $this->_format_where($where);
-        if ( !is_null($additional) ) {
-            $sql .= " {$additional}";
-        }
-
-        $this->query($sql, $where);
-        $results = $this->fetch();
-        return (int) $results['COUNT(*)'];
-    }
-
-   /**
-    *  Deletes a record from the database.
-    *
-    *  @param string $table          The table containing the record to be
-    *                                deleted.
-    *  @param string|array $where    The WHERE clause to be included in the
-    *                                DELETE query.
-    *  @access public
-    *  @return bool
-    */
-    public function delete($table, $where) {
-        if ( is_null($where) ) {
-            return false;
-        }
-
-        $sql = "DELETE FROM {$table}";
-
-        $sql .= $this->_format_where($where);
-
-        if ( is_string($where) ) {
-            return $this->query($sql);
-        } elseif ( is_array($where) ) {
-            return $this->query($sql, $where);
-        }
-    }
-
-   /**
     *  Fetches the next row from the result set in memory (i.e., the one
     *  that was created after running query()).
     *
@@ -226,23 +178,11 @@ class PDO_MySQL extends \nx\core\Object {
     *
     *  @param string|array $fields    The fields to be retrieved.
     *  @param string $table           The table to SELECT from.
-    *  @param array $clauses          Any SQL clauses to be added to
-    *                                 the query.  Takes the following keys:
-    *                                 'where'    - string|array
-    *                                 'distinct' - true|false
-    *                                 'limit'    - int
-    *                                 'offset'   - int
-    *                                 'order_by' - string
-    *                                 'group_by' - string
-    *                                 'having'   - string
     *  @access public
     *  @return bool
     */
-    public function find($fields, $table, $clauses = array()) {
+    public function find($fields, $table) {
         $sql = 'SELECT ';
-        if ( isset($clauses['distinct']) && $clauses['distinct'] ) {
-            $sql .= 'DISTINCT ';
-        }
 
         if ( is_array($fields) ) {
             $sql .= implode(', ', $fields);
@@ -251,153 +191,7 @@ class PDO_MySQL extends \nx\core\Object {
         }
 
         $sql .= " FROM {$table}";
-        if ( isset($clauses['where']) ) {
-            $sql .= $this->_format_where($clauses['where']);
-        } else {
-            $clauses['where'] = null;
-        }
-
-        if ( isset($clauses['limit']) && is_int($clauses['limit']) ) {
-            $sql .= " LIMIT {$clauses['limit']}";
-        }
-        if ( isset($clauses['offset']) && is_int($clauses['offset']) ) {
-            $sql .= " OFFSET {$clauses['offset']}";
-        }
-        if ( isset($clauses['order_by']) ) {
-            $sql .= " ORDER BY {$clauses['order_by']}";
-        }
-        if ( isset($clauses['group_by']) ) {
-            $sql .= " GROUP BY {$clauses['group_by']}";
-        }
-        if ( isset($clauses['having']) ) {
-            $sql .= " HAVING {$clauses['having']}";
-        }
-        return $this->query($sql, $clauses['where']);
-    }
-
-   /**
-    *  Parses a WHERE clause, which can be of any of the following formats:
-    *
-    *  $where = 'id = 3';
-    *  (produces ' WHERE id = 3')
-    *
-    *  $where = array(
-    *      'id'       => 3,
-    *      'username' => 'test'
-    *  );
-    *  (produces ' WHERE id = 3 and username = "test"')
-    *
-    *  $where = array(
-    *      'id' => array(
-    *          'gte' => 20,
-    *          'lt' => 30
-    *      ),
-    *      'username' => 'test'
-    *  );
-    *  (produces ' WHERE id >= 20 and id < 30 and username = "test"')
-    *
-    *  @param string|array $where    The clause to be parsed.
-    *  @access protected
-    *  @return string
-    */
-    protected function _format_where(&$where = null) {
-        $sql = '';
-
-        if ( is_null($where) ) {
-            return $sql;
-        }
-
-        $sql = ' WHERE ';
-        if ( is_string($where) ) {
-            $sql .= $where;
-            return $sql;
-        }
-
-        $bindings = $where;
-        foreach ( $bindings as $name => $val ) {
-            if ( is_string($val) || is_numeric($val) ) {
-                $sql .= "{$name}=:{$name} and ";
-            } elseif ( is_array($val) ) {
-                foreach ( $val as $sign => $constraint ) {
-
-                    if ( is_array($constraint) ) {
-                        if ( empty($constraint) ) {
-                            unset($where[$name]);
-                            continue;
-                        }
-
-                        $sql .= "{$name} ";
-                        $list = '';
-                        foreach ( $constraint as $item ) {
-                            do {
-                                $new_name = "{$name}__" . rand();
-                            } while ( isset($where[$new_name]) );
-                            $list .= ":{$new_name},";
-                            $where[$new_name] = $item;
-                        }
-                        $list = rtrim($list, ',');
-
-                        switch ( $sign ) {
-                            case 'in':
-                            case 'not in':
-                                $sql .= "{$sign} ({$list})";
-                                break;
-                        }
-                        $sql .= ' and ';
-                        unset($where[$name]);
-
-                        continue;
-                    }
-
-                    $sql .= "{$name} ";
-                    do {
-                        $new_name = "{$name}__" . rand();
-                    } while ( isset($where[$new_name]) );
-                    switch ( $sign ) {
-                        case 'like':
-                            $sql .= 'like ';
-                            break;
-                        case 'like%':
-                            $sql .= 'like ';
-                            $constraint = "{$constraint}%";
-                            break;
-                        case '%like':
-                            $sql .= 'like ';
-                            $constraint = "%{$constraint}";
-                            break;
-                        case '%like%':
-                            $sql .= 'like ';
-                            $constraint = "%{$constraint}%";
-                            break;
-                        case 'gt':
-                            $sql .= '>';
-                            break;
-                        case 'gte':
-                            $sql .= '>=';
-                            break;
-                        case 'lt':
-                            $sql .= '<';
-                            break;
-                        case 'lte':
-                            $sql .= '<=';
-                            break;
-                        case 'ne':
-                            $sql .= '!=';
-                            break;
-                        case 'e':
-                        default:
-                            $sql .= '=';
-                            break;
-                    }
-                    $sql .= ":{$new_name} and ";
-                    $where[$new_name] = $constraint;
-                    unset($where[$name]);
-                }
-            }
-        }
-        $sql = substr($sql, 0, strlen($sql) - strlen(' and '));
-
-        return $sql;
+        return $this->query($sql);
     }
 
    /**
@@ -441,18 +235,6 @@ class PDO_MySQL extends \nx\core\Object {
     */
     public function insert_id() {
         return $this->_dbh->lastInsertId();
-    }
-
-   /**
-    *  Returns the number of rows affected by the last SELECT query.
-    *
-    *  @access public
-    *  @return int
-    */
-    public function num_rows() {
-        $this->query('SELECT FOUND_ROWS()');
-        $rows = $this->fetch_column();
-        return $rows;
     }
 
    /**
@@ -500,20 +282,8 @@ class PDO_MySQL extends \nx\core\Object {
             case 'assoc':
                 $this->_statement->setFetchMode(\PDO::FETCH_ASSOC);
                 break;
-            case 'both':
-                $this->_statement->setFetchMode(\PDO::FETCH_BOTH);
-                break;
             case 'into':
                 $this->_statement->setFetchMode(\PDO::FETCH_INTO, $obj);
-                break;
-            case 'lazy':
-                $this->_statement->setFetchMode(\PDO::FETCH_LAZY);
-                break;
-            case 'num':
-                $this->_statement->setFetchMode(\PDO::FETCH_NUM);
-                break;
-            case 'obj':
-                $this->_statement->setFetchMode(\PDO::FETCH_OBJ);
                 break;
             default:
                 $this->_statement->setFetchMode(\PDO::FETCH_ASSOC);

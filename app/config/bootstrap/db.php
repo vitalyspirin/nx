@@ -3,7 +3,7 @@
 $config = array(
 
     'default' => array(
-        'plugin'   => 'PDO_MySQL',
+        'plugin'   => 'nx\plugin\db\PDO_MySQL',
         'database' => '',
         'host'     => 'localhost',
         'username' => 'root',
