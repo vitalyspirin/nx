@@ -20,14 +20,6 @@ namespace nx\core;
 class Model extends Object {
 
    /**
-    *  The database handler.
-    *
-    *  @var object
-    *  @access protected
-    */
-    protected $_db;
-
-   /**
     *  The validators to be used when validating data.
     *
     *  @see /nx/lib/Validator
@@ -37,9 +29,7 @@ class Model extends Object {
     protected $_validators = array();
 
    /**
-    *  Initializes an object.  Takes the following configuration options:
-    *  'db'       - The name of the db connection to use as defined
-    *               in app/config/bootstrap/db.php.
+    *  TODO: FIX THIS
     *
     *  @param array $config        The configuration options.
     *  @access public
@@ -48,23 +38,10 @@ class Model extends Object {
     public function __construct(array $config = array()) {
         $defaults = array(
             'libs' => array(
-                'connections' => 'nx\lib\Connections',
-                'validator'   => 'nx\lib\Validator'
+                'validator' => 'nx\lib\Validator'
             )
         );
         parent::__construct($config + $defaults);
-    }
-
-   /**
-    *  Initializes an object.  Object properties are populated
-    *  automatically by retrieving the values from the database.
-    *
-    *  @access protected
-    *  @return void
-    */
-    protected function _init() {
-        $connections = $this->_config['libs']['connections'];
-        $this->_db = $connections::get_db();
     }
 
    /**
@@ -75,7 +52,7 @@ class Model extends Object {
     *  @access protected
     *  @return array
     */
-    public function validate($field) {
+    public function is_valid($field) {
         if ( !isset($this->_validators[$field]) ) {
             return array();
         }

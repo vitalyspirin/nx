@@ -68,7 +68,7 @@ class Session extends \nx\core\Object {
     */
     public function is_valid() {
         $fingerprint = $this->_get_fingerprint();
-        return ( $this->_fingerprint && $this->_fingerprint == $fingerprint );
+        return ( $this->_fingerprint == $fingerprint );
     }
 
    /**

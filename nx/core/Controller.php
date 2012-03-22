@@ -121,25 +121,8 @@ class Controller extends Object {
             return false;
         }
 
-        return Auth::is_token_valid($token);
-    }
-
-   /**
-    *  Redirects the page.
-    *
-    *  @param string $page    The redirect location.
-    *  @access public
-    *  @return void
-    */
-    public function redirect($page) {
-        header('Location: ' . $page);
-        exit;
-    }
-
-    public function to_json($array) {
-        $options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
-            | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
-        return json_encode($array, $options);
+        $auth = $this->_config['libs']['auth'];
+        return $auth::is_token_valid($token);
     }
 
 }

@@ -10,6 +10,9 @@
 
 namespace nx\plugin\db;
 
+use \PDO;
+use \PDOException;
+
 /*
  *  The `PDO_MySQL` class is used to connect to a MySQL database
  *  via the PDO interface.
@@ -80,32 +83,6 @@ class PDO_MySQL extends \nx\core\Object {
     }
 
    /**
-    *  Connects and selects database.
-    *
-    *  @param array $options    Contains the connection information.  Takes the
-    *                           following options:
-    *                           'database' - The name of the database.
-    *                           'host'     - The database host.
-    *                           'username' - The database username.
-    *                           'password' - The database password.
-    *  @access public
-    *  @return bool
-    */
-    public function connect($options) {
-        // TODO: Add port
-        $dsn = "mysql:host={$options['host']};dbname={$options['database']}";
-        try {
-            $this->_dbh = new \PDO($dsn, $options['username'], $options['password']);
-            $this->_dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            return true;
-        } catch ( PDOException $e ) {
-            // TODO: How to handle error reporting?
-            //die($e->getMessage() . var_dump($e->getTrace()));
-            return false;
-        }
-    }
-
-   /**
     *  Returns the number of rows affected by the last DELETE,
     *  INSERT, or UPDATE query.
     *
@@ -125,6 +102,30 @@ class PDO_MySQL extends \nx\core\Object {
     public function close() {
         $this->_dbh = null;
         return true;
+    }
+
+   /**
+    *  Connects and selects database.
+    *
+    *  @param array $options    Contains the connection information.  Takes the
+    *                           following options:
+    *                           'database' - The name of the database.
+    *                           'host'     - The database host.
+    *                           'username' - The database username.
+    *                           'password' - The database password.
+    *  @access public
+    *  @return bool
+    */
+    public function connect($options) {
+        // TODO: Add port
+        $dsn = "mysql:host={$options['host']};dbname={$options['database']}";
+        try {
+            $this->_dbh = new PDO($dsn, $options['username'], $options['password']);
+            $this->_dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return true;
+        } catch ( PDOException $e ) {
+            die($e->getMessage() . var_dump($e->getTrace()));
+        }
     }
 
    /**
@@ -174,27 +175,6 @@ class PDO_MySQL extends \nx\core\Object {
     }
 
    /**
-    *  Performs a 'SELECT FROM' query.
-    *
-    *  @param string|array $fields    The fields to be retrieved.
-    *  @param string $table           The table to SELECT from.
-    *  @access public
-    *  @return bool
-    */
-    public function find($fields, $table) {
-        $sql = 'SELECT ';
-
-        if ( is_array($fields) ) {
-            $sql .= implode(', ', $fields);
-        } else {
-            $sql .= $fields;
-        }
-
-        $sql .= " FROM {$table}";
-        return $this->query($sql);
-    }
-
-   /**
     *  Inserts a record into the database.
     *
     *  @param string $table    The table containing the record to be inserted.
@@ -217,10 +197,8 @@ class PDO_MySQL extends \nx\core\Object {
 
         try {
             $statement->execute($data);
-    	} catch ( \PDOException $e ) {
-            // TODO: How to handle error reporting?
-            //die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
-            return false;
+        } catch ( PDOException $e ) {
+            die($e->getMessage() . var_dump($e->getTrace()));
         }
 
     	$this->_affected_rows = $statement->rowCount();
@@ -246,21 +224,17 @@ class PDO_MySQL extends \nx\core\Object {
     *  @access public
     *  @return bool
     */
-    public function query($sql, $parameters = null) {
+    public function query($sql, $parameters = array()) {
         $statement = $this->_dbh->prepare($sql);
 
-        if ( is_array($parameters) ) {
-            foreach ( $parameters as $field => &$value ) {
-                $statement->bindParam(':' . $field, $value);
-            }
+        foreach ( $parameters as $index => $parameter ) {
+            $statement->bindValue($index + 1, $parameter);
         }
+
         try {
             $statement->execute();
-    	} catch ( \PDOException $e ) {
-            // TODO: How to handle error reporting?
-            //die($e->getMessage() . $sql . var_dump($parameters) . var_dump($e->getTrace()));
-            $this->_affected_rows = 0;
-            return false;
+        } catch ( PDOException $e ) {
+            die($e->getMessage() . var_dump($e->getTrace()));
         }
 
     	$this->_affected_rows = $statement->rowCount();
@@ -280,13 +254,13 @@ class PDO_MySQL extends \nx\core\Object {
     protected function _set_fetch_mode($fetch_style, $obj = null) {
         switch ( $fetch_style ) {
             case 'assoc':
-                $this->_statement->setFetchMode(\PDO::FETCH_ASSOC);
+                $this->_statement->setFetchMode(PDO::FETCH_ASSOC);
                 break;
             case 'into':
-                $this->_statement->setFetchMode(\PDO::FETCH_INTO, $obj);
+                $this->_statement->setFetchMode(PDO::FETCH_INTO, $obj);
                 break;
             default:
-                $this->_statement->setFetchMode(\PDO::FETCH_ASSOC);
+                $this->_statement->setFetchMode(PDO::FETCH_ASSOC);
                 break;
         }
     }
@@ -323,10 +297,8 @@ class PDO_MySQL extends \nx\core\Object {
 
         try {
             $statement->execute($data);
-    	} catch ( \PDOException $e ) {
-            // TODO: How to handle error reporting?
-            //die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
-            return false;
+        } catch ( PDOException $e ) {
+            die($e->getMessage() . var_dump($e->getTrace()));
         }
 
     	$this->_affected_rows = $statement->rowCount();
@@ -362,10 +334,8 @@ class PDO_MySQL extends \nx\core\Object {
 
         try {
             $statement->execute($data);
-    	} catch ( \PDOException $e ) {
-            // TODO: How to handle error reporting?
-            //die($e->getMessage() . $sql . var_dump($data) . var_dump($e->getTrace()));
-            return false;
+        } catch ( PDOException $e ) {
+            die($e->getMessage() . var_dump($e->getTrace()));
         }
 
     	$this->_affected_rows = $statement->rowCount();

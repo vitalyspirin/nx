@@ -2,7 +2,7 @@
 
 namespace app\controller;
 
-class Dashboard extends \nx\core\Controller {
+class Dashboard extends ApplicationController {
 
     public function index() {
         return array();
