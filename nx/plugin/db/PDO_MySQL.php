@@ -22,14 +22,6 @@ use \PDOException;
 class PDO_MySQL extends \nx\core\Object {
 
    /**
-    *  The db handle.
-    *
-    *  @var object
-    *  @access protected
-    */
-    protected $_dbh;
-
-   /**
     *  Number of rows affected by MySQL query.
     *
     *  @var int
@@ -38,49 +30,20 @@ class PDO_MySQL extends \nx\core\Object {
     protected $_affected_rows = 0;
 
    /**
+    *  The db handle.
+    *
+    *  @var object
+    *  @access protected
+    */
+    protected $_dbh;
+
+   /**
     *  The result set associated with a prepared statement.
     *
     *  @var PDOStatement
     *  @access protected
     */
     protected $_statement;
-
-   /**
-    *  Loads the configuration settings for a MySQL connection.
-    *
-    *  @param array $config    The configuration settings, which can take
-    *                          four options:
-    *                          'database' - The name of the database.
-    *                          'host'     - The database host.
-    *                          'username' - The database username.
-    *                          'password' - The database password.
-    *  @access public
-    *  @return void
-    */
-    public function __construct(array $config = array()) {
-        $defaults = array(
-            'database' => '',
-            'host'     => 'localhost',
-            'username' => 'root',
-            'password' => 'admin'
-        );
-        parent::__construct($config + $defaults);
-    }
-
-   /**
-    *  Connects to the database.
-    *
-    *  @access protected
-    *  @return void
-    */
-    protected function _init() {
-        $this->connect($this->_config);
-        // Prevent dumping
-        unset($this->_config['database']);
-        unset($this->_config['host']);
-        unset($this->_config['username']);
-        unset($this->_config['password']);
-    }
 
    /**
     *  Returns the number of rows affected by the last DELETE,

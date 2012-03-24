@@ -18,7 +18,7 @@ class Session extends \nx\core\Object {
     *  @access protected
     *  @return void
     */
-    protected function _init() {
+    public function __construct() {
         session_start();
     }
 

@@ -21,6 +21,14 @@ namespace nx\core;
 class View extends Object {
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected $_config = array();
+
+   /**
     *  The form helper object.
     *
     *  @var object
@@ -49,16 +57,8 @@ class View extends Object {
             )
         );
 
-        parent::__construct($config + $defaults);
-    }
+        $this->_config = $config + $defaults;
 
-   /**
-    *  Initializes a form for use within the view.
-    *
-    *  @access protected
-    *  @return void
-    */
-    protected function _init() {
         $form = $this->_config['libs']['form'];
         $this->form = new $form();
     }

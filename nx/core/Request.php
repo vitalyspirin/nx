@@ -70,21 +70,23 @@ class Request extends Object {
             'data'  => array(),
             'query' => array()
         );
-        parent::__construct($config + $defaults);
+
+        $this->_init($config + $defaults);
     }
 
    /**
     *  Organizes the data pertinent to the incoming request.
     *
+    *  // TODO: Fix this
+    *  @param array $defaults
     *  @access protected
     *  @return void
     */
-    protected function _init() {
-        $defaults = array(
+    protected function _init($defaults) {
+        $this->_env = $_SERVER + $_ENV + array(
             'CONTENT_TYPE'   => 'text/html',
             'REQUEST_METHOD' => 'GET'
         );
-        $this->_env = $_SERVER + $_ENV + $defaults;
 
         if ( isset($this->_env['SCRIPT_URI']) ) {
             $this->_env['HTTPS'] =
@@ -111,9 +113,9 @@ class Request extends Object {
             $query_string = str_replace('%20', '+', $parsed['query']);
             parse_str(rawurldecode($query_string), $query);
         }
-        $this->query = $this->_config['query'] + $query;
+        $this->query = $defaults['query'] + $query;
 
-        $this->data = $this->_config['data'];
+        $this->data = $defaults['data'];
         if ( isset($_POST) ) {
             $this->data += $_POST;
         }

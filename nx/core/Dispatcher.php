@@ -18,6 +18,14 @@ namespace nx\core;
 class Dispatcher extends Object {
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected $_config = array();
+
+   /**
     *  Sets the configuration options for the dispatcher.
     *
     *  @param array $config    The configuration options.
@@ -26,72 +34,44 @@ class Dispatcher extends Object {
     */
 	public function __construct(array $config = array()) {
         $defaults = array(
+            'dependencies' => array(
+                'response' => new \nx\core\Response()
+            ),
             'libs' => array(
                 'router'  => 'nx\lib\Router'
-            ),
-            'dependencies' => array(
-                'view' => new \nx\core\View()
             )
         );
-        parent::__construct($config + $defaults);
+        $this->_config = $config + $defaults;
 	}
 
-    // TODO: Fix this description.  We should be returning a response.
+    // TODO: Fix this description.
    /**
-    *  Handles an incoming request.
+    *  Handles an incoming request, and returns a response object.
     *
     *  @param obj $request    The incoming request object.
     *  @access public
     *  @return bool
     */
     public function handle($request) {
+        $response = $this->_config['dependencies']['response'];
+
         $router = $this->_config['libs']['router'];
         $url = $request->url;
         $method = $request->get_env('REQUEST_METHOD');
 
         $parsed = $router::parse($url, $method);
         if ( is_null($parsed['callback']) ) {
+            $response->set_status(404);
             // TODO: Fix this
-            return $this->throw_404($template);
-        }
-
-        list($controller, $action) = explode('::', $parsed['callback']);
-        if ( !class_exists($controller) ) {
-            return $this->throw_404($template);
-        }
-
-        $request->params = $parsed['params'];
-
-        $controller = new $controller();
-        $response = $controller->call($action, $request);
-        // TODO: Fix this
-        // Allow for $response->set_404();
-        if ( !$response ) {
-            return $this->throw_404();
-        }
-
-        if ( $request->is('ajax') ) {
+            $response->set_body();
             return $response;
         }
 
-        // TODO: Fix this
-        $view = $this->_config['dependencies']['view'];
-        $file = lcfirst($controller->classname()) . "/{$action}";
-        return $view->render($file, $results);
-    }
+        list($controller, $action) = explode('::', $parsed['callback']);
+        $request->params = $parsed['params'];
 
-   /**
-    *  Renders a 404 page.
-    *
-    *  @param string $template    The view template to use.
-    *  @access public
-    *  @return void
-    */
-    public function throw_404($template) {
-        $view = $this->_config['classes']['view'];
-        $view = new $view(compact('template'));
-        // TODO: Fix this
-        //return $view->throw_404();
+        $controller = new $controller();
+        return $controller->call($action, $request, $response);
     }
 
 }

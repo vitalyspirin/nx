@@ -15,6 +15,8 @@ namespace nx\core;
  */
 class Response extends Object {
 
+    protected $_status = "HTTP/1.1 200 OK";
+
 	protected $_statuses = array(
 		100 => 'Continue',
 		101 => 'Switching Protocols',
@@ -57,9 +59,36 @@ class Response extends Object {
 		504 => 'Gateway Time-out'
 	);
 
-    public function __construct(array $config = array()) {
-        // TODO: something
+    protected function _render() {
+        echo 'render';
     }
+
+    public function set_body() {
+
+    }
+
+    public function set_status($code) {
+        if ( is_numeric($code) ) {
+            if ( !isset($this->_statuses[$code]) ) {
+                return false;
+            }
+
+            $this->_status = "HTTP/1.1 {$code} {$this->_statuses[$code]}";
+        } else {
+            $statuses = array_flip($this->_statuses);
+            if ( !isset($statuses[$code]) ) {
+                return false;
+            }
+
+            $this->_status = "HTTP/1.1 {$status[$code]} {$code}";
+        }
+    }
+
+    public function __toString() {
+        $this->_render();
+        return '';
+    }
+
 
 }
 

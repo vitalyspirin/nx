@@ -20,12 +20,12 @@ namespace nx\core;
 class Controller extends Object {
 
    /**
-    *  The session object.
+    *  The configuration settings.
     *
-    *  @var object
-    *  @access public
+    *  @var array
+    *  @access protected
     */
-    public $session;
+    protected $_config = array();
 
    /**
     *  Loads the configuration settings for the controller.
@@ -37,24 +37,14 @@ class Controller extends Object {
     public function __construct(array $config = array()) {
         $defaults = array(
             'dependencies' => array(
-                'response' => new \nx\core\Response(),
-                'session'  => new \nx\core\Session()
+                'view'     => new \nx\core\View()
             ),
             'libs' => array(
                 'auth' => 'nx\lib\Auth'
             )
         );
-        parent::__construct($config + $defaults);
-    }
 
-   /**
-    *  Makes the session object publicly available.
-    *
-    *  @access protected
-    *  @return void
-    */
-    protected function _init() {
-        $this->session = $this->_config['dependencies']['session'];
+        $this->_config = $config + $defaults;
     }
 
    /**
@@ -63,10 +53,11 @@ class Controller extends Object {
     *
     *  @param string $action    The action.
     *  @param obj $request      The request.
+    *  @param obj $response     The response.
     *  @access public
     *  @return mixed
     */
-    public function call($action, $request) {
+    public function call($action, $request, $response) {
         if ( !$this->_is_valid_request($request) ) {
             $this->handle_CSRF();
         }
@@ -75,16 +66,18 @@ class Controller extends Object {
         $auth = $this->_config['libs']['auth'];
         $token = $auth::create_token();
 
-        $response = $this->_config['dependencies']['response'];
-        // TODO: Fix this to handle response
-        $response = $this->$action($request, $response);
+        $result = $this->$action($request, $response);
 
-        if ( !$response ) {
-            return false;
+        if ( !is_array($result) ) {
+            $response = $result;
+        } else {
+            $view = $this->_config['dependencies']['view'];
+            $file = lcfirst($this->classname()) . "/{$action}";
+            $result += compact('token');
+            $response->set_body($view->render($file, $result));
         }
 
-        // TODO: Fix this
-        return $results + compact('token');
+        return $response;
     }
 
    /**

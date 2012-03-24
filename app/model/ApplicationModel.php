@@ -13,6 +13,14 @@ class ApplicationModel extends \nx\core\Model {
     protected $_belongs_to = array();
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected $_config = array();
+
+   /**
     *  The database handler.
     *
     *  @var object
@@ -44,11 +52,10 @@ class ApplicationModel extends \nx\core\Model {
     */
     protected $_has_and_belongs_to_many = array();
 
-
    /**
     *  Initializes an object.  Takes the following configuration options:
     *
-    *  @param array $config        The configuration options.
+    *  @param array $config    The configuration options.
     *  @access public
     *  @return void
     */
@@ -61,19 +68,13 @@ class ApplicationModel extends \nx\core\Model {
             'primary_key'                       => 'id',
             'primary_key_separator'             => '_'
         );
-        parent::__construct($config + $defaults);
-    }
 
-   /**
-    *  Initializes an object.  Object properties are populated
-    *  automatically by retrieving the values from the database.
-    *
-    *  @access protected
-    *  @return void
-    */
-    protected function _init() {
+        $this->_config = $config + $defaults;
+
         $connections = $this->_config['libs']['connections'];
         $this->_db = $connections::get_db();
+
+        parent::__construct();
     }
 
    /**

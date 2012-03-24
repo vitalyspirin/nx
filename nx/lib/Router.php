@@ -111,7 +111,7 @@ class Router {
             }
         }
         return array(
-            'params'     => null,
+            'params'   => null,
             'callback' => null
         );
     }

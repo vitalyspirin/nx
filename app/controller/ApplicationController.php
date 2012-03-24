@@ -5,6 +5,22 @@ namespace app\controller;
 class ApplicationController extends \nx\core\Controller {
 
    /**
+    *  The session object.
+    *
+    *  @var obj
+    *  @access public
+    */
+    public $current_user;
+
+   /**
+    *  The session object.
+    *
+    *  @var obj
+    *  @access public
+    */
+    public $session;
+
+   /**
     *  Loads the configuration settings for the controller.
     *
     *  @param array $config        The configuration options.
@@ -14,10 +30,16 @@ class ApplicationController extends \nx\core\Controller {
     public function __construct(array $config = array()) {
         $defaults = array(
             'dependencies' => array(
-                'user' => new \app\model\User(),
+                'session' => new \nx\core\Session(),
+                'user'    => new \app\model\User()
             )
         );
-        parent::__construct($config + $defaults);
+        $config += $defaults;
+
+        $this->session = $config['dependencies']['session'];
+        // TODO: Load the appropriate user
+        $this->current_user = $config['dependencies']['user'];
+        parent::__construct();
     }
 
    /**

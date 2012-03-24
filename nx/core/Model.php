@@ -20,6 +20,14 @@ namespace nx\core;
 class Model extends Object {
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected $_config = array();
+
+   /**
     *  The validators to be used when validating data.
     *
     *  @see /nx/lib/Validator
@@ -41,7 +49,7 @@ class Model extends Object {
                 'validator' => 'nx\lib\Validator'
             )
         );
-        parent::__construct($config + $defaults);
+        $this->_config = $config + $defaults;
     }
 
    /**
