@@ -75,7 +75,7 @@ class Router {
                 continue;
             }
 
-            if ( is_null($uri) || $uri == '*' || $uri == '404' ) {
+            if ( is_null($uri) || $uri == '*' ) {
                 $params = array();
                 return compact('params', 'callback');
             }

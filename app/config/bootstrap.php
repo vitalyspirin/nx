@@ -9,9 +9,6 @@ spl_autoload_register(function($class) {
 });
 
 require __DIR__ . '/routes.php';
-/*
-require __DIR__ . '/bootstrap/cache.php';
 require __DIR__ . '/bootstrap/db.php';
- */
 
 ?>

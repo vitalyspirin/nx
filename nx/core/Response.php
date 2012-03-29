@@ -15,7 +15,11 @@ namespace nx\core;
  */
 class Response extends Object {
 
-    protected $_status = "HTTP/1.1 200 OK";
+    public $body = '';
+
+    public $headers = array('Content-Type: text/html; charset=utf-8');
+
+    public $status = 200;
 
 	protected $_statuses = array(
 		100 => 'Continue',
@@ -60,28 +64,30 @@ class Response extends Object {
 	);
 
     protected function _render() {
-        echo 'render';
+        $status = $this->_convert_status($this->status);
+        header($status);
+        foreach ( $this->headers as $header ) {
+            header($header, false);
+        }
+        $chunks = str_split($this->body, 8192);
+        foreach ( $chunks as $chunk ) {
+            echo $chunk;
+        }
     }
 
-    public function set_body() {
-
-    }
-
-    public function set_status($code) {
+    protected function _convert_status($code) {
+        $protocol = 'HTTP/1.1';
         if ( is_numeric($code) ) {
-            if ( !isset($this->_statuses[$code]) ) {
-                return false;
+            if ( isset($this->_statuses[$code]) ) {
+                return "{$protocol} {$code} {$this->_statuses[$code]}";
             }
-
-            $this->_status = "HTTP/1.1 {$code} {$this->_statuses[$code]}";
         } else {
             $statuses = array_flip($this->_statuses);
-            if ( !isset($statuses[$code]) ) {
-                return false;
+            if ( isset($statuses[$code]) ) {
+                return "{$protocol} {$status[$code]} {$code}";
             }
-
-            $this->_status = "HTTP/1.1 {$status[$code]} {$code}";
         }
+        return "{$protocol} 200 OK";
     }
 
     public function __toString() {

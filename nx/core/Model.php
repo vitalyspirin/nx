@@ -10,7 +10,6 @@
 
 namespace nx\core;
 
-// TODO: Update this
 /*
  *  The `Model` class is the parent class of all application models.
  *  It provides validation mechanisms.
@@ -37,7 +36,6 @@ class Model extends Object {
     protected $_validators = array();
 
    /**
-    *  TODO: FIX THIS
     *
     *  @param array $config        The configuration options.
     *  @access public
@@ -60,7 +58,7 @@ class Model extends Object {
     *  @access protected
     *  @return array
     */
-    public function is_valid($field) {
+    public function validate($field) {
         if ( !isset($this->_validators[$field]) ) {
             return array();
         }

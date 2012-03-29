@@ -71,18 +71,8 @@ class Request extends Object {
             'query' => array()
         );
 
-        $this->_init($config + $defaults);
-    }
+        $config += $defaults;
 
-   /**
-    *  Organizes the data pertinent to the incoming request.
-    *
-    *  // TODO: Fix this
-    *  @param array $defaults
-    *  @access protected
-    *  @return void
-    */
-    protected function _init($defaults) {
         $this->_env = $_SERVER + $_ENV + array(
             'CONTENT_TYPE'   => 'text/html',
             'REQUEST_METHOD' => 'GET'
@@ -113,9 +103,9 @@ class Request extends Object {
             $query_string = str_replace('%20', '+', $parsed['query']);
             parse_str(rawurldecode($query_string), $query);
         }
-        $this->query = $defaults['query'] + $query;
+        $this->query = $config['query'] + $query;
 
-        $this->data = $defaults['data'];
+        $this->data = $config['data'];
         if ( isset($_POST) ) {
             $this->data += $_POST;
         }
@@ -137,27 +127,6 @@ class Request extends Object {
             fclose($stream);
         }
 
-    }
-
-   /**
-    *  Determines the environment (development, test, or  production).
-    *
-    *  @access public
-    *  @return string
-    */
-    public function environment() {
-        $local = array('::1', '127.0.0.1');
-        $is_local = in_array($this->_env['SERVER_ADDR'], $local);
-        $uri = $this->_env['REQUEST_URI'];
-        $is_test = (preg_match('/^test\//', $uri) && $is_local)
-            || preg_match('/^test/', $this->_env['HTTP_HOST']);
-
-        if ( $is_test ) {
-            return 'test';
-        } elseif ( $is_local ) {
-            return 'development';
-        }
-        return 'production';
     }
 
    /**

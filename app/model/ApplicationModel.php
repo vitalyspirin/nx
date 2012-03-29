@@ -29,12 +29,12 @@ class ApplicationModel extends \nx\core\Model {
     protected $_db;
 
    /**
-    *  The 'has one' relationships pertaining to '$this'.
+    *  The 'has and belongs to many' relationships pertaining to '$this'.
     *
     *  @var array
     *  @access protected
     */
-    protected $_has_one = array();
+    protected $_has_and_belongs_to_many = array();
 
    /**
     *  The 'has many' relationships pertaining to '$this'.
@@ -45,12 +45,12 @@ class ApplicationModel extends \nx\core\Model {
     protected $_has_many = array();
 
    /**
-    *  The 'has and belongs to many' relationships pertaining to '$this'.
+    *  The 'has one' relationships pertaining to '$this'.
     *
     *  @var array
     *  @access protected
     */
-    protected $_has_and_belongs_to_many = array();
+    protected $_has_one = array();
 
    /**
     *  Initializes an object.  Takes the following configuration options:
@@ -61,9 +61,10 @@ class ApplicationModel extends \nx\core\Model {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
+            'db'                                => 'default',
             'has_and_belongs_to_many_separator' => '__',
             'libs'                              => array(
-                'connections' => 'nx\lib\Connections'
+                'connections' => 'app\lib\Connections'
             ),
             'primary_key'                       => 'id',
             'primary_key_separator'             => '_'
@@ -72,7 +73,8 @@ class ApplicationModel extends \nx\core\Model {
         $this->_config = $config + $defaults;
 
         $connections = $this->_config['libs']['connections'];
-        $this->_db = $connections::get_db();
+        $db = $connections::get_db($this->_config['db']);
+        $this->_db = new $db['plugin']($db);
 
         parent::__construct();
     }
@@ -93,7 +95,12 @@ class ApplicationModel extends \nx\core\Model {
             $sql = "DELETE FROM {$this->classname()} WHERE "
                 . "{$this->_config['primary_key']} = ?";
             $bindings = array($primary_key);
-            return $this->_db->query($sql, $bindings);
+
+            $this->_db->connect();
+            $query = $this->_db->query($sql, $bindings);
+            $this->_db->close();
+
+            return $query;
         }
 
         return false;
@@ -139,10 +146,13 @@ class ApplicationModel extends \nx\core\Model {
             $sql = "SELECT * FROM {$this->classname()} "
                 . "WHERE {$foreign_key} = ?";
             $bindings = array($this->$foreign_key);
-            $this->_db->query($sql, $bindings);
-
             $object = new $field();
+
+            $this->_db->connect();
+            $this->_db->query($sql, $bindings);
             $this->_db->fetch('into', $object);
+            $this->_db->close();
+
             return $object;
         }
     }
@@ -174,9 +184,12 @@ class ApplicationModel extends \nx\core\Model {
                 . "{$field}.{$primary_key} = {$table}.{$foreign_key} "
                 . "WHERE {$table}.{$reference_key} = ?";
             $bindings = array($this->$primary_key);
-            $this->_db->query($sql, $bindings);
 
+            $this->_db->connect();
+            $this->_db->query($sql, $bindings);
             $rows = $this->_db->fetch_all('assoc');
+            $this->_db->close();
+
             $objects = array();
             foreach ( $rows as $row ) {
                 $object = new $field();
@@ -202,9 +215,12 @@ class ApplicationModel extends \nx\core\Model {
             $sql = "SELECT * FROM {$field} WHERE {$foreign_key} = ? ORDER BY "
                 . "{$primary_key} DESC";
             $bindings = array($this->get_primary_key());
-            $this->_db->query($sql, $bindings);
 
+            $this->_db->connect();
+            $this->_db->query($sql, $bindings);
             $rows = $this->_db->fetch_all('assoc');
+            $this->_db->close();
+
             $objects = array();
             foreach ( $rows as $row ) {
                 $object = new $field();
@@ -228,10 +244,13 @@ class ApplicationModel extends \nx\core\Model {
                 . "{$this->_config['primary_key_separator']}{$primary_key}";
             $sql = "SELECT * FROM {$field} WHERE {$foreign_key} = ? LIMIT 1";
             $bindings = array($this->get_primary_key());
-            $this->_db->query($sql, $bindings);
-
             $object = new $field();
+
+            $this->_db->connect();
+            $this->_db->query($sql, $bindings);
             $this->_db->fetch('into', $object);
+            $this->_db->close();
+
             return $object;
         }
     }
@@ -247,6 +266,18 @@ class ApplicationModel extends \nx\core\Model {
         return $this->$primary_key;
     }
 
+    public function is_valid() {
+        $properties = get_object_vars($this);
+        foreach ( $properties as $property ) {
+            $errors = parent::validate($property);
+            if ( !empty($errors) ) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
    /**
     *  Loads an object ($this) from the database.
     *
@@ -260,9 +291,11 @@ class ApplicationModel extends \nx\core\Model {
             $sql = "SELECT * FROM {$this->classname()} "
                 . "WHERE {$primary_key} = ?";
             $bindings = array($key);
-            $this->_db->query($sql, $bindings);
 
+            $this->_db->connect();
+            $this->_db->query($sql, $bindings);
             $this->_db->fetch('into', $this);
+            $this->_db->close();
         }
     }
 
@@ -297,17 +330,19 @@ class ApplicationModel extends \nx\core\Model {
             $this->map($map);
         }
 
-        // TODO: Define is_valid() here, iterate over object properties and
-        // check upstairs is_valid()
         if ( !$this->is_valid() ) {
             return false;
         }
 
+        $this->_db->connect();
         $this->_db->upsert($this->classname(), get_object_vars($this));
+
         $primary_key = $this->_config['primary_key'];
         if ( !$this->$primary_key ) {
             $this->$primary_key = $this->_db->insert_id();
         }
+
+        $this->_db->close();
         return true;
     }
 

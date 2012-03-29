@@ -8,7 +8,7 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace nx\plugin\db;
+namespace app\plugin\db;
 
 use \PDO;
 use \PDOException;
@@ -30,6 +30,14 @@ class PDO_MySQL extends \nx\core\Object {
     protected $_affected_rows = 0;
 
    /**
+    *  The configuration settings.
+    *
+    *  @var array
+    *  @access protected
+    */
+    protected $_config = array();
+
+   /**
     *  The db handle.
     *
     *  @var object
@@ -44,6 +52,10 @@ class PDO_MySQL extends \nx\core\Object {
     *  @access protected
     */
     protected $_statement;
+
+    public function __construct(array $config = array()) {
+        $this->_config = $config;
+    }
 
    /**
     *  Returns the number of rows affected by the last DELETE,
@@ -74,14 +86,16 @@ class PDO_MySQL extends \nx\core\Object {
     *                           following options:
     *                           'database' - The name of the database.
     *                           'host'     - The database host.
+    *                           'port'     - The database port.
     *                           'username' - The database username.
     *                           'password' - The database password.
     *  @access public
     *  @return bool
     */
-    public function connect($options) {
-        // TODO: Add port
-        $dsn = "mysql:host={$options['host']};dbname={$options['database']}";
+    public function connect($options = array()) {
+        $options += $this->_config;
+        $dsn = "mysql:host={$options['host']};port={$options['port']}"
+            . ";dbname={$options['database']}";
         try {
             $this->_dbh = new PDO($dsn, $options['username'], $options['password']);
             $this->_dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

@@ -1,14 +1,6 @@
 <?php
 
-/**
- * NX
- *
- * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
- * @license   http://opensource.org/licenses/bsd-license.php The BSD License
- */
-
-namespace nx\lib;
+namespace app\lib;
 
 /*
  *  The 'Connections' class contains methods that assist
@@ -17,24 +9,6 @@ namespace nx\lib;
  *  @package lib
  */
 class Connections {
-
-   /**
-    *  The collection of database handlers.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected static $_db = array();
-
-   /**
-    *  The initialization status of the handlers.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected static $_initialized = array(
-        'db' => array()
-    );
 
    /**
     *  The options for handlers.
@@ -67,29 +41,18 @@ class Connections {
     public static function add_db($config = array()) {
         foreach ( $config as $name => $options ) {
             self::$_options['db'][$name] = $options;
-            self::$_initialized['db'][$name] = false;
         }
     }
 
    /**
-    *  Returns the database handler.
+    *  Returns the database options.
     *
     *  @param string $name    The name of the database handler.
     *  @access public
     *  @return object
     */
     public static function get_db($name) {
-        if ( !self::$_initialized['db'][$name] ) {
-            $plugin = self::$_options['db'][$name]['plugin'];
-
-            $options = self::$_options['db'][$name];
-            unset($options['plugin']);
-            self::$_db[$name] = new $plugin($options);
-
-            self::$_initialized['db'][$name] = true;
-        }
-
-        return self::$_db[$name];
+        return self::$_options['db'][$name];
     }
 }
 

@@ -44,7 +44,6 @@ class Dispatcher extends Object {
         $this->_config = $config + $defaults;
 	}
 
-    // TODO: Fix this description.
    /**
     *  Handles an incoming request, and returns a response object.
     *
@@ -60,13 +59,6 @@ class Dispatcher extends Object {
         $method = $request->get_env('REQUEST_METHOD');
 
         $parsed = $router::parse($url, $method);
-        if ( is_null($parsed['callback']) ) {
-            $response->set_status(404);
-            // TODO: Fix this
-            $response->set_body();
-            return $response;
-        }
-
         list($controller, $action) = explode('::', $parsed['callback']);
         $request->params = $parsed['params'];
 

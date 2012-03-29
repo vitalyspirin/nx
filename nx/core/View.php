@@ -48,8 +48,7 @@ class View extends Object {
         $defaults = array(
             'libs'   => array(
                 'compiler' => 'nx\lib\Compiler',
-                'form'     => 'nx\lib\Form',
-                'library'  => 'nx\lib\Library'
+                'form'     => 'nx\lib\Form'
             ),
             'paths' => array(
                 'cache' => "{$root}/app/resource/cache/",
@@ -74,16 +73,17 @@ class View extends Object {
     public function render($file, $vars = null) {
         $file = "{$this->_config['paths']['view']}{$file}.html";
 
+        $compiler = $this->_config['libs']['compiler'];
+        $cache_path = $this->_config['paths']['cache'];
+        // Named as such to avoid name collisions with the variables pulled
+        // from extract($vars)
+        $____template____ = $compiler::compile($file, $cache_path);
+
         if ( is_array($vars) ) {
             extract($vars);
         }
-
-        $compiler = $this->_config['libs']['compiler'];
-        $cache_path = $this->_config['paths']['cache'];
-        $template = $compiler::compile($file, $cache_path);
-
         ob_start();
-        require $template;
+        require $____template____;
         return ob_get_clean();
     }
 

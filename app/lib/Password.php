@@ -8,7 +8,7 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace nx\lib;
+namespace app\lib;
 
 /*
  *  Adopted from PHPass, the `Password` class is

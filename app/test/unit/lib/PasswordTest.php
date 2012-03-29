@@ -1,8 +1,8 @@
 <?php
 
-namespace nx\test\unit\lib;
+namespace app\test\unit\lib;
 
-use nx\lib\Password;
+use app\lib\Password;
 
 class PasswordTest extends \PHPUnit_Framework_TestCase {
 

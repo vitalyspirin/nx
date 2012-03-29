@@ -84,6 +84,10 @@ class Session extends \nx\core\Object {
         $_SESSION = array();
     }
 
+    public function __set($property, $value) {
+        $_SESSION[$property] = $value;
+    }
+
 }
 
 ?>

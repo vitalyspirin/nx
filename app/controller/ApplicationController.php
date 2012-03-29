@@ -5,7 +5,7 @@ namespace app\controller;
 class ApplicationController extends \nx\core\Controller {
 
    /**
-    *  The session object.
+    *  The user that is currently logged in.
     *
     *  @var obj
     *  @access public
@@ -29,9 +29,18 @@ class ApplicationController extends \nx\core\Controller {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
+            'libs' => array(
+                'application' => 'app\lib\Application'
+            )
+        );
+        $config += $defaults;
+        $application = $config['libs']['application'];
+        $db = $application::environment();
+
+        $defaults = array(
             'dependencies' => array(
                 'session' => new \nx\core\Session(),
-                'user'    => new \app\model\User()
+                'user'    => new \app\model\User(compact('db'))
             )
         );
         $config += $defaults;
@@ -59,7 +68,6 @@ class ApplicationController extends \nx\core\Controller {
             | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
         return json_encode($array, $options);
     }
-
 
 }
 

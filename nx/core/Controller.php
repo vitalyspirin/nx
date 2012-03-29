@@ -59,24 +59,21 @@ class Controller extends Object {
     */
     public function call($action, $request, $response) {
         if ( !$this->_is_valid_request($request) ) {
-            $this->handle_CSRF();
+            return $this->handle_CSRF($response);
         }
-
-        // TODO: Fix this
-        $auth = $this->_config['libs']['auth'];
-        $token = $auth::create_token();
 
         $result = $this->$action($request, $response);
 
         if ( !is_array($result) ) {
-            $response = $result;
-        } else {
-            $view = $this->_config['dependencies']['view'];
-            $file = lcfirst($this->classname()) . "/{$action}";
-            $result += compact('token');
-            $response->set_body($view->render($file, $result));
+            return $result;
         }
 
+        $auth = $this->_config['libs']['auth'];
+        $result += array('authenticity_token' => $auth::create_token());
+
+        $view = $this->_config['dependencies']['view'];
+        $file = lcfirst($this->classname()) . "/{$action}";
+        $response->body = $view->render($file, $result);
         return $response;
     }
 
@@ -86,9 +83,10 @@ class Controller extends Object {
     *  @access public
     *  @return void
     */
-    public function handle_CSRF() {
-        // TODO: HTTP 403
-        die('CSRF attack!');
+    public function handle_CSRF($response) {
+        $response->status = 403;
+        $response->body = '<h1>403 Forbidden</h1>';
+        return $response;
     }
 
    /**

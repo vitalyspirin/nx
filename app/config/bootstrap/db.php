@@ -2,16 +2,34 @@
 
 $config = array(
 
-    'default' => array(
-        'plugin'   => 'nx\plugin\db\PDO_MySQL',
+    'development' => array(
+        'plugin'   => 'app\plugin\db\PDO_MySQL',
         'database' => '',
         'host'     => 'localhost',
+        'port'     => 3306,
+        'username' => 'root',
+        'password' => 'admin'
+    ),
+
+    'test' => array(
+        'plugin'   => 'app\plugin\db\PDO_MySQL',
+        'database' => '',
+        'host'     => 'localhost',
+        'port'     => 3306,
+        'username' => 'root',
+        'password' => 'admin'
+    ),
+
+    'production' => array(
+        'plugin'   => 'app\plugin\db\PDO_MySQL',
+        'database' => '',
+        'host'     => 'localhost',
+        'port'     => 3306,
         'username' => 'root',
         'password' => 'admin'
     )
-
 );
 
-\nx\lib\Connections::add_db($config);
+\app\lib\Connections::add_db($config);
 
 ?>
