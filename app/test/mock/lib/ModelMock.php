@@ -1,6 +1,6 @@
 <?php
 
-namespace nx\test\mock\lib;
+namespace app\test\mock\lib;
 
 class ModelMock {
     protected $id;

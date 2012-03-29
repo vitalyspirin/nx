@@ -8,7 +8,7 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace nx\lib;
+namespace app\lib;
 
 /*
  *  The `Form` class is used to generate common HTML elements.

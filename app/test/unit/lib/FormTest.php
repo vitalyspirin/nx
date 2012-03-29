@@ -1,9 +1,9 @@
 <?php
 
-namespace nx\test\unit\lib;
+namespace app\test\unit\lib;
 
-use nx\lib\Form;
-use nx\test\mock\lib\ModelMock;
+use app\lib\Form;
+use app\test\mock\lib\ModelMock;
 
 class FormTest extends \PHPUnit_Framework_TestCase {
 
@@ -401,13 +401,6 @@ class FormTest extends \PHPUnit_Framework_TestCase {
         $form = Form::form($attributes, $binding);
         $check = "<form id='test_form' action='/modelmock/27' method='put' />";
         $this->assertEquals($check, $form);
-    }
-
-    public function test_EscapeArray_ReturnsEscapedArray() {
-        $unescaped = array('yu"ck', 'gro&ss', "te'st");
-        $escaped = Form::escape($unescaped);
-        $check = array('yu&quot;ck', 'gro&amp;ss', 'te&#039;st');
-        $this->assertEquals($check, $escaped);
     }
 
 }

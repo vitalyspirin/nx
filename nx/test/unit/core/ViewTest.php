@@ -57,6 +57,13 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($result, $check);
     }
 
+    public function test_EscapeArray_ReturnsEscapedArray() {
+        $unescaped = array('yu"ck', 'gro&ss', "te'st");
+        $escaped = $this->_view->escape($unescaped);
+        $check = array('yu&quot;ck', 'gro&amp;ss', 'te&#039;st');
+        $this->assertEquals($check, $escaped);
+    }
+
 
 }
 
