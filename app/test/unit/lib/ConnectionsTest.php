@@ -11,7 +11,7 @@ class ConnectionsTest extends \PHPUnit_Framework_TestCase {
     public function setUp() {
         $this->_db_configs = array(
             'default' => array(
-                'plugin'   => 'nx\test\mock\plugin\db\DbMock',
+                'plugin'   => 'app\test\mock\plugin\db\DbMock',
                 'database' => '',
                 'port'     => 3306,
                 'host'     => 'localhost',

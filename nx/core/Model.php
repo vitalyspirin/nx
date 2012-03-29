@@ -37,7 +37,7 @@ class Model extends Object {
 
    /**
     *
-    *  @param array $config        The configuration options.
+    *  @param array $config    The configuration options.
     *  @access public
     *  @return void
     */

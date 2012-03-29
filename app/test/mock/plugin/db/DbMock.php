@@ -1,6 +1,6 @@
 <?php
 
-namespace nx\test\mock\plugin\db;
+namespace app\test\mock\plugin\db;
 
 class DbMock extends \nx\core\Object {
 
@@ -8,6 +8,7 @@ class DbMock extends \nx\core\Object {
         $defaults = array(
             'database' => '',
             'host'     => 'localhost',
+            'port'     => 3306,
             'username' => 'root',
             'password' => 'admin'
         );
