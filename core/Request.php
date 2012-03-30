@@ -16,7 +16,7 @@ namespace nx\core;
  *
  *  @package core
  */
-class Request extends Object {
+class Request {
 
    /**
     *  The POST/PUT/DELETE data.

@@ -13,7 +13,7 @@ namespace nx\core;
 /*
  *  @package core
  */
-class Response extends Object {
+class Response {
 
     public $body = '';
 
@@ -63,7 +63,7 @@ class Response extends Object {
 		504 => 'Gateway Time-out'
 	);
 
-    protected function _render() {
+    public function render() {
         $status = $this->_convert_status($this->status);
         header($status);
         foreach ( $this->headers as $header ) {
@@ -77,24 +77,11 @@ class Response extends Object {
 
     protected function _convert_status($code) {
         $protocol = 'HTTP/1.1';
-        if ( is_numeric($code) ) {
-            if ( isset($this->_statuses[$code]) ) {
-                return "{$protocol} {$code} {$this->_statuses[$code]}";
-            }
-        } else {
-            $statuses = array_flip($this->_statuses);
-            if ( isset($statuses[$code]) ) {
-                return "{$protocol} {$status[$code]} {$code}";
-            }
+        if ( isset($this->_statuses[$code]) ) {
+            return "{$protocol} {$code} {$this->_statuses[$code]}";
         }
         return "{$protocol} 200 OK";
     }
-
-    public function __toString() {
-        $this->_render();
-        return '';
-    }
-
 
 }
 

@@ -11,11 +11,12 @@
 namespace nx\core;
 
 /*
+ *  // TODO: Fix this
  *  The `Dispatcher` class is used to handle page rendering.
  *
  *  @package core
  */
-class Dispatcher extends Object {
+class Dispatcher {
 
    /**
     *  The configuration settings.
@@ -55,15 +56,12 @@ class Dispatcher extends Object {
         $response = $this->_config['dependencies']['response'];
 
         $router = $this->_config['libs']['router'];
-        $url = $request->url;
         $method = $request->get_env('REQUEST_METHOD');
 
-        $parsed = $router::parse($url, $method);
-        list($controller, $action) = explode('::', $parsed['callback']);
+        $parsed = $router::parse($request->url, $method);
         $request->params = $parsed['params'];
 
-        $controller = new $controller();
-        return $controller->call($action, $request, $response);
+        return call_user_func($parsed['callback'], $request, $response);
     }
 
 }
