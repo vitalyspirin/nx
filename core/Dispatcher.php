@@ -33,7 +33,7 @@ class Dispatcher {
     *  @access public
     *  @return void
     */
-	public function __construct(array $config = array()) {
+    public function __construct(array $config = array()) {
         $defaults = array(
             'buffer_size'  => 8192,
             'dependencies' => array(
@@ -42,7 +42,7 @@ class Dispatcher {
             )
         );
         $this->_config = $config + $defaults;
-	}
+    }
 
    /**
     *  Handles an incoming request, and returns a response object.
