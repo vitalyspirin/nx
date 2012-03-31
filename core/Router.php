@@ -8,24 +8,16 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace nx\lib;
+namespace nx\core;
 
 /*
  *  The `Router` class is used to handle url routing.
  *
- *  @package lib
+ *  @package core
  */
 class Router {
 
-   /**
-    *  The url rewrite scheme.
-    *
-    *  @var array
-    *  @access protected
-    */
-    protected static $_routes;
-
-    protected static function _compile_regex($route) {
+    protected function _compile_regex($route) {
         $pattern = '`(/|\.|)\[([^:\]]*+)(?::([^:\]]*+))?\](\?|)`';
 
         if ( preg_match_all($pattern, $route, $matches, PREG_SET_ORDER) ) {
@@ -56,8 +48,8 @@ class Router {
         return "`^{$route}$`";
     }
 
-    public static function parse($request_uri, $request_method) {
-        foreach ( self::$_routes as $route ) {
+    public function parse($request_uri, $request_method, $routes) {
+        foreach ( $routes as $route ) {
             list($method, $uri, $callback) = $route;
 
             if ( is_array($method) ) {
@@ -100,7 +92,7 @@ class Router {
                 $route_to_match .= $char;
             }
 
-            $regex = self::_compile_regex($route_to_match);
+            $regex = $this->_compile_regex($route_to_match);
             if ( preg_match($regex, $request_uri, $params) ) {
                 foreach ( $params as $key => $arg ) {
                     if ( is_numeric($key) ) {
@@ -114,10 +106,6 @@ class Router {
             'params'   => null,
             'callback' => null
         );
-    }
-
-    public static function set_routes($routes) {
-        self::$_routes = $routes;
     }
 
 }

@@ -35,11 +35,10 @@ class Dispatcher {
     */
 	public function __construct(array $config = array()) {
         $defaults = array(
+            'buffer_size'  => 8192,
             'dependencies' => array(
-                'response' => new \nx\core\Response()
-            ),
-            'libs' => array(
-                'router'  => 'nx\lib\Router'
+                'response' => new \nx\core\Response(),
+                'router'   => new \nx\core\Router()
             )
         );
         $this->_config = $config + $defaults;
@@ -52,16 +51,17 @@ class Dispatcher {
     *  @access public
     *  @return bool
     */
-    public function handle($request) {
-        $response = $this->_config['dependencies']['response'];
-
-        $router = $this->_config['libs']['router'];
+    public function handle($request, $routes) {
         $method = $request->get_env('REQUEST_METHOD');
 
-        $parsed = $router::parse($request->url, $method);
-        $request->params = $parsed['params'];
+        $router = $this->_config['dependencies']['router'];
+        $parsed = $router->parse($request->url, $method, $routes);
 
-        return call_user_func($parsed['callback'], $request, $response);
+        $request->params = $parsed['params'];
+        $result = call_user_func($parsed['callback'], $request);
+
+        $response = $this->_config['dependencies']['response'];
+        return $response->render($result, $this->_config['buffer_size']);
     }
 
 }

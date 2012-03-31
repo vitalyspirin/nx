@@ -15,12 +15,6 @@ namespace nx\core;
  */
 class Response {
 
-    public $body = '';
-
-    public $headers = array('Content-Type: text/html; charset=utf-8');
-
-    public $status = 200;
-
 	protected $_statuses = array(
 		100 => 'Continue',
 		101 => 'Switching Protocols',
@@ -63,24 +57,41 @@ class Response {
 		504 => 'Gateway Time-out'
 	);
 
-    public function render() {
-        $status = $this->_convert_status($this->status);
-        header($status);
-        foreach ( $this->headers as $header ) {
-            header($header, false);
+    protected function _convert_status($code) {
+        if ( isset($this->_statuses[$code]) ) {
+            return "HTTP/1.1 {$code} {$this->_statuses[$code]}";
         }
-        $chunks = str_split($this->body, 8192);
-        foreach ( $chunks as $chunk ) {
-            echo $chunk;
-        }
+        return "HTTP/1.1 200 OK";
     }
 
-    protected function _convert_status($code) {
-        $protocol = 'HTTP/1.1';
-        if ( isset($this->_statuses[$code]) ) {
-            return "{$protocol} {$code} {$this->_statuses[$code]}";
+    protected function _parse($response) {
+        $defaults = array(
+            'body'    => '',
+            'headers' => array('Content-Type: text/html; charset=utf-8'),
+            'status'  => 200
+        );
+        if ( is_array($response) ) {
+            $response += $defaults;
+        } else {
+            $defaults['body'] = (string) $response;
+            $response = $defaults;
         }
-        return "{$protocol} 200 OK";
+        return $response;
+    }
+
+    public function render($response, $buffer_size) {
+        $response = $this->_parse($response);
+        $status = $this->_convert_status($response['status']);
+        header($status);
+        foreach ( $response['headers'] as $header ) {
+            header($header, false);
+        }
+
+        $length = strlen($response['body']);
+        for ( $i = 0; $i < $length; $i += $buffer_size ) {
+            echo substr($response['body'], $i, $buffer_size);
+        }
+        return true;
     }
 
 }
