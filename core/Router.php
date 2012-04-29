@@ -17,6 +17,13 @@ namespace nx\core;
  */
 class Router {
 
+   /**
+    *  Compiles the regex necessary to capture all match types within a route.
+    *
+    *  @param string $route    The route.
+    *  @access protected
+    *  @return string
+    */
     protected function _compile_regex($route) {
         $pattern = '`(/|\.|)\[([^:\]]*+)(?::([^:\]]*+))?\](\?|)`';
 
@@ -45,9 +52,66 @@ class Router {
                 $route = str_replace($block, $replaced, $route);
             }
         }
+        if ( substr($route, strlen($route) - 1) != '/' ) {
+            $route .= '/?';
+        }
         return "`^{$route}$`";
     }
 
+   /**
+    *  Parses the supplied request uri based on the supplied routes and
+    *  the request method (i.e., GET/POST/PUT/DELETE).  Routes should be of
+    *  the following format:
+    *
+    *  $routes = array(
+    *      array(
+    *          mixed $request_method, string $request_uri, callable $callback
+    *      ),
+    *      ...
+    *  );
+    *
+    *  where:
+    *
+    *  $request_method can be a string ('GET', 'POST', 'PUT', 'DELETE'),
+    *  or an array (e.g., array('GET, 'POST')).  Note that $request_method
+    *  is case-insensitive.
+    *
+    *
+    *  $request_uri is a string, with optional match types.  Valid match types
+    *  are as follows:
+    *
+    *  [i] - integer
+    *  [a] - alphanumeric
+    *  [h] - hexadecimal
+    *  [*] - anything
+    *
+    *  Match types can be combined with parameter names, which will be
+    *  captured:
+    *
+    *  [i:id] - will match an integer, storing it within the returned 'params'
+    *  array under the 'id' key
+    *  [a:name] - will match an alphanumeric value, storing it within the
+    *  returned 'params' array under the 'name' key
+    *
+    *  Here are some examples to help illustrate:
+    *
+    *  /post/[i:id] - will match on /post/32 (with the returned 'params' array
+    *  containing an 'id' key with a value of 32), but will not match on
+    *  /post/today
+    *
+    *  /find/[h:serial] - will match on /find/ae32 (with the returned 'params'
+    *  array containing a 'serial' key will a value of 'ae32'), but will not
+    *  match on /find/john
+    *
+    *
+    *  $callback is a valid callback function.
+    *
+    *  @param string $request_uri       The request uri.
+    *  @param string $request_method    The request method.
+    *  @param array $routes             The routes.
+    *  @access public
+    *  @return array
+    */
     public function parse($request_uri, $request_method, $routes) {
         foreach ( $routes as $route ) {
             list($method, $uri, $callback) = $route;

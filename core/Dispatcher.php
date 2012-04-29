@@ -4,15 +4,15 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
 namespace nx\core;
 
 /*
- *  // TODO: Fix this
- *  The `Dispatcher` class is used to handle page rendering.
+ *  The `Dispatcher` class handles incoming HTTP requests and
+ *  sends back responses.
  *
  *  @package core
  */
@@ -35,7 +35,6 @@ class Dispatcher {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'buffer_size'  => 8192,
             'dependencies' => array(
                 'response' => new \nx\core\Response(),
                 'router'   => new \nx\core\Router()
@@ -45,9 +44,12 @@ class Dispatcher {
     }
 
    /**
-    *  Handles an incoming request, and returns a response object.
+    *  Matches an incoming request with the supplied routes,
+    *  calls the callback associated with the matched route,
+    *  and sends a response.
     *
     *  @param obj $request    The incoming request object.
+    *  @param array $routes   The routes.
     *  @access public
     *  @return bool
     */
@@ -57,11 +59,15 @@ class Dispatcher {
         $router = $this->_config['dependencies']['router'];
         $parsed = $router->parse($request->url, $method, $routes);
 
-        $request->params = $parsed['params'];
-        $result = call_user_func($parsed['callback'], $request);
+        if ( $parsed['callback'] ) {
+            $request->params = $parsed['params'];
+            $result = call_user_func($parsed['callback'], $request);
+        } else {
+            $result = false;
+        }
 
         $response = $this->_config['dependencies']['response'];
-        return $response->render($result, $this->_config['buffer_size']);
+        return $response->render($result);
     }
 
 }

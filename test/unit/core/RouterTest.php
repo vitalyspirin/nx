@@ -1,12 +1,14 @@
 <?php
 
-namespace nx\test\lib;
+namespace nx\test\core;
 
-use nx\lib\Router;
+use nx\core\Router;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
     public function test_Parse_ReturnsArray() {
+        $router = new Router();
+
         $routes = array(
             array('GET', '/', 'app\controller\Login::index'),
             array('POST', '/', 'app\controller\Login::create'),
@@ -24,7 +26,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             array('get', '/file[\.jpg|\.gif|\.png:image]?', 'app\controller\File::download'),
             array('get', '/news[:params]?', 'app\controller\News::index'),
         );
-        Router::set_routes($routes);
 
         $request_uri = '/';
         $request_method = 'GET';
@@ -32,7 +33,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\Login::index'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/';
@@ -41,7 +42,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\Login::create'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/';
@@ -50,7 +51,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\Login::update'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/users';
@@ -59,7 +60,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\User::index'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
+        $this->assertEquals($check, $input);
+
+        $request_uri = '/users/';
+        $request_method = 'GET';
+        $check = array(
+            'params'   => array(),
+            'callback' => 'app\controller\User::index'
+        );
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/users/37';
@@ -68,7 +78,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('id' => '37'),
             'callback' => 'app\controller\User::index'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/users/bob';
@@ -77,7 +87,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => null,
             'callback' => null
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/name/jimmy';
@@ -86,7 +96,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('name' => 'jimmy'),
             'callback' => 'app\controller\User::name'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/name/john';
@@ -95,7 +105,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => null,
             'callback' => null
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/name/john';
@@ -104,7 +114,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('name' => 'john'),
             'callback' => 'app\controller\User::name'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/name/42?options=none';
@@ -113,7 +123,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => null,
             'callback' => null
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/name/af0928';
@@ -122,7 +132,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('id' => 'af0928'),
             'callback' => 'app\controller\User::name'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/name/AJ';
@@ -131,7 +141,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => null,
             'callback' => null
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/phone';
@@ -140,7 +150,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => null,
             'callback' => null
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/phone/home';
@@ -149,7 +159,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('type' => 'home'),
             'callback' => 'app\controller\User::phone'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/type/somethingnew';
@@ -158,7 +168,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('type' => 'somethingnew'),
             'callback' => 'app\controller\Type::handle'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/friends/sally-382';
@@ -167,7 +177,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('friends' => 'sally-', 'id' => '382'),
             'callback' => 'app\controller\Friends::load'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/entry/create';
@@ -176,7 +186,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('action' => 'create'),
             'callback' => 'app\controller\Entry::new'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/entry/new';
@@ -185,7 +195,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('action' => 'new'),
             'callback' => 'app\controller\Entry::new'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/entry/87/date/tomorrow';
@@ -194,7 +204,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('id' => '87', 'params' => 'date/tomorrow'),
             'callback' => 'app\controller\Entry::update'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/file';
@@ -203,7 +213,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\File::download'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/file.jpg';
@@ -212,7 +222,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('image' => '.jpg'),
             'callback' => 'app\controller\File::download'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/file.bmp';
@@ -221,7 +231,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => null,
             'callback' => null
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/news';
@@ -230,7 +240,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\News::index'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
         $request_uri = '/newsflash';
@@ -239,14 +249,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array('params' => 'flash'),
             'callback' => 'app\controller\News::index'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes);
         $this->assertEquals($check, $input);
 
 
         $null_route = array(
             array('get', null, 'app\controller\Error::wrong')
         );
-        Router::set_routes(array_merge($routes, $null_route));
+        $routes_null = array_merge($routes, $null_route);
 
         $request_uri = '/something/that/doesnt/exist/here';
         $request_method = 'GET';
@@ -254,14 +264,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\Error::wrong'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes_null);
         $this->assertEquals($check, $input);
 
 
         $catchall_route = array(
             array('get', '*', 'app\controller\Error::show')
         );
-        Router::set_routes(array_merge($routes, $catchall_route));
+        $routes_all = array_merge($routes, $catchall_route);
 
         $request_uri = '/something/that/doesnt/exist';
         $request_method = 'GET';
@@ -269,7 +279,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'params'   => array(),
             'callback' => 'app\controller\Error::show'
         );
-        $input = Router::parse($request_uri, $request_method);
+        $input = $router->parse($request_uri, $request_method, $routes_all);
         $this->assertEquals($check, $input);
     }
 

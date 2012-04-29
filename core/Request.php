@@ -4,7 +4,7 @@
  * NX
  *
  * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011, Nick Sinopoli
+ * @copyright Copyright (c) 2011-2012, Nick Sinopoli
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -58,13 +58,19 @@ class Request {
     */
     public $url;
 
-    /**
-     *  Sets the configuration options.
-     *
-     *  @param array $config    The configuration options.
-     *  @access public
-     *  @return void
-     */
+   /**
+    *  Sets the configuration options.
+    *
+    *  @param array $config    The configuration options.  Possible keys
+    *                          include:
+    *                          'data' - the POST/PUT/DELETE data
+    *                          'query' - the GET data
+    *                          TODO: Include other options?
+    *                          TODO: Write up documentation about value of
+    *                          injecting these
+    *  @access public
+    *  @return void
+    */
     public function __construct(array $config = array()) {
         $defaults = array(
             'data'  => array(),
