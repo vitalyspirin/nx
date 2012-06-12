@@ -55,7 +55,67 @@ What's happening here, exactly? The try_files directive will check to see if the
 
 #### Apache
 
-###
+In your httpd.conf file, locate your DocumentRoot. It will look something like this:
+
+```apache
+DocumentRoot "/srv/http"
+```
+
+Now find the `<Directory>` tag that corresponds to your DocumentRoot. It will look like this:
+
+```apache
+<Directory "/srv/http">
+```
+
+Within that tag, change the `AllowOverride` setting:
+
+```apache
+AllowOverride All
+```
+
+Ensure that your DirectoryIndex setting contains index.php:
+
+```apache
+DirectoryIndex index.php
+```
+
+Now uncomment the following line:
+
+```apache
+Include conf/extra/httpd-vhosts.conf
+```
+
+Edit your conf/extra/httpd-vhosts.conf file and add the following code block:
+
+```apache
+<VirtualHost *:80>
+    DocumentRoot "/srv/http/project/app/public"
+    ServerName project
+    ErrorLog "/var/log/httpd/project_error.log"
+    CustomLog "/var/log/httpd/project_access.log" common
+    <Directory /srv/http/mine/project/app/public>
+        Options +FollowSymLinks
+    </Directory>
+</VirtualHost>
+```
+
+Note that you will have to change the `ServerName` to the name you used above in your hosts file. You will also have to adjust the directories ( in `DocumentRoot`, as well as the `<Directory>` tag) according to where you checked out the code. In this configuration, /srv/http/project/ is the project root. The public-facing part of your application, on the other hand, is located in app/public within the project root (so in this example, it's /srv/http/project/app/public).
+
+Within your project's public root, create an .htaccess file (in our case, it'd be located at /srv/http/project/app/public/.htaccess) and paste the following block inside:
+
+```apache
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !favicon.ico$
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
+```
+
+### Restart
+
+Restart your webserver, and then point your browser at the server name you chose above. If you see the familiar "Hello, World!", then you've configured everything correctly!
 
 ## Overview
 
