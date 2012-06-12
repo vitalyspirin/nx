@@ -1,9 +1,18 @@
 # NX
 
+## Table of Contents
 
-## Getting Started
+- [Getting Started](#getting-started)
+  - [Installing](#installing)
+  - [Configuring Your Hosts File](#conf-hosts)
+  - [Configuring Your Web Server](#conf-server)
+    - [nginx](#nginx)
+    - [Apache](#apache)
+  - [Restart Your Web Server](#restart-server)
 
-### Installing
+## <a id='getting-started'></a>Getting Started
+
+### <a id='installing'></a>Installing
 
 ```bash
 # create a directory for your project
@@ -12,7 +21,7 @@ mkdir project && cd project
 curl -L https://raw.github.com/NSinopoli/nxtra/master/resource/script/install-nx.sh | sh
 ```
 
-### Configuring Your Hosts File
+### <a id='conf-hosts'></a>Configuring Your Hosts File
 
 Choose a server name for your project, and edit your /etc/hosts file accordingly:
 
@@ -20,9 +29,9 @@ Choose a server name for your project, and edit your /etc/hosts file accordingly
 127.0.0.1    project
 ```
 
-### Configuring Your Webserver
+### <a id='conf-server'></a>Configuring Your Web Server
 
-#### nginx
+#### <a id='nginx'></a>nginx
 
 Place this code block within the http {} block in your nginx.conf file:
 
@@ -53,7 +62,7 @@ Note that you will have to change the server_name to the name you used above in 
 
 What's happening here, exactly? The try_files directive will check to see if the resouce at $uri exists in the filesystem (in this example, within /srv/http/project/app/public). If it does, that file is served by nginx. If it doesn't, it's then routed to /index.php, whereupon the framework takes responsibility for parsing the url and handling the request. The try_files directive is great for serving static content - there's no need to pass requests for js, css, or image files through the framework.
 
-#### Apache
+#### <a id='apache'></a>Apache
 
 In your httpd.conf file, locate your DocumentRoot. It will look something like this:
 
@@ -109,13 +118,13 @@ Within your project's public root, create an .htaccess file (in our case, it'd b
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !favicon.ico$
-    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+    RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>
 ```
 
-### Restart
+### <a id='restart-server'></a>Restart Your Web Server
 
-Restart your webserver, and then point your browser at the server name you chose above. If you see the familiar "Hello, World!", then you've configured everything correctly!
+Restart your web server, and then point your browser at the server name you chose above. If you see the familiar "Hello, World!", then you've configured everything correctly!
 
 ## Overview
 
