@@ -1,37 +1,28 @@
 <?php
 
-/**
- * NX
- *
- * @author    Nick Sinopoli <NSinopoli@gmail.com>
- * @copyright Copyright (c) 2011-2012, Nick Sinopoli
- * @license   http://opensource.org/licenses/bsd-license.php The BSD License
- */
-
 namespace nx\core;
 
-/*
- *  The `Dispatcher` class handles incoming HTTP requests and
- *  sends back responses.
+/**
+ * The Dispatcher handles incoming HTTP requests and sends back responses.
  *
- *  @package core
+ * @author    Nick Sinopoli <NSinopoli@gmail.com>
+ * @copyright 2011-2012 Nick Sinopoli
+ * @license   http://opensource.org/licenses/BSD-3-Clause The BSD License
  */
 class Dispatcher {
 
    /**
-    *  The configuration settings.
+    * The configuration settings.
     *
-    *  @var array
-    *  @access protected
+    * @var array
     */
     protected $_config = array();
 
    /**
-    *  Sets the configuration options for the dispatcher.
+    * Sets the configuration options for the dispatcher.
     *
-    *  @param array $config    The configuration options.
-    *  @access public
-    *  @return void
+    * @param array $config    The configuration options.
+    * @return void
     */
     public function __construct(array $config = array()) {
         $defaults = array(
@@ -44,14 +35,12 @@ class Dispatcher {
     }
 
    /**
-    *  Matches an incoming request with the supplied routes,
-    *  calls the callback associated with the matched route,
-    *  and sends a response.
+    * Matches an incoming request with the supplied routes, calls the
+    * callback associated with the matched route, and sends a response.
     *
-    *  @param obj $request    The incoming request object.
-    *  @param array $routes   The routes.
-    *  @access public
-    *  @return bool
+    * @param object $request    The incoming request object.
+    * @param array $routes      The routes.
+    * @return void
     */
     public function handle($request, $routes) {
         $method = $request->get_env('REQUEST_METHOD');
@@ -67,7 +56,7 @@ class Dispatcher {
         }
 
         $response = $this->_config['dependencies']['response'];
-        return $response->render($result);
+        $response->render($result);
     }
 
 }
