@@ -3,12 +3,12 @@
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-  - [Installing](#installing)
-  - [Configuring Your Hosts File](#confhosts)
-  - [Configuring Your Web Server](#confserver)
-    - [nginx](#nginx)
-    - [Apache](#apache)
-  - [Restart Your Web Server](#restartserver)
+  * [Installing](#installing)
+  * [Configuring Your Hosts File](#confhosts)
+  * [Configuring Your Web Server](#confserver)
+    + [nginx](#nginx)
+    + [Apache](#apache)
+  * [Restart Your Web Server](#restartserver)
 
 ## <a name='getting-started'></a>Getting Started
 
