@@ -3,6 +3,22 @@
 
 ## Getting Started
 
+### Installing
+
+```bash
+# create a directory for your project
+mkdir project-name && cd project-name
+# install NX and a basic application template
+curl -L https://raw.github.com/NSinopoli/nxtra/master/resource/script/install-nx.sh | sh
+```
+
+### Configuring Your Webserver
+
+#### nginx
+
+#### Apache
+
+###
 
 ## Overview
 
@@ -26,7 +42,7 @@ $data = $request->data;
 $query = $request->query;
 
 // Get the parameters collected from the request uri
-$params = $request->params
+$params = $request->params;
 
 // Get the request uri
 $url = $request->url;
