@@ -5,9 +5,7 @@
 - [Getting Started](#getting-started)
   * [Installing](#installing)
   * [Configuring Your Hosts File](#confhosts)
-  * [Configuring Your Web Server](#confserver)
-    + [nginx](#nginx)
-    + [Apache](#apache)
+  * [Configuring Your Web Server](#confserver) ([nginx](#nginx), or [Apache](#apache))
   * [Restart Your Web Server](#restartserver)
 
 ## <a name='getting-started'></a>Getting Started
