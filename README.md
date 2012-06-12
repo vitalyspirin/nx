@@ -4,11 +4,11 @@
 
 - [Getting Started](#getting-started)
   - [Installing](#installing)
-  - [Configuring Your Hosts File](#conf-hosts)
-  - [Configuring Your Web Server](#conf-server)
+  - [Configuring Your Hosts File](#confhosts)
+  - [Configuring Your Web Server](#confserver)
     - [nginx](#nginx)
     - [Apache](#apache)
-  - [Restart Your Web Server](#restart-server)
+  - [Restart Your Web Server](#restartserver)
 
 ## <a id='getting-started'></a>Getting Started
 
@@ -21,7 +21,7 @@ mkdir project && cd project
 curl -L https://raw.github.com/NSinopoli/nxtra/master/resource/script/install-nx.sh | sh
 ```
 
-### <a id='conf-hosts'></a>Configuring Your Hosts File
+### <a id='confhosts'></a>Configuring Your Hosts File
 
 Choose a server name for your project, and edit your /etc/hosts file accordingly:
 
@@ -29,7 +29,7 @@ Choose a server name for your project, and edit your /etc/hosts file accordingly
 127.0.0.1    project
 ```
 
-### <a id='conf-server'></a>Configuring Your Web Server
+### <a id='confserver'></a>Configuring Your Web Server
 
 #### <a id='nginx'></a>nginx
 
@@ -122,7 +122,7 @@ Within your project's public root, create an .htaccess file (in our case, it'd b
 </IfModule>
 ```
 
-### <a id='restart-server'></a>Restart Your Web Server
+### <a id='restartserver'></a>Restart Your Web Server
 
 Restart your web server, and then point your browser at the server name you chose above. If you see the familiar "Hello, World!", then you've configured everything correctly!
 
