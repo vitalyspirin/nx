@@ -7,14 +7,51 @@
 
 ```bash
 # create a directory for your project
-mkdir project-name && cd project-name
+mkdir project && cd project
 # install NX and a basic application template
 curl -L https://raw.github.com/NSinopoli/nxtra/master/resource/script/install-nx.sh | sh
+```
+
+### Configuring Your Hosts File
+
+Choose a server name for your project, and edit your /etc/hosts file accordingly:
+
+```
+127.0.0.1    project
 ```
 
 ### Configuring Your Webserver
 
 #### nginx
+
+Place this code block within the http {} block in your nginx.conf file:
+
+```nginx
+
+    server {
+	    server_name     project;
+	    root            /srv/http/project/app/public;
+	    index           index.php;
+
+	    access_log      /var/log/nginx/project_access.log;
+	    error_log       /var/log/nginx/project_error.log;
+
+	    location / {
+            try_files $uri /index.php;
+	    }
+
+	    location ~ \.php$ {
+            fastcgi_pass    unix:/var/run/php-fpm/php-fpm.sock;
+            fastcgi_index   index.php;
+            fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include         fastcgi_params;
+	    }
+    }
+```
+
+Note that you will have to change the server_name to the name you used above in your hosts file. You will also have to adjust the directories according to where you checked out the code. In this configuration, /srv/http/project/ is the project root. The public-facing part of your application, on the other hand, is located in app/public within the project root (so in this example, it's /srv/http/project/app/public).
+
+What's happening here, exactly? The try_files directive will check to see if the resouce at $uri exists in the filesystem (in this example, within /srv/http/project/app/public). If it does, that file is served by nginx. If it doesn't, it's then routed to /index.php, whereupon the framework takes responsibility for parsing the url and handling the request. The try_files directive is great for serving static content - there's no need to pass requests for js, css, or image files through the framework.
 
 #### Apache
 
