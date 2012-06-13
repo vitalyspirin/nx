@@ -3,30 +3,32 @@
 ## Table of Contents
 
 - [Philosophy](#philosophy)
-- [Code Statistics](#statistics)
+- [Statistics](#statistics)
 - [Getting Started](#getting-started)
   * [Installing](#installing)
   * [Configuring Your Hosts File](#confhosts)
   * [Configuring Your Web Server](#confserver) ([nginx](#nginx), or [Apache](#apache))
   * [Restart Your Web Server](#restartserver)
 - [Tutorial](#tutorial)
-- [NXtra](#nxtra)
 - [API](#api)
   * [Request](#request)
   * [Response](#response)
   * [Dispatcher](#dispatcher)
   * [Router](#router)
+- [NXtra](#nxtra)
+- [Contributing](#contributing)
 - [Credits](#credits)
+- [License](#license)
 
 > Il semble que la perfection soit atteinte non quand il n'y a plus rien à ajouter, mais quand il n'y a plus rien à retrancher.
 
--- Antoine de Saint-Exupéry
+> -- Antoine de Saint-Exupéry
 
 ## <a name='philosophy'></a>Philosophy
 
 [PHP](http://codeigniter.com/) [suffers](http://framework.zend.com/) [from](http://symfony.com/) [a](http://www.yiiframework.com/) [plethora](http://cakephp.org/) [of](http://lithify.me/) [frameworks](http://bcosca.github.com/fatfree/).  So why another one?
 
-Rather than offer a "full stack" solution, NX focuses on only that which is _absolutely essential_.  All web applications need to handle incoming requests and serve well-formed responses.  To that end, NX provides a simple, lightweight solution.  Because it leaves out what are essentially _application-specific components_ (ORMs, MV* patterns, form helpers, template engines, etc.), it's blazingly fast.  More importantly, it offers a rock-solid foundation that _never gets in your way_.  Best of all, the few components NX does implement are completely modular and easily replaceable.
+Rather than offer a "full stack" solution, NX focuses on only that which is _absolutely essential_.  All web applications need to handle incoming requests and serve well-formed responses.  To that end, NX provides a simple, lightweight solution.  Because it leaves out what are essentially _application-specific components_ (ORMs, MV* patterns, form helpers, template engines, etc.), it's also blazingly fast.  More importantly, it offers a rock-solid foundation that _never gets in your way_.  Best of all, the few components NX does implement are completely modular and easily replaceable.
 
 ## <a name='statistics'></a>Statistics
 
@@ -180,10 +182,6 @@ Restart your web server, and then point your browser at the server name you chos
 ## <a name='tutorial'></a>Tutorial
 
 TODO
-
-## <a name='nxtra'></a>NXtra
-
-Several common application libraries were built while developing and using NX.  Rather than include them in the core framework, they have been placed into a separate repository.  Check out [NXtra](http://git.io/nxtra) for more information.
 
 
 ## <a name='api'></a>API
@@ -549,8 +547,57 @@ $dispatcher->handle($request, $routes);
 ```
 
 
+## <a name='nxtra'></a>NXtra
+
+Several common application libraries were built while developing and using NX.  Rather than include them in the core framework, they have been placed into a separate repository.  Check out [NXtra](http://git.io/nxtra) for more information.
+
+
+## <a name='contributing'></a>Contributing
+
+Please submit any feedback you may have on the project's [issue tracker](https://github.com/NSinopoli/nx/issues).
+
+
 ## <a name='credits'></a>Credits
 
 Huge thanks to [Chris O'Hara](https://github.com/chriso), whose [router](https://github.com/chriso/klein.php) was adapted for use in NX.
 
 Special thanks to [Andrew Ettinger](https://github.com/sillydeveloper), whose [ploof](https://github.com/sillydeveloper/ploof) framework provided the initial inspiration.
+
+
+## <a name='license'></a>License
+
+NX is licensed under [The BSD License](http://opensource.org/licenses/BSD-3-Clause).
+
+```
+Copyright (c) 2011-2012, Nick Sinopoli <nsinopoli@gmail.com>.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+ * Neither the name of Nick Sinopoli nor the names of his
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+```
