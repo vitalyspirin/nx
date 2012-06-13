@@ -20,11 +20,11 @@
 - [Credits](#credits)
 - [License](#license)
 
+## <a name='philosophy'></a>Philosophy
+
 > Il semble que la perfection soit atteinte non quand il n'y a plus rien à ajouter, mais quand il n'y a plus rien à retrancher.
 
 > -- Antoine de Saint-Exupéry
-
-## <a name='philosophy'></a>Philosophy
 
 [PHP](http://codeigniter.com/) [suffers](http://framework.zend.com/) [from](http://symfony.com/) [a](http://www.yiiframework.com/) [plethora](http://cakephp.org/) [of](http://lithify.me/) [frameworks](http://bcosca.github.com/fatfree/).  So why another one?
 
@@ -429,10 +429,10 @@ $response = new \nx\core\Response(compact('buffer_size'));
 The dispatcher is responsible for connecting requests with responses.
 
 #### Handling an Incoming Request
-The dispatcher passes an incoming Request (along with predefined routes) to the Router, whereupon an array is returned containing the parameters collected from the request uri as well as the callback function provided in the matched route.
+The dispatcher passes an incoming [Request](#request) (along with predefined routes) to the [Router](#router), whereupon an array is returned containing the parameters collected from the request uri as well as the callback function provided in the matched route.
 
 #### Rendering a Response
-The acquired callback function is called by the dispatcher, whose return value is then passed to the Response class for rendering.
+The acquired callback function is called by the dispatcher, whose return value is then passed to the [Response](#response) class for rendering.
 
 
 ### <a name='router'></a>Router
@@ -529,7 +529,7 @@ $routes = array(
 
 ##### Connecting Application Routes to NX
 
-Routes are not directly passed to the Router.  Instead, they are passed to the Dispatcher (along with a Request object):
+Routes are not directly passed to the Router.  Instead, they are passed to the [Dispatcher](#dispatcher) (along with a [Request](#request) object):
 
 ```php
 <?php
