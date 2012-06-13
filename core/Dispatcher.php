@@ -26,10 +26,8 @@ class Dispatcher {
     */
     public function __construct(array $config = array()) {
         $defaults = array(
-            'dependencies' => array(
-                'response' => new \nx\core\Response(),
-                'router'   => new \nx\core\Router()
-            )
+            'response' => new \nx\core\Response(),
+            'router'   => new \nx\core\Router()
         );
         $this->_config = $config + $defaults;
     }
@@ -43,9 +41,9 @@ class Dispatcher {
     * @return void
     */
     public function handle($request, $routes) {
-        $method = $request->get_env('REQUEST_METHOD');
+        $method = $request->request_method;
 
-        $router = $this->_config['dependencies']['router'];
+        $router = $this->_config['router'];
         $parsed = $router->parse($request->url, $method, $routes);
 
         if ( $parsed['callback'] ) {
@@ -55,7 +53,7 @@ class Dispatcher {
             $result = false;
         }
 
-        $response = $this->_config['dependencies']['response'];
+        $response = $this->_config['response'];
         $response->render($result);
     }
 

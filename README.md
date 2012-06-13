@@ -2,11 +2,63 @@
 
 ## Table of Contents
 
+- [Philosophy](#philosophy)
+- [Code Statistics](#statistics)
 - [Getting Started](#getting-started)
   * [Installing](#installing)
   * [Configuring Your Hosts File](#confhosts)
   * [Configuring Your Web Server](#confserver) ([nginx](#nginx), or [Apache](#apache))
   * [Restart Your Web Server](#restartserver)
+- [Tutorial](#tutorial)
+- [NXtra](#nxtra)
+- [API](#api)
+  * [Request](#request)
+  * [Response](#response)
+  * [Dispatcher](#dispatcher)
+  * [Router](#router)
+- [Credits](#credits)
+
+> Il semble que la perfection soit atteinte non quand il n'y a plus rien à ajouter, mais quand il n'y a plus rien à retrancher.
+
+-- Antoine de Saint-Exupéry
+
+## <a name='philosophy'></a>Philosophy
+
+[PHP](http://codeigniter.com/) [suffers](http://framework.zend.com/) [from](http://symfony.com/) [a](http://www.yiiframework.com/) [plethora](http://cakephp.org/) [of](http://lithify.me/) [frameworks](http://bcosca.github.com/fatfree/).  So why another one?
+
+Rather than offer a "full stack" solution, NX focuses on only that which is _absolutely essential_.  All web applications need to handle incoming requests and serve well-formed responses.  To that end, NX provides a simple, lightweight solution.  Because it leaves out what are essentially _application-specific components_ (ORMs, MV* patterns, form helpers, template engines, etc.), it's blazingly fast.  More importantly, it offers a rock-solid foundation that _never gets in your way_.  Best of all, the few components NX does implement are completely modular and easily replaceable.
+
+## <a name='statistics'></a>Statistics
+
+```
+Lines of Code (LOC):                                624
+  Cyclomatic Complexity / Lines of Code:           0.14
+Comment Lines of Code (CLOC):                       256
+Non-Comment Lines of Code (NCLOC):                  368
+
+Namespaces:                                           1
+Interfaces:                                           0
+Classes:                                              4
+  Abstract:                                           0 (0.00%)
+  Concrete:                                           4 (100.00%)
+  Average Class Length (NCLOC):                      89
+Methods:                                             11
+  Scope:
+    Non-Static:                                      11 (100.00%)
+    Static:                                           0 (0.00%)
+  Visibility:
+    Public:                                           5 (45.45%)
+    Non-Public:                                       6 (54.55%)
+  Average Method Length (NCLOC):                     32
+  Cyclomatic Complexity / Number of Methods:       5.73
+
+Anonymous Functions:                                  0
+Functions:                                            0
+
+Constants:                                            0
+  Global constants:                                   0
+  Class constants:                                    0
+```
 
 ## <a name='getting-started'></a>Getting Started
 
@@ -31,7 +83,7 @@ Choose a server name for your project, and edit your /etc/hosts file accordingly
 
 #### <a name='nginx'></a>nginx
 
-Place this code block within the http {} block in your nginx.conf file:
+Place this code block within the `http {}` block in your nginx.conf file:
 
 ```nginx
 
@@ -56,19 +108,19 @@ Place this code block within the http {} block in your nginx.conf file:
     }
 ```
 
-Note that you will have to change the server_name to the name you used above in your hosts file. You will also have to adjust the directories according to where you checked out the code. In this configuration, /srv/http/project/ is the project root. The public-facing part of your application, on the other hand, is located in app/public within the project root (so in this example, it's /srv/http/project/app/public).
+Note that you will have to change the `server_name` to the name you used above in your hosts file. You will also have to adjust the directories according to where you checked out the code. In this configuration, /srv/http/project/ is the project root. The public-facing part of your application, on the other hand, is located in app/public within the project root (so in this example, it's /srv/http/project/app/public).
 
-What's happening here, exactly? The try_files directive will check to see if the resouce at $uri exists in the filesystem (in this example, within /srv/http/project/app/public). If it does, that file is served by nginx. If it doesn't, it's then routed to /index.php, whereupon the framework takes responsibility for parsing the url and handling the request. The try_files directive is great for serving static content - there's no need to pass requests for js, css, or image files through the framework.
+What's happening here, exactly? The `try_files` directive will check to see if the resouce at $uri exists in the filesystem (in this example, within /srv/http/project/app/public). If it does, that file is served by nginx. If it doesn't, it's then routed to /index.php, whereupon the framework takes responsibility for handling the request. The `try_files` directive is great for serving static content - there's no need to pass requests for js, css, or image files through the framework.
 
 #### <a name='apache'></a>Apache
 
-In your httpd.conf file, locate your DocumentRoot. It will look something like this:
+In your httpd.conf file, locate your `DocumentRoot`. It will look something like this:
 
 ```apache
 DocumentRoot "/srv/http"
 ```
 
-Now find the `<Directory>` tag that corresponds to your DocumentRoot. It will look like this:
+Now find the `<Directory>` tag that corresponds to your `DocumentRoot`. It will look like this:
 
 ```apache
 <Directory "/srv/http">
@@ -80,7 +132,7 @@ Within that tag, change the `AllowOverride` setting:
 AllowOverride All
 ```
 
-Ensure that your DirectoryIndex setting contains index.php:
+Ensure that your `DirectoryIndex` setting contains index.php:
 
 ```apache
 DirectoryIndex index.php
@@ -124,11 +176,20 @@ Within your project's public root, create an .htaccess file (in our case, it'd b
 
 Restart your web server, and then point your browser at the server name you chose above. If you see the familiar "Hello, World!", then you've configured everything correctly!
 
-## Overview
+
+## <a name='tutorial'></a>Tutorial
+
+TODO
+
+## <a name='nxtra'></a>NXtra
+
+Several common application libraries were built while developing and using NX.  Rather than include them in the core framework, they have been placed into a separate repository.  Check out [NXtra](http://git.io/nxtra) for more information.
 
 
+## <a name='api'></a>API
 
-### Request
+
+### <a name='request'></a>Request
 
 The Request class is responsible for organizing all data pertaining to an incoming HTTP request.
 
@@ -265,8 +326,7 @@ $routes = array(
 ```
 
 
-
-### Response
+### <a name='response'></a>Response
 
 The Response class is used to output an HTTP response.  It consists of three parts: a status code, HTTP headers, and a body.
 
@@ -366,8 +426,7 @@ $response = new \nx\core\Response(compact('buffer_size'));
 ```
 
 
-
-### Dispatcher
+### <a name='dispatcher'></a>Dispatcher
 
 The dispatcher is responsible for connecting requests with responses.
 
@@ -378,8 +437,7 @@ The dispatcher passes an incoming Request (along with predefined routes) to the 
 The acquired callback function is called by the dispatcher, whose return value is then passed to the Response class for rendering.
 
 
-
-### Router
+### <a name='router'></a>Router
 
 Every incoming request has an associated uri and method.  The router's responsibility is to match the request uri and method to a predefined route.
 
@@ -489,3 +547,10 @@ $dispatcher->handle($request, $routes);
 
 ?>
 ```
+
+
+## <a name='credits'></a>Credits
+
+Huge thanks to [Chris O'Hara](https://github.com/chriso), whose [router](https://github.com/chriso/klein.php) was adapted for use in NX.
+
+Special thanks to [Andrew Ettinger](https://github.com/sillydeveloper), whose [ploof](https://github.com/sillydeveloper/ploof) framework provided the initial inspiration.
