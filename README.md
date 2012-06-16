@@ -154,7 +154,7 @@ Edit your conf/extra/httpd-vhosts.conf file and add the following code block:
     ServerName project
     ErrorLog "/var/log/httpd/project_error.log"
     CustomLog "/var/log/httpd/project_access.log" common
-    <Directory /srv/http/mine/project/app/public>
+    <Directory /srv/http/project/app/public>
         Options +FollowSymLinks
     </Directory>
 </VirtualHost>
