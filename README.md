@@ -8,7 +8,6 @@
   * [Installing](#installing)
   * [Configuring Your Hosts File](#confhosts)
   * [Configuring Your Web Server](#confserver) ([nginx](#nginx), or [Apache](#apache))
-  * [Restart Your Web Server](#restartserver)
 - [Tutorial](#tutorial)
 - [API](#api)
   * [Request](#request)
@@ -114,69 +113,11 @@ Note that you will have to change the `server_name` to the name you used above i
 
 What's happening here, exactly? The `try_files` directive will check to see if the resouce at $uri exists in the filesystem (in this example, within /srv/http/project/app/public). If it does, that file is served by nginx. If it doesn't, it's then routed to /index.php, whereupon the framework takes responsibility for handling the request. The `try_files` directive is great for serving static content - there's no need to pass requests for js, css, or image files through the framework.
 
+When that's done, restart your web server, and then point your browser at the server name you chose above!
+
 #### <a name='apache'></a>Apache
 
-In your httpd.conf file, locate your `DocumentRoot`. It will look something like this:
-
-```apache
-DocumentRoot "/srv/http"
-```
-
-Now find the `<Directory>` tag that corresponds to your `DocumentRoot`. It will look like this:
-
-```apache
-<Directory "/srv/http">
-```
-
-Within that tag, change the `AllowOverride` setting:
-
-```apache
-AllowOverride All
-```
-
-Ensure that your `DirectoryIndex` setting contains index.php:
-
-```apache
-DirectoryIndex index.php
-```
-
-Now uncomment the following line:
-
-```apache
-Include conf/extra/httpd-vhosts.conf
-```
-
-Edit your conf/extra/httpd-vhosts.conf file and add the following code block:
-
-```apache
-<VirtualHost *:80>
-    DocumentRoot "/srv/http/project/app/public"
-    ServerName project
-    ErrorLog "/var/log/httpd/project_error.log"
-    CustomLog "/var/log/httpd/project_access.log" common
-    <Directory /srv/http/mine/project/app/public>
-        Options +FollowSymLinks
-    </Directory>
-</VirtualHost>
-```
-
-Note that you will have to change the `ServerName` to the name you used above in your hosts file. You will also have to adjust the directories ( in `DocumentRoot`, as well as the `<Directory>` tag) according to where you checked out the code. In this configuration, /srv/http/project/ is the project root. The public-facing part of your application, on the other hand, is located in app/public within the project root (so in this example, it's /srv/http/project/app/public).
-
-Within your project's public root, create an .htaccess file (in our case, it'd be located at /srv/http/project/app/public/.htaccess) and paste the following block inside:
-
-```apache
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !favicon.ico$
-    RewriteRule ^(.*)$ index.php [QSA,L]
-</IfModule>
-```
-
-### <a name='restartserver'></a>Restart Your Web Server
-
-Restart your web server, and then point your browser at the server name you chose above. If you see the familiar "Hello, World!", then you've configured everything correctly!
+The basic application template (installed above) comes with .htaccess files, so there's no need to configure anything.  Simply point your browser at the location where you installed the code!
 
 
 ## <a name='tutorial'></a>Tutorial
@@ -461,8 +402,8 @@ $routes = array(
 ##### Parameters
 
 ```
-$request_method can be a string (one of 'GET', 'POST', 'PUT', or 'DELETE'), or an array containing a combination of request
-methods.  Note that these are case-insensitive.
+$request_method can be a string (one of 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', or 'OPTIONS'), or an array containing
+a combination of request methods.  Note that these are case-insensitive.
 ```
 ```
 $request_uri is a regex-like pattern, providing support for optional match types.
