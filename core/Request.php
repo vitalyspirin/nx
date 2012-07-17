@@ -99,7 +99,11 @@ class Request {
         $query = array();
         if ( isset($parsed['query']) ) {
             $query_string = str_replace('%20', '+', $parsed['query']);
-            parse_str(rawurldecode($query_string), $query);
+            $pairs = explode('&', $query_string);
+            foreach ( $pairs as $pair ) {
+                list($k, $v) = array_map('urldecode', explode('=', $pair));
+                $query[$k] = $v;
+            }
         }
         $this->query = $config['query'] + $query;
 
