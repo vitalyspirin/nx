@@ -32,17 +32,17 @@ Rather than offer a "full stack" solution, NX focuses on only that which is _abs
 ## <a name='statistics'></a>Statistics
 
 ```
-Lines of Code (LOC):                                634
+Lines of Code (LOC):                                627
   Cyclomatic Complexity / Lines of Code:           0.14
-Comment Lines of Code (CLOC):                       256
-Non-Comment Lines of Code (NCLOC):                  378
+Comment Lines of Code (CLOC):                       253
+Non-Comment Lines of Code (NCLOC):                  374
 
 Namespaces:                                           1
 Interfaces:                                           0
 Classes:                                              4
   Abstract:                                           0 (0.00%)
   Concrete:                                           4 (100.00%)
-  Average Class Length (NCLOC):                      92
+  Average Class Length (NCLOC):                      91
 Methods:                                             11
   Scope:
     Non-Static:                                      11 (100.00%)

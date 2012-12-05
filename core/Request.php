@@ -54,9 +54,6 @@ class Request {
     *                         include:
     *                         'data' - the POST/PUT/DELETE data
     *                         'query' - the GET data
-    *                         TODO: Include other options?
-    *                         TODO: Write up documentation about value of
-    *                         injecting these
     * @return void
     */
     public function __construct(array $config = array()) {
@@ -82,10 +79,6 @@ class Request {
         } else {
             $this->_env['HTTPS'] = false;
         }
-
-        $this->_env['PHP_SELF'] = str_replace('\\', '/', str_replace(
-            $this->_env['DOCUMENT_ROOT'], '', $this->_env['SCRIPT_FILENAME']
-        ));
 
         $parsed = parse_url($this->_env['REQUEST_URI']);
 
