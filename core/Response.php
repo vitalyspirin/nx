@@ -90,9 +90,9 @@ class Response {
     */
     protected function _convert_status($code) {
         if ( isset($this->_statuses[$code]) ) {
-            return "HTTP/1.1 {$code} {$this->_statuses[$code]}";
+            return $_SERVER['SERVER_PROTOCOL'] . " {$code} {$this->_statuses[$code]}";
         }
-        return "HTTP/1.1 200 OK";
+        return $_SERVER['SERVER_PROTOCOL'] . " 200 OK";
     }
 
    /**
